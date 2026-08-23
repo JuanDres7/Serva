@@ -57,6 +57,20 @@
       "when": 1787513222719,
       "tag": "0007_majestic_kid_colt",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1787514291346,
+      "tag": "0008_unique_sue_storm",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1787514378578,
+      "tag": "0009_rapid_mordo",
+      "breakpoints": true
     }
   ]
 }

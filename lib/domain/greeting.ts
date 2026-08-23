@@ -19,8 +19,10 @@ export type ContextoSaludo = {
   readonly diasSinRegistrar: number | null
   /** Movimientos registrados en el período en curso. */
   readonly registrosDelPeriodo: number
-  /** Cobros o avisos accionables pendientes. */
+  /** Cobros recurrentes por confirmar. */
   readonly pendientes: number
+  /** Presupuestos que llegaron al umbral de aviso. */
+  readonly presupuestosEnAviso: number
 }
 
 export type Saludo = {
@@ -47,6 +49,18 @@ export function construirSaludo(contexto: ContextoSaludo): Saludo {
         contexto.pendientes === 1
           ? 'Tienes un cobro por confirmar'
           : `Tienes ${contexto.pendientes} cobros por confirmar`,
+    }
+  }
+
+  // Al 80% todavía se puede reaccionar; al 100% ya no queda nada por hacer
+  // salvo sentirse mal (D-026).
+  if (contexto.presupuestosEnAviso > 0) {
+    return {
+      titulo,
+      subtitulo:
+        contexto.presupuestosEnAviso === 1
+          ? 'Uno de tus topes se está acercando'
+          : `${contexto.presupuestosEnAviso} de tus topes se están acercando`,
     }
   }
 

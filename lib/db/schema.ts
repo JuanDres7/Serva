@@ -27,6 +27,7 @@ import {
   real,
   text,
   timestamp,
+  uniqueIndex,
   uuid,
 } from 'drizzle-orm/pg-core'
 import { user } from './auth-schema'
@@ -169,6 +170,15 @@ export const userSettings = pgTable('user_settings', {
 
   /** Ciclo de períodos. Mes calendario por defecto (D-025, D-027). */
   cycleConfig: jsonb('cycle_config').notNull().default({ kind: 'calendar-month' }),
+
+  /**
+   * Cuándo se configuró el ciclo de pago.
+   *
+   * Nulo mientras el usuario no lo haya elegido: se le pregunta la primera vez
+   * que entra a presupuestos, que es donde la respuesta tiene sentido y donde
+   * entiende para qué sirve (D-027).
+   */
+  cycleConfiguredAt: timestamp('cycle_configured_at', { withTimezone: true }),
 
   /**
    * Cuándo terminó la configuración inicial.
@@ -358,3 +368,37 @@ export const savingsGoals = pgTable(
 )
 
 export type SavingsGoalRow = typeof savingsGoals.$inferSelect
+
+/**
+ * Presupuestos (spec 005).
+ *
+ * Un tope de gasto por categoría, medido sobre el ciclo configurado del usuario
+ * y no sobre el mes calendario (D-025).
+ */
+export const budgets = pgTable(
+  'budgets',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+
+    category: categoryKey('category').notNull(),
+    limitCents: bigint('limit_cents', { mode: 'number' }).notNull(),
+    currency: char('currency', { length: 3 }).notNull(),
+
+    isSample: boolean('is_sample').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // FR-005: un solo presupuesto por categoría. Dos topes para lo mismo no
+    // significarían nada.
+    uniqueIndex('budget_user_category_uidx').on(table.userId, table.category),
+    check('budget_limit_positive', sql`${table.limitCents} > 0`),
+  ],
+)
+
+export type BudgetRow = typeof budgets.$inferSelect

@@ -30,6 +30,8 @@ export type UserSettings = {
   readonly cycleConfig: CycleConfig
   /** Nulo mientras la persona no haya completado la configuración inicial. */
   readonly onboardedAt: Date | null
+  /** Nulo mientras no haya elegido su ciclo de pago (D-027). */
+  readonly cycleConfiguredAt: Date | null
 }
 
 function toSettings(row: UserSettingsRow): UserSettings {
@@ -42,6 +44,7 @@ function toSettings(row: UserSettingsRow): UserSettings {
     timeZone: row.timeZone,
     cycleConfig: row.cycleConfig as CycleConfig,
     onboardedAt: row.onboardedAt,
+    cycleConfiguredAt: row.cycleConfiguredAt,
   }
 }
 
@@ -121,5 +124,20 @@ export async function completarConfiguracion(
       onboardedAt: new Date(),
       updatedAt: new Date(),
     })
+    .where(eq(userSettings.userId, userId))
+}
+
+/**
+ * Guarda el ciclo de pago del usuario (spec 005, FR-011).
+ *
+ * Se pregunta al entrar a presupuestos por primera vez: allí la pregunta llega
+ * con contexto y el usuario entiende qué está definiendo. En el primer arranque
+ * habría interpelado a alguien que aún no sabe para qué sirve la respuesta
+ * (D-027).
+ */
+export async function guardarCiclo(userId: string, ciclo: CycleConfig): Promise<void> {
+  await db
+    .update(userSettings)
+    .set({ cycleConfig: ciclo, cycleConfiguredAt: new Date(), updatedAt: new Date() })
     .where(eq(userSettings.userId, userId))
 }

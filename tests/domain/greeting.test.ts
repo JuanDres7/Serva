@@ -8,6 +8,7 @@ const base = (extra: Partial<ContextoSaludo> = {}): ContextoSaludo => ({
   diasSinRegistrar: 0,
   registrosDelPeriodo: 5,
   pendientes: 0,
+  presupuestosEnAviso: 0,
   ...extra,
 })
 
@@ -50,6 +51,26 @@ describe('saludo de bienvenida', () => {
       const texto = `${construirSaludo(caso).titulo} ${construirSaludo(caso).subtitulo ?? ''}`
       expect(texto).not.toMatch(/gastaste demasiado|mucho|mal|cuidado|exceso|alerta/i)
     }
+  })
+
+  it('avisa cuando un tope se acerca, no cuando ya se pasó', () => {
+    // Al 100% ya no queda nada por hacer salvo sentirse mal (D-026).
+    const saludo = construirSaludo(base({ presupuestosEnAviso: 1 }))
+    expect(saludo.subtitulo).toContain('se está acercando')
+    expect(saludo.subtitulo).not.toMatch(/excediste|pasaste|demasiado/i)
+  })
+
+  it('concuerda en plural con varios topes', () => {
+    expect(construirSaludo(base({ presupuestosEnAviso: 3 })).subtitulo).toContain(
+      '3 de tus topes',
+    )
+  })
+
+  it('los cobros por confirmar mandan sobre los topes', () => {
+    // Confirmar un cobro es algo que se resuelve ahora mismo; un tope acercándose
+    // es información.
+    const saludo = construirSaludo(base({ pendientes: 2, presupuestosEnAviso: 3 }))
+    expect(saludo.subtitulo).toContain('cobros por confirmar')
   })
 
   it('los avisos accionables mandan sobre cualquier otro mensaje', () => {
