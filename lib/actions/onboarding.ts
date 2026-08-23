@@ -23,17 +23,17 @@ export async function guardarConfiguracionInicial(datos: {
   try {
     const userId = await requireUserId()
 
-    // La moneda solo se fija mientras no haya movimientos: después, cambiarla
-    // falsearía todo el historial porque los montos guardados no se convierten
-    // (FR-011 de la spec 004).
-    if ((await countTransactions(userId)) > 0) {
-      return {
-        ok: false,
-        error: 'Ya tienes movimientos registrados: la moneda no se puede cambiar',
-      }
-    }
+    // Con movimientos ya registrados la moneda se conserva, pero la
+    // configuración se completa igual. Bloquearla dejaría atrapada a cualquier
+    // cuenta anterior a esta pantalla: el contenedor la manda aquí y aquí no
+    // podría salir.
+    const conservarMoneda = (await countTransactions(userId)) > 0
 
-    await completarConfiguracion(userId, { displayName: nombre, country: datos.country })
+    await completarConfiguracion(userId, {
+      displayName: nombre,
+      country: datos.country,
+      conservarMoneda,
+    })
 
     revalidatePath('/')
     revalidatePath('/ajustes')
