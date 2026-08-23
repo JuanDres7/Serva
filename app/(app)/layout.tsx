@@ -17,6 +17,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   const settings = await ensureUserSettings(userId)
 
+  // Quien no ha elegido nombre ni país opera con valores provisionales: se le
+  // lleva a configurarlos antes de registrar nada (spec 004). La bienvenida vive
+  // fuera de este contenedor, de modo que no puede redirigirse a sí misma.
+  if (!settings.onboardedAt) redirect('/bienvenida')
+
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">

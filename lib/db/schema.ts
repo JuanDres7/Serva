@@ -169,6 +169,14 @@ export const userSettings = pgTable('user_settings', {
   /** Ciclo de períodos. Mes calendario por defecto (D-025, D-027). */
   cycleConfig: jsonb('cycle_config').notNull().default({ kind: 'calendar-month' }),
 
+  /**
+   * Cuándo terminó la configuración inicial.
+   *
+   * Mientras sea nulo, la persona no ha elegido nombre ni país y opera con
+   * valores provisionales: la aplicación la lleva a la bienvenida.
+   */
+  onboardedAt: timestamp('onboarded_at', { withTimezone: true }),
+
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
 })

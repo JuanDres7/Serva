@@ -15,6 +15,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EtiquetaPeriodo } from '@/components/etiqueta-periodo'
 import { CargarEjemplo, BorrarEjemplo } from '@/components/datos-de-ejemplo'
 import { tieneDatosDeEjemplo } from '@/lib/db/queries/sample-data'
+import { gastoPorDia, evolucion } from '@/lib/db/queries/charts'
+import { compararRitmo, ritmoRelativo } from '@/lib/domain/series'
+import { GraficoEvolucion, GraficoRitmo } from '@/components/graficos'
+import { nombrarPeriodo } from '@/components/etiqueta-periodo'
+import { construirSaludo } from '@/lib/domain/greeting'
+import { listTransactions } from '@/lib/db/queries/transactions'
+import { daysBetween, fromISO } from '@/lib/domain/civil-date'
 
 export default async function InicioPage() {
   const userId = await requireUserIdOrRedirect()
@@ -24,19 +31,59 @@ export default async function InicioPage() {
   const periodo = periodFor(settings.cycleConfig, hoy)
   const anterior = previousPeriod(settings.cycleConfig, periodo)
 
-  const [agregados, agregadosAnteriores, desgloseCrudo, total, conEjemplos] =
-    await Promise.all([
-      periodAggregates(userId, periodo, settings.currency),
-      periodAggregates(userId, anterior, settings.currency),
-      categoryBreakdown(userId, periodo),
-      countTransactions(userId),
-      tieneDatosDeEjemplo(userId),
-    ])
+  const [
+    agregados,
+    agregadosAnteriores,
+    desgloseCrudo,
+    total,
+    conEjemplos,
+    diasActual,
+    diasAnterior,
+    serieEvolucion,
+  ] = await Promise.all([
+    periodAggregates(userId, periodo, settings.currency),
+    periodAggregates(userId, anterior, settings.currency),
+    categoryBreakdown(userId, periodo),
+    countTransactions(userId),
+    tieneDatosDeEjemplo(userId),
+    gastoPorDia(userId, periodo),
+    gastoPorDia(userId, anterior),
+    evolucion(userId, settings.cycleConfig, periodo, 6),
+  ])
+
+  const [ultimo] = await listTransactions(userId, { limit: 1 })
+  const horaLocal = Number(
+    new Intl.DateTimeFormat('en-GB', {
+      timeZone: settings.timeZone,
+      hour: '2-digit',
+      hour12: false,
+    }).format(new Date()),
+  )
+
+  const saludo = construirSaludo({
+    nombre: settings.displayName,
+    hora: horaLocal,
+    diasSinRegistrar: ultimo ? daysBetween(fromISO(ultimo.occurredOn), hoy) : null,
+    registrosDelPeriodo: total,
+    // Los cobros recurrentes llegan con la feature 007.
+    pendientes: 0,
+  })
 
   const totales = computeTotals(agregados)
   const totalesAnteriores = computeTotals(agregadosAnteriores)
   const desglose = computeBreakdown(desgloseCrudo, settings.currency)
   const comparacionGasto = compareWithPrevious(totales.expense, totalesAnteriores.expense)
+
+  const ritmo = compararRitmo(diasActual, diasAnterior, { actual: periodo, anterior }, hoy)
+  const comparacionRitmo = ritmoRelativo(ritmo)
+  const evolucionParaGrafico = serieEvolucion.map((punto) => ({
+    etiqueta: nombrarPeriodo(punto.periodo, settings.locale).replace(/ de \d{4}$/, ''),
+    ingresos: punto.ingresos,
+    gastos: punto.gastos,
+  }))
+  // Un solo período no permite comparar nada: el gráfico diría menos que el
+  // total que ya está arriba (FR-007 de la spec 008).
+  const hayEvolucion = serieEvolucion.filter((p) => p.ingresos + p.gastos > 0).length >= 2
 
   const formatear = (cents: number) =>
     formatMoney({ cents, currency: settings.currency }, settings.locale)
@@ -47,9 +94,7 @@ export default async function InicioPage() {
     return (
       <div className="mx-auto max-w-md space-y-6 py-12 text-center">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Hola, {settings.displayName}
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{saludo.titulo}</h1>
           <p className="text-muted-foreground">
             Aquí vas a ver a dónde se va tu dinero. Para empezar, registra tu primer
             gasto: toma unos segundos.
@@ -76,10 +121,13 @@ export default async function InicioPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            Hola, {settings.displayName}
-          </h1>
+          <h1 className="text-2xl font-semibold tracking-tight">{saludo.titulo}</h1>
           <p className="text-sm text-muted-foreground">
+            {saludo.subtitulo ? (
+              <>
+                {saludo.subtitulo} ·{' '}
+              </>
+            ) : null}
             <EtiquetaPeriodo periodo={periodo} locale={settings.locale} />
           </p>
         </div>
@@ -179,6 +227,45 @@ export default async function InicioPage() {
                 </div>
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {hayEvolucion && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-base">¿Voy mejor o peor que antes?</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <GraficoEvolucion
+              datos={evolucionParaGrafico}
+              currency={settings.currency}
+              locale={settings.locale}
+            />
+          </CardContent>
+        </Card>
+      )}
+
+      {ritmo.length > 0 && (
+        <Card>
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-base">¿Voy más rápido de lo normal?</CardTitle>
+            {comparacionRitmo && (
+              <p className="text-sm text-muted-foreground">
+                {comparacionRitmo.diferencia === 0
+                  ? 'Vas al mismo ritmo que el período anterior.'
+                  : comparacionRitmo.diferencia > 0
+                    ? `Llevas ${formatear(comparacionRitmo.diferencia)} más que a estas alturas del período anterior.`
+                    : `Llevas ${formatear(-comparacionRitmo.diferencia)} menos que a estas alturas del período anterior.`}
+              </p>
+            )}
+          </CardHeader>
+          <CardContent>
+            <GraficoRitmo
+              datos={ritmo}
+              currency={settings.currency}
+              locale={settings.locale}
+            />
           </CardContent>
         </Card>
       )}

@@ -17,7 +17,11 @@ async function crearCuentaConDatos(page: Page) {
   await page.getByLabel('Contraseña').fill('contrasena-de-prueba-123')
   await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Crear cuenta' }).click()
-  await expect(page.getByRole('heading', { name: 'Hola, Juan' })).toBeVisible()
+
+  await expect(page.getByRole('heading', { name: 'Antes de empezar' })).toBeVisible()
+  await page.getByLabel(/Cómo quieres que te llamemos/).fill('Juan')
+  await page.getByRole('button', { name: 'Empezar' }).click()
+  await expect(page.getByRole('heading', { name: /Juan/ })).toBeVisible()
 
   await page.getByRole('button', { name: 'Ver con datos de ejemplo' }).click()
   await expect(page.getByText('¿En qué se te fue?')).toBeVisible()
@@ -69,7 +73,11 @@ test('E4 — sin movimientos se avisa en lugar de entregar un archivo vacío', a
   await page.getByLabel('Contraseña').fill('contrasena-de-prueba-123')
   await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Crear cuenta' }).click()
-  await expect(page.getByRole('heading', { name: 'Hola, Vacío' })).toBeVisible()
+
+  await expect(page.getByRole('heading', { name: 'Antes de empezar' })).toBeVisible()
+  await page.getByLabel(/Cómo quieres que te llamemos/).fill('Vacío')
+  await page.getByRole('button', { name: 'Empezar' }).click()
+  await expect(page.getByRole('heading', { name: /Vacío/ })).toBeVisible()
 
   const cookies = await page.context().cookies()
   const encabezado = cookies.map((c) => `${c.name}=${c.value}`).join('; ')
