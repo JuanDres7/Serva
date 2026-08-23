@@ -1,8 +1,9 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { transactions, categorizationLog } from '@/lib/db/schema'
+import { transactions, categorizationLog, recurringMovements } from '@/lib/db/schema'
 import { addDays, toISO, type CivilDate } from '@/lib/domain/civil-date'
 import { extraerPalabrasClave, normalizar, descripcionCorta } from '@/lib/domain/keywords'
+import { primeraFecha } from '@/lib/domain/recurrence'
 
 /**
  * Datos de ejemplo (D-046).
@@ -72,7 +73,23 @@ function generador(semilla: number) {
 
 export type ResultadoEjemplo = {
   readonly movimientos: number
+  readonly recurrentes: number
 }
+
+/**
+ * Recurrentes de ejemplo.
+ *
+ * Uno de ellos vence hoy, a propósito: sin un cobro pendiente, quien visita el
+ * proyecto no vería nunca la parte que da sentido a la funcionalidad —que Finzen
+ * pregunta en lugar de asumir— porque tendría que esperar a que llegara una
+ * fecha.
+ */
+const RECURRENTES = [
+  { descripcion: 'arriendo', categoria: 'housing', unidades: 1200000, dia: 1, venceHoy: true },
+  { descripcion: 'suscripción de música', categoria: 'subscriptions', unidades: 16900, dia: 5, venceHoy: false },
+  { descripcion: 'internet', categoria: 'utilities', unidades: 75000, dia: 12, venceHoy: false },
+  { descripcion: 'salario', categoria: 'salary', unidades: 3200000, dia: 30, venceHoy: false, ingreso: true },
+] as const
 
 export async function generarDatosDeEjemplo(
   userId: string,
@@ -140,11 +157,38 @@ export async function generarDatosDeEjemplo(
     await db.insert(categorizationLog).values(aprendizaje)
   }
 
-  return { movimientos: insertadas.length }
+  const recurrentes = await db
+    .insert(recurringMovements)
+    .values(
+      RECURRENTES.map((plantilla) => ({
+        userId,
+        type: ('ingreso' in plantilla && plantilla.ingreso ? 'income' : 'expense') as
+          | 'income'
+          | 'expense',
+        amountCents: plantilla.unidades * 100,
+        currency: opciones.currency,
+        category: plantilla.categoria as (typeof recurringMovements.$inferInsert)['category'],
+        description: plantilla.descripcion,
+        schedule: { kind: 'monthly' as const, day: plantilla.dia },
+        nextDueOn: toISO(
+          plantilla.venceHoy
+            ? opciones.hoy
+            : primeraFecha({ kind: 'monthly', day: plantilla.dia }, opciones.hoy),
+        ),
+        isSample: true,
+      })),
+    )
+    .returning({ id: recurringMovements.id })
+
+  return { movimientos: insertadas.length, recurrentes: recurrentes.length }
 }
 
 /** Elimina todos los datos de ejemplo del usuario, sin tocar los suyos. */
 export async function eliminarDatosDeEjemplo(userId: string): Promise<number> {
+  await db
+    .delete(recurringMovements)
+    .where(and(eq(recurringMovements.userId, userId), eq(recurringMovements.isSample, true)))
+
   const borradas = await db
     .delete(transactions)
     .where(and(eq(transactions.userId, userId), eq(transactions.isSample, true)))

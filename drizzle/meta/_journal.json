@@ -43,6 +43,13 @@
       "when": 1787497771436,
       "tag": "0005_marcar_cuentas_previas",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1787507369363,
+      "tag": "0006_lazy_spacker_dave",
+      "breakpoints": true
     }
   ]
 }
