@@ -60,5 +60,6 @@
   "description": "Gestor de finanzas personales con IA",
   "overrides": {
     "zod": "$zod"
-  }
+  },
+  "license": "MIT"
 }

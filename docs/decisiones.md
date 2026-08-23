@@ -1185,6 +1185,22 @@ que nadie alcanzara datos ajenos —lo que decide si el asistente es fiable—, 
 no podían detectar que la búsqueda no entendiera un plural. Eso solo lo encuentra
 alguien preguntando de verdad.
 
+## D-058 · Licencia MIT (2026-08-23)
+
+El repositorio se publica bajo licencia MIT. Cualquiera puede usar, modificar y
+distribuir el código, incluso con fines comerciales, conservando el aviso de
+copyright.
+
+**Por qué:** un repositorio público sin licencia no autoriza a nadie a usarlo —por
+defecto son todos los derechos reservados—, así que sin ella el proyecto se puede
+leer pero no reutilizar. Siendo un proyecto de portafolio (D-045), el objetivo es
+que se vea, se pruebe y se valore, no controlar su explotación comercial. MIT es
+la licencia más reconocible y la que menos fricción genera.
+
+**Descartada AGPL**, que habría obligado a publicar el código a quien desplegara
+Finzen como servicio. Protege más, pero hace que menos gente lo toque, y aquí
+importa más lo segundo.
+
 ---
 
 # Decisiones pendientes
@@ -1194,7 +1210,6 @@ alguien preguntando de verdad.
 
 | # | Pregunta | Afecta |
 |---|---|---|
-| P-020 | ¿Qué licencia lleva el repositorio? Sin una, nadie puede usar el código legalmente. Recomendación: MIT | repositorio |
 | P-019 | ¿Los datos de cada usuario se cifran en reposo más allá de lo que ofrece el proveedor? | constitución |
 
 <!--

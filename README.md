@@ -107,3 +107,8 @@ Tailwind con shadcn/ui · Recharts · Vercel AI SDK · Vitest y Playwright.
 
 La justificación de cada elección está en
 [decisiones.md](docs/decisiones.md) (D-039).
+
+## Licencia
+
+[MIT](LICENSE). Puedes usar, modificar y distribuir este código, incluso con
+fines comerciales, conservando el aviso de copyright.
