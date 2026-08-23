@@ -24,16 +24,40 @@ describe('esquema de datos', () => {
     await client.end()
   })
 
-  it('no usa ningún tipo de coma flotante', async () => {
-    // Criterio 4 de la spec 001 y Artículo I: un `real` o `double precision` en
-    // cualquier columna rompería la exactitud de los montos.
-    const columnas = await db.execute(sql`
+  it('no usa coma flotante salvo en la única excepción justificada', async () => {
+    // Criterio 4 de la spec 001 y Artículo I: un `real` o `double precision`
+    // rompería la exactitud de los montos.
+    //
+    // La excepción es nominal, no categórica: `categorization_log.confidence`.
+    // El Artículo I prohíbe la coma flotante *para montos*, donde un céntimo
+    // perdido corrompe el historial. Una confianza es aproximada por naturaleza
+    // —0,7341 y 0,7342 significan lo mismo— y aplicarle la regla del dinero
+    // sería obedecer la letra ignorando la razón (plan 002, §5).
+    //
+    // Cualquier otra columna de coma flotante que aparezca hace fallar esto.
+    const columnas = await db.execute<{ table_name: string; column_name: string }>(sql`
       SELECT table_name, column_name, data_type
       FROM information_schema.columns
       WHERE table_schema = 'public'
         AND data_type IN ('real', 'double precision', 'float', 'money')
+        AND NOT (table_name = 'categorization_log' AND column_name = 'confidence')
     `)
     expect(columnas).toHaveLength(0)
+  })
+
+  it('ninguna columna de montos usa coma flotante', async () => {
+    // La comprobación que de verdad protege el Artículo I: toda columna que
+    // guarde dinero debe ser entera, se llame como se llame.
+    const columnas = await db.execute<{ data_type: string }>(sql`
+      SELECT data_type FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND (column_name LIKE '%amount%' OR column_name LIKE '%cents%'
+             OR column_name LIKE '%monto%' OR column_name LIKE '%price%')
+    `)
+    for (const columna of columnas) {
+      expect(columna.data_type).toBe('bigint')
+    }
+    expect(columnas.length).toBeGreaterThan(0)
   })
 
   it('guarda los montos como entero de 64 bits', async () => {

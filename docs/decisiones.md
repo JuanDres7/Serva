@@ -1092,6 +1092,33 @@ mostrar una cifra falsa.
 **Lección aplicable al resto del proyecto:** presentación y semántica no son la
 misma fuente de verdad. La regla vale también para fechas y períodos.
 
+## D-054 · La confianza es el único campo de coma flotante, y es correcto (2026-08-23)
+
+`categorization_log.confidence` se almacena como `real`. Es la única columna de
+coma flotante del sistema.
+
+**Por qué no viola el Artículo I:** el artículo prohíbe la coma flotante **para
+montos**, porque un céntimo perdido corrompe el historial y el error se propaga
+en silencio. Una confianza es una estimación aproximada por naturaleza: 0,7341 y
+0,7342 significan exactamente lo mismo. Aplicarle la regla del dinero sería
+obedecer la letra ignorando la razón.
+
+**Cómo se protege igualmente la regla real:** la prueba que vigilaba los tipos de
+coma flotante se dividió en dos. Una excluye esta columna **por nombre** —no por
+categoría—, de modo que cualquier otra que aparezca hace fallar la verificación.
+La otra comprueba directamente lo que importa: toda columna que guarde dinero es
+entera.
+
+## D-055 · Un enlace con aspecto de botón sigue siendo un enlace (2026-08-23)
+
+Los enlaces que se ven como botones usan las clases del botón sobre un enlace
+normal, no el componente `Button` envolviéndolo.
+
+**Por qué:** envolver un enlace en el componente de botón le quita el rol de
+enlace ante los lectores de pantalla y ante cualquier herramienta que navegue por
+roles. Se descubrió porque las pruebas dejaron de encontrar el elemento al
+buscarlo como enlace: la comprobación de accesibilidad hizo de aviso temprano.
+
 ---
 
 # Decisiones pendientes
@@ -1102,7 +1129,6 @@ misma fuente de verdad. La regla vale también para fechas y períodos.
 | # | Pregunta | Afecta |
 |---|---|---|
 | P-020 | ¿Qué licencia lleva el repositorio? Sin una, nadie puede usar el código legalmente. Recomendación: MIT | repositorio |
-| P-016 | Elegir el proveedor de modelo para producción (se decide en el plan de la feature 002) | specs 002 y 003 |
 | P-019 | ¿Los datos de cada usuario se cifran en reposo más allá de lo que ofrece el proveedor? | constitución |
 
 <!--

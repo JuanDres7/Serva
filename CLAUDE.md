@@ -35,7 +35,7 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 |---|---|---|---|
 | 000 — Cuentas y acceso | ✅ | — | sí, previa a todo |
 | 001 — Registro y consulta de movimientos | ✅ | ✅ | **construida** |
-| 002 — Categorización automática | ✅ | — | sí |
+| 002 — Categorización automática | ✅ | ✅ | **construida** |
 | 003 — Chat sobre tus finanzas | ✅ | — | sí |
 | 004 — Configuración inicial y personalización | ✅ | — | sí |
 | 005 — Presupuestos | decisiones | — | no |
@@ -46,8 +46,9 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**Siguiente paso:** feature 002 (categorización automática). La 001 está
-construida y verificada; `npm run verify` pasa con 175 comprobaciones.
+**Siguiente paso:** feature 003 (chat sobre tus finanzas). Las features 001 y 002
+están construidas; `npm run verify` pasa con 228 comprobaciones, ninguna de las
+cuales requiere un modelo instalado.
 
 ## Documentos
 
@@ -55,7 +56,7 @@ construida y verificada; `npm run verify` pasa con 175 comprobaciones.
 |---|---|
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
 | `docs/vision.md` | Qué es Finzen, para quién y qué no es. |
-| `docs/decisiones.md` | Las 48 decisiones tomadas, con su razón. |
+| `docs/decisiones.md` | Las 55 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |

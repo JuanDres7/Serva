@@ -14,13 +14,16 @@
 import { sql } from 'drizzle-orm'
 import {
   bigint,
+  boolean,
   char,
   check,
   date,
   index,
+  integer,
   jsonb,
   pgEnum,
   pgTable,
+  real,
   text,
   timestamp,
   uuid,
@@ -167,3 +170,71 @@ export const userSettings = pgTable('user_settings', {
 export type TransactionRow = typeof transactions.$inferSelect
 export type NewTransactionRow = typeof transactions.$inferInsert
 export type UserSettingsRow = typeof userSettings.$inferSelect
+
+/** Nivel de la cascada que produjo la sugerencia (D-013). */
+export const categorizationMechanism = pgEnum('categorization_mechanism', [
+  'keywords',
+  'similarity',
+  'model',
+  'none',
+])
+
+/**
+ * Historial de aprendizaje (D-015).
+ *
+ * Se captura desde el primer día aunque todavía no se explote del todo: es el
+ * insumo de toda personalización futura y de cualquier medición de acierto, y no
+ * hay forma de reconstruirlo hacia atrás. Qué habría propuesto la IA y qué
+ * corrigió el usuario es información que, si no se guarda en el momento, se
+ * pierde para siempre.
+ */
+export const categorizationLog = pgTable(
+  'categorization_log',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+
+    /** Nulo mientras el usuario no haya confirmado el movimiento. */
+    transactionId: uuid('transaction_id').references(() => transactions.id, {
+      onDelete: 'cascade',
+    }),
+
+    /** Lo que escribió la persona, tal cual. */
+    inputText: text('input_text').notNull(),
+    /** Forma canónica, para poder comparar entre sí descripciones distintas. */
+    normalizedText: text('normalized_text').notNull(),
+    keywords: text('keywords').array().notNull().default([]),
+
+    suggestedCategory: categoryKey('suggested_category'),
+
+    /**
+     * Único campo de coma flotante del sistema, y es correcto que lo sea. El
+     * Artículo I prohíbe la coma flotante **para montos**, donde un céntimo
+     * perdido corrompe el historial. Una confianza es aproximada por naturaleza:
+     * 0,7341 y 0,7342 significan lo mismo.
+     */
+    confidence: real('confidence'),
+
+    mechanism: categorizationMechanism('mechanism').notNull(),
+
+    /** Categoría con la que quedó el movimiento tras la decisión del usuario. */
+    finalCategory: categoryKey('final_category'),
+    wasCorrected: boolean('was_corrected').notNull().default(false),
+
+    latencyMs: integer('latency_ms'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // Búsqueda del nivel 1: solapamiento de términos dentro de un usuario.
+    index('categorization_user_keywords_idx').using('gin', table.keywords),
+    index('categorization_user_idx').on(table.userId, table.finalCategory),
+    // Para medir el acierto a lo largo del tiempo.
+    index('categorization_user_date_idx').on(table.userId, table.createdAt),
+  ],
+)
+
+export type CategorizationLogRow = typeof categorizationLog.$inferSelect

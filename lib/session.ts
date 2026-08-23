@@ -1,4 +1,5 @@
 import { headers } from 'next/headers'
+import { redirect } from 'next/navigation'
 import { auth } from '@/lib/auth'
 
 /**
@@ -24,5 +25,21 @@ export async function requireUserId(): Promise<string> {
   if (!userId) {
     throw new Error('No hay sesión activa')
   }
+  return userId
+}
+
+/**
+ * Igual que `requireUserId`, pero redirige en lugar de lanzar.
+ *
+ * Es la que deben usar las **páginas**: aunque el contenedor de la aplicación ya
+ * comprueba la sesión, Next puede renderizar la página en paralelo con él, y una
+ * excepción sin controlar ensucia los registros y puede llegar a mostrarse.
+ *
+ * Las acciones del servidor siguen usando `requireUserId`, porque ahí lanzar es
+ * la respuesta correcta: no hay ninguna pantalla a la que llevar al usuario.
+ */
+export async function requireUserIdOrRedirect(): Promise<string> {
+  const userId = await currentUserId()
+  if (!userId) redirect('/entrar')
   return userId
 }

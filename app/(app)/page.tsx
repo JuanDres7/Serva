@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { requireUserId } from '@/lib/session'
+import { requireUserIdOrRedirect } from '@/lib/session'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
 import {
   periodAggregates,
@@ -10,12 +10,12 @@ import { periodFor, previousPeriod } from '@/lib/domain/cycle'
 import { todayIn } from '@/lib/domain/civil-date'
 import { computeTotals, computeBreakdown, compareWithPrevious } from '@/lib/domain/balance'
 import { formatMoney } from '@/lib/domain/money-format'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EtiquetaPeriodo } from '@/components/etiqueta-periodo'
 
 export default async function InicioPage() {
-  const userId = await requireUserId()
+  const userId = await requireUserIdOrRedirect()
   const settings = await ensureUserSettings(userId)
 
   const hoy = todayIn(settings.timeZone)
@@ -52,9 +52,12 @@ export default async function InicioPage() {
           </p>
         </div>
 
-        <Button render={<Link href="/registro" />} size="lg" className="w-full">
+        <Link
+          href="/registro"
+          className={buttonVariants({ size: 'lg', className: 'w-full' })}
+        >
           Registrar mi primer movimiento
-        </Button>
+        </Link>
       </div>
     )
   }
@@ -71,9 +74,9 @@ export default async function InicioPage() {
           </p>
         </div>
 
-        <Button render={<Link href="/registro" />} size="lg">
+        <Link href="/registro" className={buttonVariants({ size: 'lg' })}>
           Registro fácil
-        </Button>
+        </Link>
       </div>
 
       <div className="grid gap-4 sm:grid-cols-3">

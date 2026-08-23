@@ -1,11 +1,11 @@
 import Link from 'next/link'
-import { requireUserId } from '@/lib/session'
+import { requireUserIdOrRedirect } from '@/lib/session'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
 import { todayIn, toISO } from '@/lib/domain/civil-date'
 import { RegistroFacil } from '@/components/registro-facil'
 
 export default async function RegistroPage() {
-  const userId = await requireUserId()
+  const userId = await requireUserIdOrRedirect()
   const settings = await ensureUserSettings(userId)
 
   // La fecha de hoy se calcula en el servidor con la zona del usuario: el reloj
