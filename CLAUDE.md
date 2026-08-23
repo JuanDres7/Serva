@@ -62,7 +62,7 @@ repositorio (P-020).
 |---|---|
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
 | `docs/vision.md` | Qué es Finzen, para quién y qué no es. |
-| `docs/decisiones.md` | Las 55 decisiones tomadas, con su razón. |
+| `docs/decisiones.md` | Las 61 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |

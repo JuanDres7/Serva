@@ -52,8 +52,13 @@ export function ritmoDiario(aportes: readonly Aporte[], hoy: CivilDate): number 
   if (netos <= 0) return null
 
   const primero = aportes.reduce((min, a) => (daysBetween(a.fecha, min.fecha) > 0 ? a : min))
-  // Un solo día cuenta como un día, no como cero: dividir por cero daría infinito.
-  const dias = Math.max(1, daysBetween(primero.fecha, hoy))
+  const dias = daysBetween(primero.fecha, hoy)
+
+  // **Un solo aporte no es un ritmo.** Quien acaba de abonar millón y medio hoy
+  // no ahorra millón y medio al día, y prometerle la meta para dentro de tres
+  // días es una proyección que solo puede decepcionar. Hace falta al menos un
+  // día transcurrido para que la media signifique algo.
+  if (dias < 1) return null
 
   return netos / dias
 }
@@ -140,7 +145,12 @@ export function mensajeDeProgreso(params: {
 
   const estimada = fechaEstimada(estado, ritmo, hoy)
   if (!estimada) {
-    return { texto: 'Registra un aporte para ver cuándo la alcanzarías' }
+    return {
+      texto:
+        estado.aportadoCents > 0
+          ? 'Con otro aporte podremos estimar cuándo la alcanzarías'
+          : 'Registra un aporte para ver cuándo la alcanzarías',
+    }
   }
 
   const nombreMes = new Intl.DateTimeFormat(locale, {

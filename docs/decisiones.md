@@ -1248,6 +1248,26 @@ pregunta el ciclo de pago (D-027).
 Las tres desbloquearon piezas construidas y sin usar, lo que las hizo más rápidas
 de lo previsto.
 
+## D-061 · Un solo aporte no establece un ritmo (2026-08-23)
+
+La proyección de una meta («al ritmo actual, la tienes en marzo») requiere al
+menos un día transcurrido desde el primer aporte. Con un único aporte hecho hoy
+no se proyecta nada.
+
+**Encontrado usando la aplicación**, no por las pruebas: al crear una meta de
+seis millones y abonar millón y medio, el sistema respondía que la tendría «en
+agosto de 2026» —dentro de tres días—, porque tomaba ese aporte como ritmo
+diario.
+
+Era correcto aritméticamente y falso en la práctica: quien acaba de abonar millón
+y medio no ahorra millón y medio al día. Una promesa así solo puede decepcionar,
+y la credibilidad de las proyecciones es lo que hace que alguien las mire.
+
+**Con un aporte y sin ritmo**, el mensaje lo dice: «con otro aporte podremos
+estimar cuándo la alcanzarías». Es el mismo criterio que el asistente aplica con
+poco historial (spec 003): advertir en lugar de sacar conclusiones de una muestra
+que no significa nada.
+
 ---
 
 # Decisiones pendientes
