@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { requireUserId } from '@/lib/session'
+import { requireUserIdOrRedirect } from '@/lib/session'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
 import {
   listTransactions,
@@ -14,7 +14,7 @@ import { formatMoney } from '@/lib/domain/money-format'
 import { nombrarPeriodo } from '@/components/etiqueta-periodo'
 import { HistorialTabla } from '@/components/historial-tabla'
 import { FiltrosHistorial } from '@/components/filtros-historial'
-import { Button } from '@/components/ui/button'
+import { buttonVariants } from '@/components/ui/button'
 
 const POR_PAGINA = 25
 
@@ -44,7 +44,7 @@ function desplazar(
 
 export default async function HistorialPage({ searchParams }: Params) {
   const params = await searchParams
-  const userId = await requireUserId()
+  const userId = await requireUserIdOrRedirect()
   const settings = await ensureUserSettings(userId)
 
   const offsetPeriodo = Number.parseInt(params.p ?? '0', 10) || 0
@@ -100,26 +100,41 @@ export default async function HistorialPage({ searchParams }: Params) {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            render={<Link href={enlaceCon({ p: String(offsetPeriodo - 1) })} />}
+          <Link
+            href={enlaceCon({ p: String(offsetPeriodo - 1) })}
+            className={buttonVariants({ variant: 'outline', size: 'sm' })}
           >
             ← Anterior
-          </Button>
+          </Link>
           {offsetPeriodo !== 0 && (
-            <Button variant="ghost" size="sm" render={<Link href={enlaceCon({ p: '0' })} />}>
+            <Link
+              href={enlaceCon({ p: '0' })}
+              className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+            >
               Hoy
-            </Button>
+            </Link>
           )}
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={offsetPeriodo >= 0}
-            render={<Link href={enlaceCon({ p: String(offsetPeriodo + 1) })} />}
-          >
-            Siguiente →
-          </Button>
+          {offsetPeriodo < 0 ? (
+            <Link
+              href={enlaceCon({ p: String(offsetPeriodo + 1) })}
+              className={buttonVariants({ variant: 'outline', size: 'sm' })}
+            >
+              Siguiente →
+            </Link>
+          ) : (
+            // No hay períodos futuros que consultar: se muestra inerte en lugar
+            // de como un enlace que no lleva a ninguna parte.
+            <span
+              aria-disabled
+              className={buttonVariants({
+                variant: 'outline',
+                size: 'sm',
+                className: 'pointer-events-none opacity-50',
+              })}
+            >
+              Siguiente →
+            </span>
+          )}
         </div>
       </div>
 
@@ -163,12 +178,12 @@ export default async function HistorialPage({ searchParams }: Params) {
 
       {movimientos.length < total && (
         <div className="text-center">
-          <Button
-            variant="outline"
-            render={<Link href={enlaceCon({ n: String(limite + POR_PAGINA) })} />}
+          <Link
+            href={enlaceCon({ n: String(limite + POR_PAGINA) })}
+            className={buttonVariants({ variant: 'outline' })}
           >
             Cargar más ({total - movimientos.length} restantes)
-          </Button>
+          </Link>
         </div>
       )}
     </div>

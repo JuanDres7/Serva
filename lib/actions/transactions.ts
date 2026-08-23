@@ -11,6 +11,7 @@ import {
   type TransactionPatch,
 } from '@/lib/db/queries/transactions'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
+import { confirmarCategorizacion } from '@/lib/db/queries/learning'
 
 /**
  * Mutaciones de movimientos.
@@ -30,6 +31,11 @@ export type ResultadoAccion =
 
 type EntradaRegistro = Omit<TransactionInput, 'currency' | 'categorySource'> & {
   readonly categorySource?: TransactionInput['categorySource']
+  /**
+   * Registro de aprendizaje asociado, si hubo sugerencia. Al guardar se cierra
+   * el ciclo: qué propuso el sistema y con qué se quedó la persona (D-015).
+   */
+  readonly logId?: string | null
 }
 
 export async function registrarMovimiento(
@@ -39,11 +45,26 @@ export async function registrarMovimiento(
     const userId = await requireUserId()
     const settings = await ensureUserSettings(userId)
 
+    const { logId, ...datos } = entrada
+
     const fila = await createTransaction(userId, {
-      ...entrada,
+      ...datos,
       currency: settings.currency,
       categorySource: entrada.categorySource ?? 'user',
     })
+
+    if (logId) {
+      // Un fallo cerrando el aprendizaje no puede tumbar un movimiento que ya
+      // se guardó bien.
+      try {
+        await confirmarCategorizacion(userId, logId, {
+          transactionId: fila.id,
+          finalCategory: fila.category,
+        })
+      } catch {
+        // Se pierde una muestra de aprendizaje; el registro del usuario, no.
+      }
+    }
 
     revalidatePath('/')
     revalidatePath('/historial')

@@ -14,9 +14,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { categoriesFor, findCategory, type MovementKind } from '@/lib/domain/categories'
+import { descripcionCorta as recortarDescripcion } from '@/lib/domain/keywords'
 import { formatWhileTyping, parseAmount, formatMoney } from '@/lib/domain/money-format'
 import { money, add, zero } from '@/lib/domain/money'
 import { registrarMovimiento, anularMovimiento } from '@/lib/actions/transactions'
+import { sugerirCategoria } from '@/lib/actions/categorize'
 
 type Props = {
   readonly currency: string
@@ -42,6 +44,14 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
   const [registrados, setRegistrados] = useState(0)
   const [totalSesion, setTotalSesion] = useState(() => zero(currency))
 
+  // Sugerencia de la IA. `elegidaPorUsuario` es la que protege el Artículo II.3:
+  // una vez la persona escoge, ninguna sugerencia posterior la pisa.
+  const [logId, setLogId] = useState<string | null>(null)
+  const [descripcionCorta, setDescripcionCorta] = useState<string | null>(null)
+  const [categoriaSugerida, setCategoriaSugerida] = useState<string | null>(null)
+  const [elegidaPorUsuario, setElegidaPorUsuario] = useState(false)
+  const [pensando, setPensando] = useState(false)
+
   // FR-010: al abrir, el cursor ya está en el monto. Es un toque de menos, y es
   // el que más se nota.
   useEffect(() => {
@@ -52,15 +62,55 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
 
   function cambiarTipo(nuevo: MovementKind) {
     setTipo(nuevo)
-    // Las categorías del otro tipo no aplican (FR-004).
+    // Las categorías del otro tipo no aplican (FR-004), y la sugerencia se
+    // calculó para el tipo anterior.
     setCategoria('')
+    setCategoriaSugerida(null)
+    setElegidaPorUsuario(false)
+    setLogId(null)
     setError(null)
+  }
+
+  function elegirCategoria(clave: string) {
+    setCategoria(clave)
+    // A partir de aquí manda el usuario (Art. II.3).
+    setElegidaPorUsuario(true)
+  }
+
+  /**
+   * Pide la sugerencia al salir del campo de descripción, no al enviar.
+   *
+   * Así la categoría ya está puesta cuando la persona llega al botón de
+   * guardar. Pedirla al confirmar añadiría una espera justo en el momento en
+   * que quiere terminar.
+   */
+  async function pedirSugerencia() {
+    const texto = descripcion.trim()
+    if (texto === '') return
+
+    setPensando(true)
+    try {
+      const sugerencia = await sugerirCategoria(texto, tipo)
+      setLogId(sugerencia.logId)
+      setDescripcionCorta(sugerencia.descripcionCorta || null)
+
+      if (sugerencia.categoria && !elegidaPorUsuario) {
+        setCategoria(sugerencia.categoria)
+        setCategoriaSugerida(sugerencia.categoria)
+      }
+    } finally {
+      setPensando(false)
+    }
   }
 
   function limpiar() {
     setMontoTexto('')
     setDescripcion('')
     setCategoria('')
+    setCategoriaSugerida(null)
+    setElegidaPorUsuario(false)
+    setLogId(null)
+    setDescripcionCorta(null)
     setError(null)
     montoRef.current?.focus()
   }
@@ -96,6 +146,15 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
       category: categoria || categoriaPorDefecto(tipo),
       occurredOn: fecha,
       description: descripcion.trim() || null,
+      // Si la sugerencia no llegó a tiempo —el usuario escribió y guardó de
+      // inmediato—, la versión corta se calcula aquí. El historial debe ser
+      // legible con IA o sin ella.
+      descriptionShort:
+        descripcionCorta ?? (descripcion.trim() ? recortarDescripcion(descripcion) : null),
+      // Si la persona tocó el desplegable, la categoría es suya, venga de donde
+      // venga la sugerencia previa.
+      categorySource: elegidaPorUsuario || !categoriaSugerida ? 'user' : 'model',
+      logId,
     })
     setGuardando(false)
 
@@ -179,12 +238,24 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
           placeholder="almuerzo, mercado de la semana…"
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
+          onBlur={pedirSugerencia}
         />
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="categoria">Categoría</Label>
-        <Select value={categoria} onValueChange={(v) => setCategoria(v ?? '')}>
+        <Label htmlFor="categoria" className="flex items-center gap-2">
+          Categoría
+          {pensando && (
+            <span className="text-xs font-normal text-muted-foreground">pensando…</span>
+          )}
+          {/* FR-002: la sugerencia se distingue de una elección propia. */}
+          {!pensando && categoriaSugerida && categoria === categoriaSugerida && (
+            <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-normal text-primary">
+              sugerida
+            </span>
+          )}
+        </Label>
+        <Select value={categoria} onValueChange={(v) => elegirCategoria(v ?? '')}>
           <SelectTrigger id="categoria" className="w-full">
             {/* El valor guardado es la clave interna. Sin esta función, el
                 selector mostraría «eating_out» en lugar de «Comidas fuera». */}
