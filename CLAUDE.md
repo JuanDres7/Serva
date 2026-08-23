@@ -34,7 +34,7 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 | Feature | Spec | Plan | En el MVP |
 |---|---|---|---|
 | 000 — Cuentas y acceso | ✅ | — | sí, previa a todo |
-| 001 — Registro y consulta de movimientos | ✅ | ✅ | sí |
+| 001 — Registro y consulta de movimientos | ✅ | ✅ | **construida** |
 | 002 — Categorización automática | ✅ | — | sí |
 | 003 — Chat sobre tus finanzas | ✅ | — | sí |
 | 004 — Configuración inicial y personalización | ✅ | — | sí |
@@ -46,8 +46,8 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**Siguiente paso:** `tasks.md` de la feature 001 y montaje del oráculo
-(`npm run verify`) antes de escribir la primera funcionalidad.
+**Siguiente paso:** feature 002 (categorización automática). La 001 está
+construida y verificada; `npm run verify` pasa con 175 comprobaciones.
 
 ## Documentos
 
