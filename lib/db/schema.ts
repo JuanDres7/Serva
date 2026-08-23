@@ -15,6 +15,7 @@ import { sql } from 'drizzle-orm'
 import {
   bigint,
   boolean,
+  customType,
   char,
   check,
   date,
@@ -302,3 +303,58 @@ export const recurringMovements = pgTable(
 )
 
 export type RecurringRow = typeof recurringMovements.$inferSelect
+
+/**
+ * Imagen guardada en la propia base.
+ *
+ * Para un prototipo evita depender de un servicio de almacenamiento externo:
+ * quien clone el repositorio no necesita configurar nada, y no hay claves ni
+ * cuentas de terceros. Con el límite de tamaño de la aplicación, el coste es
+ * despreciable. Si algún día crece, se mueve a almacenamiento de objetos sin
+ * tocar el resto del modelo.
+ */
+const bytea = customType<{ data: Buffer; driverData: Buffer }>({
+  dataType: () => 'bytea',
+})
+
+/**
+ * Metas de ahorro (spec 006).
+ *
+ * El progreso no se guarda: se deriva de los movimientos de tipo ahorro
+ * asociados, igual que los saldos se derivan del historial (Art. VII.2).
+ */
+export const savingsGoals = pgTable(
+  'savings_goals',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+
+    name: text('name').notNull(),
+    targetCents: bigint('target_cents', { mode: 'number' }).notNull(),
+    currency: char('currency', { length: 3 }).notNull(),
+
+    /** Imagen propia del usuario. Es el mecanismo, no la decoración (D-029). */
+    image: bytea('image'),
+    imageType: text('image_type'),
+
+    /** Opcional: con ella se calcula cuánto aportar por período (FR-010). */
+    targetDate: date('target_date'),
+
+    /** Cuándo se alcanzó. Las metas logradas se archivan, no se borran. */
+    achievedAt: timestamp('achieved_at', { withTimezone: true }),
+
+    isSample: boolean('is_sample').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('goals_user_idx').on(table.userId, table.achievedAt),
+    check('goal_target_positive', sql`${table.targetCents} > 0`),
+  ],
+)
+
+export type SavingsGoalRow = typeof savingsGoals.$inferSelect

@@ -27,32 +27,41 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
-          <nav className="flex items-center gap-6">
-            <Link href="/" className="font-semibold tracking-tight">
+        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
+          {/* Con varias secciones, en pantalla estrecha la navegación no cabe.
+              Se desplaza dentro de su propio espacio en lugar de empujar la
+              página, que es lo que hace que una web se sienta rota. */}
+          <nav className="flex min-w-0 items-center gap-4 overflow-x-auto sm:gap-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <Link href="/" className="shrink-0 font-semibold tracking-tight">
               Finzen
             </Link>
             <Link
               href="/historial"
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
             >
               Historial
             </Link>
             <Link
+              href="/metas"
+              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
+            >
+              Metas
+            </Link>
+            <Link
               href="/recurrentes"
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
             >
               Recurrentes
             </Link>
             <Link
               href="/ajustes"
-              className="text-sm text-muted-foreground hover:text-foreground"
+              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
             >
               Ajustes
             </Link>
           </nav>
 
-          <div className="flex items-center gap-4">
+          <div className="flex shrink-0 items-center gap-4">
             <span className="hidden text-sm text-muted-foreground sm:inline">
               {settings.displayName}
             </span>
