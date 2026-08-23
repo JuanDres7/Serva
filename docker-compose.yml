@@ -1,0 +1,31 @@
+# Base de datos para desarrollo local.
+#
+# Postgres con la extensión pgvector ya incluida: evita instalar Postgres y
+# compilar la extensión a mano, que es el paso de instalación más propenso a
+# fallar (D-051).
+#
+#   docker compose up -d
+
+services:
+  db:
+    image: pgvector/pgvector:pg17
+    container_name: finzen-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: finzen
+      POSTGRES_PASSWORD: finzen_dev
+      POSTGRES_DB: finzen
+    ports:
+      # 5433 en el anfitrión: evita colisionar con un Postgres ya instalado,
+      # que es lo habitual en máquinas de desarrollo.
+      - "5433:5432"
+    volumes:
+      - finzen-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U finzen -d finzen"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  finzen-data:
