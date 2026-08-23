@@ -49,10 +49,12 @@ La numeración identifica la feature; no es el orden de construcción.
 **El MVP está construido.** `npm run verify` pasa con 301 comprobaciones,
 ninguna de las cuales requiere un modelo instalado.
 
-**Siguiente paso:** comprobar el asistente con un modelo real
-(`AI_PROVIDER=ollama` o `gemini`) y desplegar. Las pruebas cubren que las cifras
-sean correctas y que nada se rompa sin modelo, pero no si el modelo elige bien
-la herramienta ni si redacta con claridad: eso exige ejecutarlo.
+**El asistente está verificado en ejecución** con Gemini: elige bien la
+herramienta, las cifras coinciden y respeta sus límites (D-057). Con modelo local
+en esta máquina no es viable (D-056).
+
+**Siguiente paso:** desplegar en Vercel y Neon, y elegir licencia para el
+repositorio (P-020).
 
 ## Documentos
 

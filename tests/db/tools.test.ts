@@ -135,6 +135,30 @@ describe('herramientas del asistente', () => {
     expect(resultado.total).toContain('40.000')
   })
 
+  it('la búsqueda entiende plurales y singulares', async () => {
+    // Encontrado probando el asistente de verdad: se preguntó por «domicilios»
+    // y no encontró «domicilio de comida», porque comparaba texto literal. La
+    // búsqueda usa las mismas raíces que la categorización, así que ambas
+    // coinciden en qué consideran la misma cosa.
+    await gastar(ANA, 2500000, 'eating_out', 'domicilio de comida')
+    await gastar(ANA, 1500000, 'eating_out', 'domicilio del almuerzo')
+
+    const enPlural = await ejecutar(ANA, 'buscarMovimientos', { texto: 'domicilios' })
+    const enSingular = await ejecutar(ANA, 'buscarMovimientos', { texto: 'domicilio' })
+
+    expect(enPlural.cuantos).toBe(2)
+    expect(enPlural.total).toBe(enSingular.total)
+  })
+
+  it('la búsqueda ignora el relleno de la frase', async () => {
+    await gastar(ANA, 3000000, 'transport', 'taxi al aeropuerto')
+
+    // «un taxi» debe encontrar «taxi al aeropuerto»: las palabras vacías no
+    // cuentan para buscar.
+    const resultado = await ejecutar(ANA, 'buscarMovimientos', { texto: 'un taxi' })
+    expect(resultado.cuantos).toBe(1)
+  })
+
   it('la búsqueda sin resultados lo dice', async () => {
     const resultado = await ejecutar(ANA, 'buscarMovimientos', { texto: 'inexistente' })
     expect(resultado.sinDatos).toBe(true)

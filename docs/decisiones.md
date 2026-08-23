@@ -1154,6 +1154,37 @@ para conversar.
 como estaba previsto. Haberlo anticipado evitó concluir que el chat «no funciona»
 cuando lo que no da la talla es el modelo.
 
+## D-057 · El chat funciona con Gemini: verificado en ejecución (2026-08-23)
+
+Primera prueba del asistente contra un modelo real, con datos de ejemplo. Lo que
+hasta ahora estaba construido y probado sin modelo, ejecutado de verdad:
+
+| Pregunta | Herramienta elegida | Resultado |
+|---|---|---|
+| «¿En qué se me fue la plata este mes?» | `gastoPorCategoria` | Correcto, cifras idénticas a la pantalla |
+| «¿Gasté más que el mes pasado?» | `compararConPeriodoAnterior` | Correcto, 1,1% de aumento |
+| «¿Cuánto he gastado en domicilios?» | `buscarMovimientos` | Correcto tras corregir la búsqueda |
+| «¿Cómo puedo ahorrar más?» | `gastoPorCategoria` | Responde con sus propias categorías, sin consejos genéricos |
+| «¿En qué acciones debería invertir?» | ninguna | Se niega, como exige el Artículo II.4 |
+
+**Tiempo de respuesta: entre 2 y 3 segundos.** Frente a más de tres minutos sin
+llegar a consultar con el modelo local (D-056).
+
+**Dos fallos encontrados al ejecutarlo, ninguno detectable sin modelo:**
+
+1. El modelo por defecto que se había fijado ya no se ofrece a cuentas nuevas.
+   Ahora la versión se puede fijar por configuración, porque los proveedores
+   retiran modelos y cualquier valor por defecto envejece.
+2. **La búsqueda comparaba texto literal:** preguntar por «domicilios» no
+   encontraba «domicilio de comida». Ahora usa las mismas raíces que la
+   categorización, de modo que ambas coinciden en qué consideran la misma cosa.
+   El fallo solo aparece cuando alguien pregunta con sus propias palabras.
+
+**Lección:** las pruebas sin modelo cubrieron que las cifras fueran correctas y
+que nadie alcanzara datos ajenos —lo que decide si el asistente es fiable—, pero
+no podían detectar que la búsqueda no entendiera un plural. Eso solo lo encuentra
+alguien preguntando de verdad.
+
 ---
 
 # Decisiones pendientes
