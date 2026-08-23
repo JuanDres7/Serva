@@ -1201,18 +1201,42 @@ la licencia más reconocible y la que menos fricción genera.
 Finzen como servicio. Protege más, pero hace que menos gente lo toque, y aquí
 importa más lo segundo.
 
+## D-059 · Sin cifrado en la capa de aplicación (2026-08-23)
+
+Los datos se guardan en claro en la base, protegidos por el cifrado en reposo del
+proveedor. Finzen **no** cifra las descripciones antes de guardarlas.
+
+**Qué se gana no haciéndolo:** el texto se puede buscar e indexar. De eso dependen
+la búsqueda del asistente, el nivel 1 de la categorización —que compara palabras
+contra el historial del usuario— y el filtro por descripción. Cifrar en la
+aplicación obligaría a rehacer las tres con técnicas notablemente más complejas.
+
+**Qué se asume:** el cifrado del proveedor protege el robo del disco, pero no a
+quien obtenga las credenciales de la base ni a quien tenga acceso desde dentro del
+proveedor. Con acceso a la base, una descripción como «consulta con el
+psiquiatra» se lee tal cual.
+
+**Por qué es aceptable aquí:** Finzen es un prototipo de portafolio (D-045) que
+pide explícitamente no introducir datos financieros reales y que viene con datos
+de ejemplo inventados. Cifrar contra un atacante que ya tiene las credenciales de
+la base es proteger una casa vacía.
+
+**Cuándo se revisa:** el día que Finzen deje de ser una demostración, junto con
+D-043 —el uso del nivel gratuito de IA—. Las dos dependen de lo mismo: si los
+datos son reales o no.
+
 ---
 
 # Decisiones pendientes
 
-> El cambio de premisa a aplicación web multiusuario (D-038) ya se propagó a la
-> constitución (Artículo VI, v2.0.0), a la spec 000 y a las specs 001 y 004.
+_Ninguna. Todas las preguntas abiertas quedaron resueltas._
 
+<!--
 | # | Pregunta | Afecta |
 |---|---|---|
-| P-019 | ¿Los datos de cada usuario se cifran en reposo más allá de lo que ofrece el proveedor? | constitución |
 
 <!--
 | # | Pregunta | Bloquea |
 |---|---|---|
+-->
 -->
