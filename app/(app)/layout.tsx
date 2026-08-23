@@ -31,6 +31,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             >
               Historial
             </Link>
+            <Link
+              href="/ajustes"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Ajustes
+            </Link>
           </nav>
 
           <div className="flex items-center gap-4">

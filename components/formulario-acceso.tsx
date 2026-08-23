@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import Link from 'next/link'
 import { signIn, signUp } from '@/lib/auth-client'
 
 type Modo = 'entrar' | 'crear'
@@ -98,7 +99,11 @@ export function FormularioAcceso() {
           <span>
             Autorizo el tratamiento de mis datos para el funcionamiento de la
             aplicación. Las descripciones que escriba pueden enviarse a un proveedor
-            externo de inteligencia artificial para categorizarlas.
+            externo de inteligencia artificial para categorizarlas. Puedo leer el{' '}
+            <Link href="/privacidad" className="underline hover:text-foreground">
+              aviso de privacidad
+            </Link>
+            .
           </span>
         </label>
       )}
@@ -123,6 +128,17 @@ export function FormularioAcceso() {
       >
         {modo === 'crear' ? '¿Ya tienes cuenta? Entrar' : 'Crear una cuenta nueva'}
       </button>
+
+      {modo === 'entrar' && (
+        <p className="text-center text-sm">
+          <Link
+            href="/restablecer"
+            className="text-muted-foreground hover:text-foreground"
+          >
+            Olvidé mi contraseña
+          </Link>
+        </p>
+      )}
     </form>
   )
 }

@@ -13,6 +13,8 @@ import { formatMoney } from '@/lib/domain/money-format'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EtiquetaPeriodo } from '@/components/etiqueta-periodo'
+import { CargarEjemplo, BorrarEjemplo } from '@/components/datos-de-ejemplo'
+import { tieneDatosDeEjemplo } from '@/lib/db/queries/sample-data'
 
 export default async function InicioPage() {
   const userId = await requireUserIdOrRedirect()
@@ -22,12 +24,14 @@ export default async function InicioPage() {
   const periodo = periodFor(settings.cycleConfig, hoy)
   const anterior = previousPeriod(settings.cycleConfig, periodo)
 
-  const [agregados, agregadosAnteriores, desgloseCrudo, total] = await Promise.all([
-    periodAggregates(userId, periodo, settings.currency),
-    periodAggregates(userId, anterior, settings.currency),
-    categoryBreakdown(userId, periodo),
-    countTransactions(userId),
-  ])
+  const [agregados, agregadosAnteriores, desgloseCrudo, total, conEjemplos] =
+    await Promise.all([
+      periodAggregates(userId, periodo, settings.currency),
+      periodAggregates(userId, anterior, settings.currency),
+      categoryBreakdown(userId, periodo),
+      countTransactions(userId),
+      tieneDatosDeEjemplo(userId),
+    ])
 
   const totales = computeTotals(agregados)
   const totalesAnteriores = computeTotals(agregadosAnteriores)
@@ -52,12 +56,18 @@ export default async function InicioPage() {
           </p>
         </div>
 
-        <Link
-          href="/registro"
-          className={buttonVariants({ size: 'lg', className: 'w-full' })}
-        >
-          Registrar mi primer movimiento
-        </Link>
+        <div className="space-y-3">
+          <Link
+            href="/registro"
+            className={buttonVariants({ size: 'lg', className: 'w-full' })}
+          >
+            Registrar mi primer movimiento
+          </Link>
+
+          {/* D-046: quien llega a probar necesita ver la aplicación con datos,
+              o no verá nada de lo que la distingue. */}
+          <CargarEjemplo />
+        </div>
       </div>
     )
   }
@@ -172,6 +182,8 @@ export default async function InicioPage() {
           </CardContent>
         </Card>
       )}
+
+      {conEjemplos && <BorrarEjemplo />}
 
       <p className="text-center text-sm">
         <Link href="/historial" className="text-muted-foreground hover:text-foreground">
