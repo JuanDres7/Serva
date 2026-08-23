@@ -36,7 +36,7 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 | 000 — Cuentas y acceso | ✅ | — | **construida** |
 | 001 — Registro y consulta de movimientos | ✅ | ✅ | **construida** |
 | 002 — Categorización automática | ✅ | ✅ | **construida** |
-| 003 — Chat sobre tus finanzas | ✅ | — | sí |
+| 003 — Chat sobre tus finanzas | ✅ | ✅ | **construida** |
 | 004 — Configuración inicial y personalización | ✅ | — | **construida** |
 | 005 — Presupuestos | decisiones | — | no |
 | 006 — Metas de ahorro | decisiones | — | no |
@@ -46,9 +46,13 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**Siguiente paso:** feature 003 (chat sobre tus finanzas), la única del MVP que
-falta. Todo lo demás está construido; `npm run verify` pasa con 284
-comprobaciones, ninguna de las cuales requiere un modelo instalado.
+**El MVP está construido.** `npm run verify` pasa con 301 comprobaciones,
+ninguna de las cuales requiere un modelo instalado.
+
+**Siguiente paso:** comprobar el asistente con un modelo real
+(`AI_PROVIDER=ollama` o `gemini`) y desplegar. Las pruebas cubren que las cifras
+sean correctas y que nada se rompa sin modelo, pero no si el modelo elige bien
+la herramienta ni si redacta con claridad: eso exige ejecutarlo.
 
 ## Documentos
 

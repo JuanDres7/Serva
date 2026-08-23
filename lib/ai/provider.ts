@@ -76,6 +76,22 @@ function crearModelo() {
   return null
 }
 
+/**
+ * Modelo para el chat, o `null` si no hay proveedor configurado.
+ *
+ * Se expone aparte porque el chat necesita el modelo en bruto para hacer
+ * streaming y usar herramientas, mientras que la categorización solo necesita
+ * una sugerencia validada.
+ */
+export function modeloDeChat() {
+  return crearModelo()
+}
+
+/** Indica si hay algún proveedor de IA disponible. */
+export function hayProveedor(): boolean {
+  return crearModelo() !== null
+}
+
 export function crearProveedor(): ProveedorIA {
   const modelo = crearModelo()
   if (!modelo) return proveedorInactivo

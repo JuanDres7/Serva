@@ -19,6 +19,7 @@
   "dependencies": {
     "@ai-sdk/google": "^4.0.50",
     "@ai-sdk/openai-compatible": "^3.0.35",
+    "@ai-sdk/react": "^4.0.80",
     "@base-ui/react": "^1.7.0",
     "ai": "^7.0.77",
     "better-auth": "^1.7.1",
@@ -56,5 +57,8 @@
     "typescript": "^5",
     "vitest": "^4.1.11"
   },
-  "description": "Gestor de finanzas personales con IA"
+  "description": "Gestor de finanzas personales con IA",
+  "overrides": {
+    "zod": "$zod"
+  }
 }

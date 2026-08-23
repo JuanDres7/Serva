@@ -3,6 +3,8 @@ import Link from 'next/link'
 import { currentUserId } from '@/lib/session'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
 import { CerrarSesion } from '@/components/cerrar-sesion'
+import { ChatPanel } from '@/components/chat-panel'
+import { hayProveedor } from '@/lib/ai/provider'
 
 /**
  * Contenedor de la aplicación autenticada.
@@ -54,6 +56,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+
+      {/* Sin proveedor de IA el botón no aparece: mejor que no exista a que
+          exista y no funcione (spec 003, degradación). */}
+      {hayProveedor() && <ChatPanel nombre={settings.displayName} />}
     </div>
   )
 }

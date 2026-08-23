@@ -31,6 +31,14 @@ El único valor que debes rellenar en `.env.local` para arrancar es
 openssl rand -base64 32
 ```
 
+## Qué hace
+
+Registrar gastos e ingresos en segundos, con la categoría sugerida a partir de lo
+que escribes. Historial con filtros, edición y anulación reversible. Totales del
+período comparados con el anterior, desglose por categoría, evolución de seis
+períodos y ritmo de gasto día a día. Un asistente al que se le pregunta en
+lenguaje natural sobre los propios datos. Exportación a hoja de cálculo.
+
 ## La IA es opcional
 
 Finzen funciona sin ningún modelo instalado. La categorización automática y el chat
