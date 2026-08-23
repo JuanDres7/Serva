@@ -40,14 +40,15 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 | 004 — Configuración inicial y personalización | ✅ | — | **construida** |
 | 005 — Presupuestos | decisiones | — | no |
 | 006 — Metas de ahorro | decisiones | — | no |
-| 007 — Movimientos recurrentes | decisiones | — | no |
+| 007 — Movimientos recurrentes | ✅ | — | **construida** |
 | 008 — Gráficos y visualización | ✅ | — | **construida** |
 | 009 — Exportación de datos | ✅ | — | **construida** |
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**El MVP está construido.** `npm run verify` pasa con 301 comprobaciones,
-ninguna de las cuales requiere un modelo instalado.
+**El MVP está construido**, y se están añadiendo las features que quedaron
+fuera. `npm run verify` pasa con 345 comprobaciones, ninguna de las cuales
+requiere un modelo instalado.
 
 **El asistente está verificado en ejecución** con Gemini: elige bien la
 herramienta, las cifras coinciden y respeta sus límites (D-057). Con modelo local

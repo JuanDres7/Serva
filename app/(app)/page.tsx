@@ -22,6 +22,7 @@ import { nombrarPeriodo } from '@/components/etiqueta-periodo'
 import { construirSaludo } from '@/lib/domain/greeting'
 import { listTransactions } from '@/lib/db/queries/transactions'
 import { daysBetween, fromISO } from '@/lib/domain/civil-date'
+import { contarPendientes } from '@/lib/db/queries/recurring'
 
 export default async function InicioPage() {
   const userId = await requireUserIdOrRedirect()
@@ -51,7 +52,10 @@ export default async function InicioPage() {
     evolucion(userId, settings.cycleConfig, periodo, 6),
   ])
 
-  const [ultimo] = await listTransactions(userId, { limit: 1 })
+  const [[ultimo], pendientes] = await Promise.all([
+    listTransactions(userId, { limit: 1 }),
+    contarPendientes(userId, hoy),
+  ])
   const horaLocal = Number(
     new Intl.DateTimeFormat('en-GB', {
       timeZone: settings.timeZone,
@@ -65,8 +69,7 @@ export default async function InicioPage() {
     hora: horaLocal,
     diasSinRegistrar: ultimo ? daysBetween(fromISO(ultimo.occurredOn), hoy) : null,
     registrosDelPeriodo: total,
-    // Los cobros recurrentes llegan con la feature 007.
-    pendientes: 0,
+    pendientes,
   })
 
   const totales = computeTotals(agregados)

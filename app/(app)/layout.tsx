@@ -39,6 +39,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               Historial
             </Link>
             <Link
+              href="/recurrentes"
+              className="text-sm text-muted-foreground hover:text-foreground"
+            >
+              Recurrentes
+            </Link>
+            <Link
               href="/ajustes"
               className="text-sm text-muted-foreground hover:text-foreground"
             >

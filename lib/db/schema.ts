@@ -252,3 +252,53 @@ export const categorizationLog = pgTable(
 )
 
 export type CategorizationLogRow = typeof categorizationLog.$inferSelect
+
+/**
+ * Movimientos recurrentes (spec 007).
+ *
+ * Finzen no está conectada a ningún banco, así que no puede saber si un cobro
+ * ocurrió: guarda cuándo toca el próximo y pregunta al usuario cuando llega.
+ */
+export const recurringMovements = pgTable(
+  'recurring_movements',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+
+    /** Gasto o ingreso. El ahorro se aporta a metas, no se programa. */
+    type: movementType('type').notNull(),
+
+    /** Monto del último cobro confirmado: es lo que se propone la próxima vez. */
+    amountCents: bigint('amount_cents', { mode: 'number' }).notNull(),
+    currency: char('currency', { length: 3 }).notNull(),
+
+    category: categoryKey('category').notNull(),
+    description: text('description').notNull(),
+
+    /** Periodicidad: mensual en un día, o cada N días (D-032). */
+    schedule: jsonb('schedule').notNull(),
+
+    /** Fecha del próximo cobro pendiente de confirmar. */
+    nextDueOn: date('next_due_on').notNull(),
+    /** Última vez que se confirmó un cobro de este recurrente. */
+    lastConfirmedOn: date('last_confirmed_on'),
+
+    isSample: boolean('is_sample').notNull().default(false),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // Los pendientes se consultan en cada visita a la aplicación.
+    index('recurring_user_due_idx').on(table.userId, table.nextDueOn),
+
+    check('recurring_amount_positive', sql`${table.amountCents} > 0`),
+    // El ahorro va a metas: programarlo aquí no tendría destino.
+    check('recurring_not_saving', sql`${table.type} <> 'saving'`),
+  ],
+)
+
+export type RecurringRow = typeof recurringMovements.$inferSelect
