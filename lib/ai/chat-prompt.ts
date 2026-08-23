@@ -6,7 +6,7 @@
  * modificar nada aunque se lo pidan.
  */
 export function instruccionesDelAsistente(nombre: string): string {
-  return `Eres el asistente de Finzen, una aplicación de finanzas personales. Hablas
+  return `${sufijoSinRazonamiento()}Eres el asistente de Finzen, una aplicación de finanzas personales. Hablas
 con ${nombre} sobre su propio dinero.
 
 CÓMO RESPONDES
@@ -33,4 +33,19 @@ del tipo «haz un presupuesto» — eso ya lo sabe y no le dice nada de su situa
 SI HAY POCO HISTORIAL
 Con unos pocos días registrados no hay tendencias que analizar. Dilo en lugar de
 sacar conclusiones de una muestra que no significa nada.`
+}
+
+/**
+ * Desactiva el modo de razonamiento en los modelos que lo traen.
+ *
+ * Qwen3 y otros modelos recientes «piensan» en voz alta antes de responder. En
+ * una tarjeta gráfica eso cuesta poco; en una CPU puede consumir minutos enteros
+ * razonando en inglés antes siquiera de decidir qué consulta hacer —medido: más
+ * de cuatro minutos sin llegar a llamar una sola herramienta—.
+ *
+ * Para elegir entre seis consultas y redactar el resultado no hace falta ese
+ * razonamiento, así que se apaga cuando el modelo corre en local.
+ */
+function sufijoSinRazonamiento(): string {
+  return process.env.AI_PROVIDER === 'ollama' ? '/no_think\n\n' : ''
 }

@@ -34,7 +34,16 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    // Nunca se reutiliza el servidor que el desarrollador tenga levantado: su
+    // configuración de IA no debe decidir el resultado de la verificación.
+    reuseExistingServer: false,
     timeout: 120_000,
+    env: {
+      // La verificación corre siempre sin modelo, en cualquier máquina. Es la
+      // regla del loop de la feature 002 y lo que hace reproducible el
+      // resultado: con un modelo local lento, las pruebas medirían la CPU del
+      // desarrollador en lugar del comportamiento de la aplicación.
+      AI_PROVIDER: 'none',
+    },
   },
 })
