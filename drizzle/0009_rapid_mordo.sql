@@ -1,0 +1,1 @@
+ALTER TABLE "user_settings" ADD COLUMN "cycle_configured_at" timestamp with time zone;

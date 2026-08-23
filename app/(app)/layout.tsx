@@ -42,6 +42,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
               Historial
             </Link>
             <Link
+              href="/presupuestos"
+              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
+            >
+              Presupuestos
+            </Link>
+            <Link
               href="/metas"
               className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
             >

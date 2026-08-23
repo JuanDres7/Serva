@@ -23,6 +23,7 @@ import { construirSaludo } from '@/lib/domain/greeting'
 import { listTransactions } from '@/lib/db/queries/transactions'
 import { daysBetween, fromISO } from '@/lib/domain/civil-date'
 import { contarPendientes } from '@/lib/db/queries/recurring'
+import { contarEnAviso } from '@/lib/db/queries/budgets'
 
 export default async function InicioPage() {
   const userId = await requireUserIdOrRedirect()
@@ -52,9 +53,10 @@ export default async function InicioPage() {
     evolucion(userId, settings.cycleConfig, periodo, 6),
   ])
 
-  const [[ultimo], pendientes] = await Promise.all([
+  const [[ultimo], pendientes, presupuestosEnAviso] = await Promise.all([
     listTransactions(userId, { limit: 1 }),
     contarPendientes(userId, hoy),
+    contarEnAviso(userId, periodo),
   ])
   const horaLocal = Number(
     new Intl.DateTimeFormat('en-GB', {
@@ -70,6 +72,7 @@ export default async function InicioPage() {
     diasSinRegistrar: ultimo ? daysBetween(fromISO(ultimo.occurredOn), hoy) : null,
     registrosDelPeriodo: total,
     pendientes,
+    presupuestosEnAviso,
   })
 
   const totales = computeTotals(agregados)

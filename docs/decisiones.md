@@ -1225,6 +1225,29 @@ la base es proteger una casa vacía.
 D-043 —el uso del nivel gratuito de IA—. Las dos dependen de lo mismo: si los
 datos son reales o no.
 
+## D-060 · Se construyen las tres features aplazadas (2026-08-23)
+
+Presupuestos, metas de ahorro y movimientos recurrentes entran al producto,
+revirtiendo el aplazamiento de D-037.
+
+**Qué cambió respecto a entonces:** cuando se pospusieron no existían los datos
+de ejemplo (D-046). Con tres períodos de movimientos verosímiles, un presupuesto
+sugerido **sí** se puede calcular y probar, que era la objeción principal —
+diseñar a ciegas sobre suposiciones.
+
+**Lo que sigue sin poder verificarse con datos simulados:** si estas features son
+*útiles*. Los datos generados demuestran que funcionan; que sirvan solo se sabe
+usándolas un mes con dinero propio.
+
+**Orden de construcción y por qué:** recurrentes primero, por ser la candidata
+que D-037 ya señalaba y la que menos depende de lo demás; metas después, que
+activan el tipo de movimiento «ahorro» presente en el modelo desde la feature
+001; presupuestos al final, porque estrenan el motor de ciclos y son donde se
+pregunta el ciclo de pago (D-027).
+
+Las tres desbloquearon piezas construidas y sin usar, lo que las hizo más rápidas
+de lo previsto.
+
 ---
 
 # Decisiones pendientes
