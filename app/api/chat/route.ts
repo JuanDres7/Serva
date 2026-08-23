@@ -47,9 +47,10 @@ export async function POST(peticion: Request) {
       system: instruccionesDelAsistente(settings.displayName),
       messages: await convertToModelMessages(messages),
       tools,
-      // Consultar, leer el resultado y responder son varios pasos. El tope evita
-      // que un modelo confundido encadene llamadas sin fin.
-      stopWhen: stepCountIs(5),
+      // Consultar, leer el resultado y responder. Cada paso es una generación
+      // completa, que en CPU cuesta segundos: el tope evita que un modelo
+      // confundido encadene llamadas sin fin y deje al usuario esperando.
+      stopWhen: stepCountIs(3),
       temperature: 0.3,
     })
 

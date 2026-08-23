@@ -1119,6 +1119,41 @@ enlace ante los lectores de pantalla y ante cualquier herramienta que navegue po
 roles. Se descubrió porque las pruebas dejaron de encontrar el elemento al
 buscarlo como enlace: la comprobación de accesibilidad hizo de aviso temprano.
 
+## D-056 · El chat no es viable con un modelo local en esta máquina (2026-08-23)
+
+Medido, no supuesto. Con `qwen3:4b` en un Ryzen 7 5700G sin tarjeta gráfica
+dedicada:
+
+| Medición | Resultado |
+|---|---|
+| Velocidad de generación | **7,8 tokens por segundo** |
+| Responder «di hola en una palabra» | **33 segundos** |
+| Una pregunta del chat con herramientas | **más de 3 minutos, sin llegar a consultar** |
+
+**Dos causas se suman:**
+
+1. **La velocidad del hardware.** A 7,8 tokens por segundo, cualquier respuesta
+   de un par de frases cuesta medio minuto.
+2. **El modo de razonamiento de Qwen3.** El modelo «piensa» en voz alta antes de
+   responder, y en su caso el razonamiento aparece pegado al contenido: ni el
+   parámetro `think: false` de Ollama ni la directiva `/no_think` lo eliminan del
+   todo. Gasta cientos de tokens antes de decidir qué consultar.
+
+**Consecuencia para la categorización:** con el tiempo máximo de espera de 4
+segundos (plan 002, §6), el nivel 3 de la cascada expira siempre con este modelo.
+La categorización sigue funcionando por el nivel 1 —palabras clave sobre el
+historial—, que es instantáneo y no usa modelo.
+
+**Decisión:** el chat se sirve desde la nube. La capa de proveedor intercambiable
+(D-008) existía precisamente para esto, y el cambio es una variable de entorno.
+Para IA local queda pendiente probar un modelo sin razonamiento y más pequeño
+—de la familia Llama 3.2 o Granite—, que podría bastar para categorizar aunque no
+para conversar.
+
+**Lo que esto confirma:** el riesgo escrito en la spec 003, §8, se materializó tal
+como estaba previsto. Haberlo anticipado evitó concluir que el chat «no funciona»
+cuando lo que no da la talla es el modelo.
+
 ---
 
 # Decisiones pendientes
