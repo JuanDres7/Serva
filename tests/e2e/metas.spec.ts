@@ -65,13 +65,16 @@ test('E2 — aportar avanza el progreso sin contar como gasto', async ({ page })
   await expect(principal.getByText('-$ 250.000').first()).toBeVisible()
 })
 
-test('E3 — con aportes, proyecta cuándo se alcanzaría', async ({ page }) => {
+test('E3 — con un solo aporte no se promete una fecha', async ({ page }) => {
   await entrar(page)
   await crearMeta(page, 'Viaje', '1000000')
   await aportar(page, 'Viaje', '100000')
 
-  // Lo que motiva son los datos, no las frases genéricas.
-  await expect(page.getByText(/Al ritmo actual/)).toBeVisible()
+  // Encontrado usando la aplicación: con un único aporte hecho hoy proyectaba
+  // la meta para dentro de días, tomando ese aporte como si fuera el ritmo
+  // diario. Un solo aporte no es un ritmo, y prometerlo decepciona.
+  await expect(page.getByText(/otro aporte/)).toBeVisible()
+  await expect(page.getByText(/Al ritmo actual/)).toHaveCount(0)
 })
 
 test('E4 — con fecha objetivo dice cuánto aportar al mes', async ({ page }) => {

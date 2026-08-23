@@ -34,6 +34,16 @@ export type SugerenciaVista = {
   readonly sugeridoCents: number
 }
 
+/**
+ * Redondea a la unidad para mostrar un promedio.
+ *
+ * «Gastas $196.656,67 en promedio» delata el cálculo y no informa mejor que
+ * «$196.657». Los centavos importan en un movimiento real, no en una media.
+ */
+function aUnidades(cents: number): number {
+  return Math.round(cents / 100) * 100
+}
+
 const COLOR_POR_NIVEL: Record<PresupuestoVista['nivel'], string> = {
   holgado: 'bg-primary',
   cerca: 'bg-amber-500',
@@ -140,7 +150,8 @@ export function PresupuestosLista({
                     <span className="font-medium">{categoria?.name}</span>
                     <span className="text-muted-foreground">
                       {' '}
-                      · gastas {dinero(sugerencia.promedioCents)} en promedio
+                      · gastas {dinero(aUnidades(sugerencia.promedioCents))} en
+                      promedio
                     </span>
                   </span>
                   <Button

@@ -48,8 +48,15 @@ describe('ritmo de ahorro', () => {
     expect(ritmo).toBeCloseTo(100000000 / 10, 0)
   })
 
-  it('un solo aporte hoy no divide por cero', () => {
-    const ritmo = ritmoDiario([{ fecha: HOY, cents: 10000000 }], HOY)
+  it('un solo aporte de hoy no establece un ritmo', () => {
+    // Encontrado usando la aplicación: con un único aporte de millón y medio
+    // hecho hoy, proyectaba la meta para dentro de tres días. Quien acaba de
+    // abonar eso no ahorra millón y medio al día, y prometerlo decepciona.
+    expect(ritmoDiario([{ fecha: HOY, cents: 150000000 }], HOY)).toBeNull()
+  })
+
+  it('con al menos un día transcurrido sí hay ritmo', () => {
+    const ritmo = ritmoDiario([{ fecha: fromISO('2026-08-22'), cents: 10000000 }], HOY)
     expect(ritmo).toBe(10000000)
     expect(Number.isFinite(ritmo!)).toBe(true)
   })
@@ -149,7 +156,17 @@ describe('mensajes de progreso', () => {
       estado: calcularEstado(0, 60000000),
       ritmo: null,
     })
-    expect(mensaje.texto).toContain('aporte')
+    expect(mensaje.texto).toContain('Registra un aporte')
+  })
+
+  it('con un solo aporte no promete una fecha', () => {
+    const mensaje = mensajeDeProgreso({
+      ...base,
+      estado: calcularEstado(15000000, 60000000),
+      ritmo: null,
+    })
+    expect(mensaje.texto).toContain('otro aporte')
+    expect(mensaje.texto).not.toMatch(/Al ritmo actual/)
   })
 
   it('ningún mensaje reprocha ni juzga', () => {
