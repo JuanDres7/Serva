@@ -12,7 +12,7 @@ import { computeTotals, computeBreakdown, compareWithPrevious } from '@/lib/doma
 import { compararRitmo, ritmoRelativo } from '@/lib/domain/series'
 import { formatMoney } from '@/lib/domain/money-format'
 import { findCategory, CATEGORIES } from '@/lib/domain/categories'
-import { normalizar } from '@/lib/domain/keywords'
+import { extraerPalabrasClave } from '@/lib/domain/keywords'
 import { nombrarPeriodo } from '@/components/etiqueta-periodo'
 
 /**
@@ -183,14 +183,20 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
           limit: 500,
         })
 
-        const buscado = texto ? normalizar(texto) : null
-        const coinciden = buscado
-          ? movimientos.filter((m) =>
-              normalizar(`${m.description ?? ''} ${m.descriptionShort ?? ''}`).includes(
-                buscado,
-              ),
-            )
-          : movimientos
+        // Se busca por raíces y no por texto literal: quien pregunta por
+        // «domicilios» espera encontrar «domicilio de comida». Es la misma
+        // reducción que usa la categorización, así que ambas coinciden en qué
+        // consideran la misma cosa.
+        const buscadas = texto ? extraerPalabrasClave(texto) : []
+        const coinciden =
+          buscadas.length > 0
+            ? movimientos.filter((m) => {
+                const propias = extraerPalabrasClave(
+                  `${m.description ?? ''} ${m.descriptionShort ?? ''}`,
+                )
+                return buscadas.some((palabra) => propias.includes(palabra))
+              })
+            : movimientos
 
         const total = coinciden
           .filter((m) => m.type === 'expense')

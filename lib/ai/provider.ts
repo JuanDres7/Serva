@@ -58,7 +58,9 @@ function crearModelo() {
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY
     if (!apiKey) return null
     const google = createGoogleGenerativeAI({ apiKey })
-    return google(process.env.GEMINI_MODEL ?? 'gemini-2.5-flash-lite')
+    // El modelo se puede fijar por configuración: los proveedores retiran
+    // versiones y el valor por defecto envejece.
+    return google(process.env.GEMINI_MODEL ?? 'gemini-3.5-flash-lite')
   }
 
   if (proveedor === 'ollama') {
