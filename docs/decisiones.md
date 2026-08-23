@@ -1270,6 +1270,51 @@ que no significa nada.
 
 ---
 
+## D-062 · Un sistema visual propio: crema, salvia y terracota (2026-08-23)
+
+**Decisión.** Finzen deja la apariencia por defecto de shadcn y adopta un sistema
+visual propio, definido en `app/globals.css` con tokens de color en OKLCH.
+
+- **Fondo crema, tarjetas casi blancas.** El contraste lo hace el fondo, no la
+  sombra. Sobre blanco puro una tarjeta blanca necesita bordes duros para
+  existir; sobre crema flota sola.
+- **Nada de gris neutro.** La tinta tira a verde oscuro y los grises llevan un
+  punto cálido. El gris puro es lo que hace que una interfaz se sienta
+  corporativa, y Finzen es para quien no sabe de finanzas y ya llega con
+  desconfianza.
+- **Salvia profunda como color principal**, terracota apagada para lo negativo.
+  Un rojo de semáforo convierte cada gasto en un reproche. Esto vale también
+  para los gráficos y para las trece categorías, cuyos tonos se desaturaron: el
+  color distingue, no alarma.
+- **Radios amplios** (`--radius: 0.875rem`). Las esquinas duras son de hoja de
+  cálculo.
+- **Plus Jakarta Sans** para el texto y **JetBrains Mono** para las cifras. Una
+  sola familia de texto; el carácter viene del tratamiento —etiquetas en
+  mayúsculas muy espaciadas (`.eyebrow`), contraste fuerte de tamaños— y no de
+  mezclar tipografías, que es más disciplinado y envejece mejor. Los montos van
+  siempre monoespaciados y tabulares (`.cifra`): sin ancho fijo, una columna de
+  cifras baila al cambiar de dígito y deja de poder leerse en vertical.
+
+**Tres consecuencias en la estructura, no solo en el color:**
+
+1. **La navegación pasa a un lado** en pantalla ancha, y a una tira que se
+   desplaza en estrecha. Con seis secciones, una barra superior obligaba a
+   apretarlas.
+2. **El monto de Registro Fácil es el elemento firma**: superficie propia, cifra
+   grande, símbolo aparte. Es lo primero que se teclea y lo único que no se
+   puede omitir; que parezca un campo más era desaprovechar la pantalla que
+   define el producto.
+3. **Los estados vacíos invitan a actuar** (`components/vacio.tsx`): título, por
+   qué vale la pena y el botón dentro. Un recuadro punteado con una frase gris
+   deja a la persona donde estaba.
+
+**Por qué no seguir con la apariencia por defecto.** Funcionaba, pero era
+indistinguible de cualquier panel de administración, y el producto se apoya en
+que la persona se sienta acompañada y no juzgada. El tono de la interfaz es
+parte de eso, igual que lo son los mensajes (D-024).
+
+---
+
 # Decisiones pendientes
 
 _Ninguna. Todas las preguntas abiertas quedaron resueltas._

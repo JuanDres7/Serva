@@ -91,12 +91,12 @@ export default async function HistorialPage({ searchParams }: Params) {
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Historial</h1>
-          <p className="text-sm text-muted-foreground">
+        <div className="space-y-1.5">
+          <p className="eyebrow text-muted-foreground">
             {nombrarPeriodo(periodo, settings.locale)} · {total}{' '}
             {total === 1 ? 'movimiento' : 'movimientos'}
           </p>
+          <h1 className="text-3xl font-semibold tracking-tight">Historial</h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
@@ -144,17 +144,15 @@ export default async function HistorialPage({ searchParams }: Params) {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-3">
+      <div className="superficie grid divide-y divide-border/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         {[
           ['Ingresos', totales.income.cents],
           ['Gastos', totales.expense.cents],
           ['Saldo', totales.balance.cents],
         ].map(([etiqueta, valor]) => (
-          <div key={etiqueta as string} className="rounded-lg border px-4 py-3">
-            <p className="text-xs text-muted-foreground">{etiqueta}</p>
-            <p className="text-lg font-semibold tabular-nums">
-              {formatear(valor as number)}
-            </p>
+          <div key={etiqueta as string} className="space-y-1.5 px-5 py-4">
+            <p className="eyebrow text-muted-foreground">{etiqueta}</p>
+            <p className="cifra text-xl">{formatear(valor as number)}</p>
           </div>
         ))}
       </div>

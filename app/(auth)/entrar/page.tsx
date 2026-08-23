@@ -1,28 +1,58 @@
 import { redirect } from 'next/navigation'
 import { currentUserId } from '@/lib/session'
 import { FormularioAcceso } from '@/components/formulario-acceso'
+import { Marca } from '@/components/navegacion'
+
+/*
+ * La puerta de entrada.
+ *
+ * En pantalla ancha se parte en dos: a la izquierda qué es Finzen, a la derecha
+ * el formulario. Un formulario solo en medio de la pantalla no dice nada de la
+ * aplicación, y esta es la única pantalla que ve alguien que todavía no la
+ * conoce.
+ */
+
+const PROMESAS = [
+  'Anotas un gasto en cinco segundos.',
+  'Finzen le pone la categoría por ti.',
+  'Le preguntas a dónde se fue tu dinero, en tus palabras.',
+]
 
 export default async function EntrarPage() {
   if (await currentUserId()) redirect('/')
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-muted/30 px-4 py-12">
-      <div className="w-full max-w-sm space-y-6">
-        <div className="space-y-2 text-center">
-          <h1 className="text-3xl font-semibold tracking-tight">Finzen</h1>
-          <p className="text-sm text-muted-foreground">
-            Registra tus gastos en segundos y entiende a dónde se va tu dinero.
-          </p>
-        </div>
+    <div className="grid min-h-screen lg:grid-cols-2">
+      <div className="flex flex-col justify-between gap-10 bg-accent px-6 py-8 lg:px-12 lg:py-12">
+        <Marca />
 
-        <FormularioAcceso />
+        <div className="max-w-lg space-y-8">
+          <h1 className="text-3xl font-semibold tracking-tight text-balance lg:text-4xl">
+            Saber en qué se te va el dinero no debería ser un trabajo.
+          </h1>
+
+          <ul className="space-y-3">
+            {PROMESAS.map((promesa) => (
+              <li key={promesa} className="flex gap-3 text-sm">
+                <span aria-hidden className="mt-2 size-1.5 shrink-0 rounded-full bg-primary" />
+                {promesa}
+              </li>
+            ))}
+          </ul>
+        </div>
 
         {/* FR-015 de la spec 000: la advertencia debe verse antes de crear la
             cuenta, no después. Es la medida principal de protección de datos. */}
-        <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
+        <p className="max-w-md rounded-xl border border-amber-300/60 bg-amber-100/60 px-4 py-3 text-xs text-amber-950 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">
           Finzen es una aplicación de demostración. No ingreses información
           financiera real.
         </p>
+      </div>
+
+      <div className="flex items-center justify-center px-4 py-12 lg:px-12">
+        <div className="w-full max-w-sm">
+          <FormularioAcceso />
+        </div>
       </div>
     </div>
   )

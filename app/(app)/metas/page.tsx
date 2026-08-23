@@ -3,6 +3,7 @@ import { ensureUserSettings } from '@/lib/db/queries/settings'
 import { listarMetas, ritmoDeMeta } from '@/lib/db/queries/goals'
 import { calcularEstado, mensajeDeProgreso } from '@/lib/domain/goals'
 import { todayIn, fromISO } from '@/lib/domain/civil-date'
+import { Vacio } from '@/components/vacio'
 import { NuevaMeta } from '@/components/nueva-meta'
 import { MetaTarjeta } from '@/components/meta-tarjeta'
 
@@ -44,21 +45,26 @@ export default async function MetasPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Metas de ahorro</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Metas de ahorro</h1>
           <p className="text-sm text-muted-foreground">
             Aquello para lo que estás juntando, con lo que llevas y lo que falta.
           </p>
         </div>
-        <NuevaMeta currency={settings.currency} locale={settings.locale} />
+        {/* Sin metas, la acción vive dentro del estado vacío: repetirla arriba
+            pone dos veces el mismo botón en la misma pantalla. */}
+        {todas.length > 0 && (
+          <NuevaMeta currency={settings.currency} locale={settings.locale} />
+        )}
       </div>
 
       {todas.length === 0 ? (
-        <div className="rounded-lg border border-dashed py-12 text-center">
-          <p className="mx-auto max-w-md text-sm text-muted-foreground">
-            Ahorrar sin un destino concreto cuesta sostenerlo. Con uno —una moto,
-            un viaje— cada aporte significa algo.
-          </p>
-        </div>
+        <Vacio
+          titulo="Todavía no tienes una meta"
+          accion={<NuevaMeta currency={settings.currency} locale={settings.locale} />}
+        >
+          Ahorrar sin un destino concreto cuesta sostenerlo. Con uno —una moto,
+          un viaje— cada aporte significa algo.
+        </Vacio>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
           {activas.map((meta) => (

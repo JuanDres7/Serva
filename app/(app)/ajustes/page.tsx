@@ -21,7 +21,7 @@ export default async function AjustesPage() {
 
   return (
     <div className="mx-auto max-w-2xl space-y-6">
-      <h1 className="text-2xl font-semibold tracking-tight">Ajustes</h1>
+      <h1 className="text-3xl font-semibold tracking-tight">Ajustes</h1>
 
       <Card>
         <CardHeader>
@@ -61,7 +61,7 @@ export default async function AjustesPage() {
               cambiarlas.
             </p>
             {acierto.tasaAcierto !== null && (
-              <p className="text-2xl font-semibold text-foreground tabular-nums">
+              <p className="cifra text-2xl text-foreground">
                 {Math.round(acierto.tasaAcierto * 100)}%
               </p>
             )}

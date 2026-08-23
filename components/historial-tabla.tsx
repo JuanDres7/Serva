@@ -24,6 +24,7 @@ import { categoriesFor, findCategory, type MovementKind } from '@/lib/domain/cat
 import { formatMoney, formatWhileTyping, parseAmount } from '@/lib/domain/money-format'
 import { toISO, type CivilDate } from '@/lib/domain/civil-date'
 import { currencyDecimals } from '@/lib/domain/money'
+import { Vacio } from '@/components/vacio'
 import {
   registrarMovimiento,
   actualizarMovimiento,
@@ -59,9 +60,9 @@ export function HistorialTabla({ movimientos, currency, locale, hoy }: Props) {
     return (
       <div className="space-y-3">
         <BotonAgregar onClick={() => setCreando(true)} deshabilitado={creando} />
-        <p className="rounded-lg border border-dashed py-12 text-center text-sm text-muted-foreground">
-          No hay movimientos que coincidan con estos filtros.
-        </p>
+        <Vacio titulo="No hay movimientos">
+          Ninguno coincide con este período y estos filtros.
+        </Vacio>
       </div>
     )
   }
@@ -271,7 +272,7 @@ function FilaNueva({
           onChange={(e) => setMonto(formatWhileTyping(e.target.value, locale))}
           inputMode="decimal"
           placeholder="0"
-          className="h-8 text-right tabular-nums"
+          className="cifra h-8 text-right"
           aria-label="Monto del nuevo movimiento"
         />
       </TableCell>
@@ -309,7 +310,7 @@ function FilaLectura({
 
   return (
     <TableRow className={anulado ? 'opacity-50' : undefined}>
-      <TableCell className="text-sm text-muted-foreground tabular-nums">
+      <TableCell className="cifra text-sm text-muted-foreground">
         {new Intl.DateTimeFormat(locale, {
           day: '2-digit',
           month: 'short',
@@ -341,8 +342,8 @@ function FilaLectura({
       </TableCell>
 
       <TableCell
-        className={`text-right tabular-nums ${
-          movimiento.type === 'income' ? 'text-emerald-600 dark:text-emerald-400' : ''
+        className={`cifra text-right ${
+          movimiento.type === 'income' ? 'text-primary' : ''
         }`}
       >
         {signo}{' '}
@@ -515,7 +516,7 @@ function FilaEdicion({
           value={monto}
           onChange={(e) => setMonto(formatWhileTyping(e.target.value, locale))}
           inputMode="decimal"
-          className="h-8 text-right tabular-nums"
+          className="cifra h-8 text-right"
           aria-label="Monto"
         />
       </TableCell>

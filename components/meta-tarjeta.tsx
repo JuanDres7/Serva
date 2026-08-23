@@ -91,12 +91,12 @@ export function MetaTarjeta({
         <header className="flex items-start justify-between gap-3">
           <div>
             <h3 className="font-medium">{meta.nombre}</h3>
-            <p className="text-sm text-muted-foreground tabular-nums">
+            <p className="cifra text-sm text-muted-foreground">
               {dinero(meta.aportadoCents)} de {dinero(meta.objetivoCents)}
             </p>
           </div>
           {meta.alcanzada && (
-            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300">
+            <span className="rounded-full bg-accent px-2.5 py-0.5 text-xs font-medium text-accent-foreground">
               Lograda
             </span>
           )}

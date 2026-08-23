@@ -46,7 +46,7 @@ function aUnidades(cents: number): number {
 
 const COLOR_POR_NIVEL: Record<PresupuestoVista['nivel'], string> = {
   holgado: 'bg-primary',
-  cerca: 'bg-amber-500',
+  cerca: 'bg-amber-400',
   excedido: 'bg-destructive',
 }
 
@@ -83,7 +83,7 @@ export function PresupuestosLista({
                     )}
                     {categoria?.name}
                   </span>
-                  <span className="text-sm tabular-nums text-muted-foreground">
+                  <span className="cifra text-sm text-muted-foreground">
                     {dinero(presupuesto.gastadoCents)} de {dinero(presupuesto.topeCents)}
                   </span>
                 </div>

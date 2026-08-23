@@ -18,6 +18,7 @@ import {
   formatMoney,
   formatWhileTyping,
   separatorsFor,
+  currencySymbol,
 } from '@/lib/domain/money-format'
 
 const COP = 'COP'
@@ -166,5 +167,16 @@ describe('presentación de montos', () => {
     expect(formatWhileTyping('1200000', CO)).toBe('1.200.000')
     expect(formatWhileTyping('15000,5', CO)).toBe('15.000,5')
     expect(formatWhileTyping('', CO)).toBe('')
+  })
+})
+
+describe('currencySymbol', () => {
+  it('devuelve el símbolo sin el número', () => {
+    expect(currencySymbol(COP, CO)).toBe('$')
+    expect(currencySymbol('EUR', 'es-ES')).toBe('€')
+  })
+
+  it('cae en el código cuando la moneda no tiene símbolo propio', () => {
+    expect(currencySymbol('XTS', CO)).toBe('XTS')
   })
 })
