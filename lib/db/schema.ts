@@ -108,8 +108,14 @@ export const transactions = pgTable(
     status: movementStatus('status').notNull().default('active'),
     voidedAt: timestamp('voided_at', { withTimezone: true }),
 
-    /** Datos de ejemplo, eliminables en bloque (D-046). */
-    isSample: text('is_sample'),
+    /**
+     * Datos de ejemplo, eliminables en bloque (D-046).
+     *
+     * Quien pruebe la aplicación y decida usarla en serio debe poder partir de
+     * cero: movimientos inventados mezclados con los suyos falsearían todos sus
+     * totales y contaminarían lo que la IA aprendió.
+     */
+    isSample: boolean('is_sample').notNull().default(false),
 
     // Previsto desde ahora para no migrar después (D-028). Sin interfaz hasta la
     // feature 006.

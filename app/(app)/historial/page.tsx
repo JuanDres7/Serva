@@ -99,7 +99,13 @@ export default async function HistorialPage({ searchParams }: Params) {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <a
+            href="/api/exportar"
+            className={buttonVariants({ variant: 'ghost', size: 'sm' })}
+          >
+            Exportar a Excel
+          </a>
           <Link
             href={enlaceCon({ p: String(offsetPeriodo - 1) })}
             className={buttonVariants({ variant: 'outline', size: 'sm' })}
