@@ -39,7 +39,7 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 | 003 — Chat sobre tus finanzas | ✅ | ✅ | **construida** |
 | 004 — Configuración inicial y personalización | ✅ | — | **construida** |
 | 005 — Presupuestos | decisiones | — | no |
-| 006 — Metas de ahorro | decisiones | — | no |
+| 006 — Metas de ahorro | ✅ | — | **construida** |
 | 007 — Movimientos recurrentes | ✅ | — | **construida** |
 | 008 — Gráficos y visualización | ✅ | — | **construida** |
 | 009 — Exportación de datos | ✅ | — | **construida** |
@@ -47,7 +47,7 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 La numeración identifica la feature; no es el orden de construcción.
 
 **El MVP está construido**, y se están añadiendo las features que quedaron
-fuera. `npm run verify` pasa con 345 comprobaciones, ninguna de las cuales
+fuera. `npm run verify` pasa con 387 comprobaciones, ninguna de las cuales
 requiere un modelo instalado.
 
 **El asistente está verificado en ejecución** con Gemini: elige bien la
