@@ -96,16 +96,26 @@ export async function updateDisplayName(
  */
 export async function completarConfiguracion(
   userId: string,
-  datos: { displayName: string; country: string },
+  datos: {
+    displayName: string
+    country: string
+    /**
+     * Con movimientos ya registrados, la moneda se conserva: los montos
+     * guardados no se convierten solos y cambiarla falsearía el historial.
+     * El resto de la configuración sí se aplica.
+     */
+    conservarMoneda?: boolean
+  },
 ): Promise<void> {
   const pais = buscarPais(datos.country) ?? PAIS_POR_DEFECTO
+  const actual = await getUserSettings(userId)
 
   await db
     .update(userSettings)
     .set({
       displayName: datos.displayName,
       country: pais.codigo,
-      currency: pais.currency,
+      currency: datos.conservarMoneda && actual ? actual.currency : pais.currency,
       locale: pais.locale,
       timeZone: pais.timeZone,
       onboardedAt: new Date(),
