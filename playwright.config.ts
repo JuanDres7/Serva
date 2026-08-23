@@ -4,7 +4,11 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 1 : 0,
+  // Un reintento también en local. Las acciones del servidor compiten por un
+  // único servidor de desarrollo y alguna prueba agota la espera por
+  // contención, no por un defecto: un oráculo que falla al azar deja de servir
+  // como señal. Un fallo real falla las dos veces.
+  retries: 1,
 
   // Un único servidor de desarrollo atendiendo a muchos trabajadores es el
   // cuello de botella: las acciones del servidor empiezan a encolarse y las
