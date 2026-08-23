@@ -17,7 +17,14 @@ async function entrarComoNuevoUsuario(page: Page, nombre = 'Juan') {
   await page.getByLabel('Contraseña').fill('contrasena-de-prueba-123')
   await page.getByRole('checkbox').check()
   await page.getByRole('button', { name: 'Crear cuenta' }).click()
-  await expect(page.getByRole('heading', { name: `Hola, ${nombre}` })).toBeVisible()
+
+  // Configuración inicial (spec 004): nombre y país antes de entrar.
+  await expect(page.getByRole('heading', { name: 'Antes de empezar' })).toBeVisible()
+  await page.getByLabel(/Cómo quieres que te llamemos/).fill(nombre)
+  await page.getByRole('button', { name: 'Empezar' }).click()
+
+  // El saludo varía con la hora, así que se comprueba por el nombre.
+  await expect(page.getByRole('heading', { name: new RegExp(nombre) })).toBeVisible()
 }
 
 async function registrar(

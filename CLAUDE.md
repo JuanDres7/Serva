@@ -33,22 +33,22 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 
 | Feature | Spec | Plan | En el MVP |
 |---|---|---|---|
-| 000 — Cuentas y acceso | ✅ | — | sí, previa a todo |
+| 000 — Cuentas y acceso | ✅ | — | **construida** |
 | 001 — Registro y consulta de movimientos | ✅ | ✅ | **construida** |
 | 002 — Categorización automática | ✅ | ✅ | **construida** |
 | 003 — Chat sobre tus finanzas | ✅ | — | sí |
-| 004 — Configuración inicial y personalización | ✅ | — | sí |
+| 004 — Configuración inicial y personalización | ✅ | — | **construida** |
 | 005 — Presupuestos | decisiones | — | no |
 | 006 — Metas de ahorro | decisiones | — | no |
 | 007 — Movimientos recurrentes | decisiones | — | no |
-| 008 — Gráficos y visualización | ✅ | — | sí |
-| 009 — Exportación de datos | ✅ | — | sí |
+| 008 — Gráficos y visualización | ✅ | — | **construida** |
+| 009 — Exportación de datos | ✅ | — | **construida** |
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**Siguiente paso:** feature 003 (chat sobre tus finanzas). Las features 001 y 002
-están construidas; `npm run verify` pasa con 228 comprobaciones, ninguna de las
-cuales requiere un modelo instalado.
+**Siguiente paso:** feature 003 (chat sobre tus finanzas), la única del MVP que
+falta. Todo lo demás está construido; `npm run verify` pasa con 284
+comprobaciones, ninguna de las cuales requiere un modelo instalado.
 
 ## Documentos
 

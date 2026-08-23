@@ -2,6 +2,7 @@ import { eq } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { userSettings, user, type UserSettingsRow } from '@/lib/db/schema'
 import type { CycleConfig } from '@/lib/domain/cycle'
+import { buscarPais, PAIS_POR_DEFECTO } from '@/lib/domain/countries'
 
 /**
  * Configuración de cada usuario: nombre, moneda, formato y ciclo.
@@ -27,6 +28,8 @@ export type UserSettings = {
   readonly locale: string
   readonly timeZone: string
   readonly cycleConfig: CycleConfig
+  /** Nulo mientras la persona no haya completado la configuración inicial. */
+  readonly onboardedAt: Date | null
 }
 
 function toSettings(row: UserSettingsRow): UserSettings {
@@ -38,6 +41,7 @@ function toSettings(row: UserSettingsRow): UserSettings {
     locale: row.locale,
     timeZone: row.timeZone,
     cycleConfig: row.cycleConfig as CycleConfig,
+    onboardedAt: row.onboardedAt,
   }
 }
 
@@ -79,5 +83,33 @@ export async function updateDisplayName(
   await db
     .update(userSettings)
     .set({ displayName, updatedAt: new Date() })
+    .where(eq(userSettings.userId, userId))
+}
+
+/**
+ * Guarda la configuración inicial: nombre y país (spec 004).
+ *
+ * El país determina moneda, formato numérico, formato de fecha y zona horaria.
+ * La moneda solo puede fijarse aquí y mientras no existan movimientos: los
+ * montos ya guardados no se convierten solos, y cambiarla después falsearía todo
+ * el historial (FR-011).
+ */
+export async function completarConfiguracion(
+  userId: string,
+  datos: { displayName: string; country: string },
+): Promise<void> {
+  const pais = buscarPais(datos.country) ?? PAIS_POR_DEFECTO
+
+  await db
+    .update(userSettings)
+    .set({
+      displayName: datos.displayName,
+      country: pais.codigo,
+      currency: pais.currency,
+      locale: pais.locale,
+      timeZone: pais.timeZone,
+      onboardedAt: new Date(),
+      updatedAt: new Date(),
+    })
     .where(eq(userSettings.userId, userId))
 }
