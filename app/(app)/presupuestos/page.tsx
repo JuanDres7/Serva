@@ -7,6 +7,7 @@ import { estadoDePresupuesto, mensajeDePresupuesto } from '@/lib/domain/budgets'
 import { nombrarPeriodo } from '@/components/etiqueta-periodo'
 import { ConfigurarCiclo } from '@/components/configurar-ciclo'
 import { PresupuestosLista } from '@/components/presupuestos-lista'
+import { Vacio } from '@/components/vacio'
 
 export default async function PresupuestosPage() {
   const userId = await requireUserIdOrRedirect()
@@ -19,7 +20,7 @@ export default async function PresupuestosPage() {
     return (
       <div className="mx-auto max-w-lg space-y-6">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Presupuestos</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Presupuestos</h1>
           <p className="text-sm text-muted-foreground">
             Antes de empezar, una pregunta que cambia cómo se mide todo.
           </p>
@@ -57,7 +58,7 @@ export default async function PresupuestosPage() {
   return (
     <div className="space-y-6">
       <div className="space-y-1">
-        <h1 className="text-2xl font-semibold tracking-tight">Presupuestos</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">Presupuestos</h1>
         <p className="text-sm text-muted-foreground">
           {nombrarPeriodo(periodo, settings.locale)} ·{' '}
           {diasRestantes === 0
@@ -67,12 +68,10 @@ export default async function PresupuestosPage() {
       </div>
 
       {presupuestos.length === 0 && sugerencias.length === 0 && (
-        <div className="rounded-lg border border-dashed py-12 text-center">
-          <p className="mx-auto max-w-md text-sm text-muted-foreground">
-            Todavía no hay historial suficiente para proponerte topes con tus
-            datos. Puedes ponerlos a mano cuando quieras.
-          </p>
-        </div>
+        <Vacio titulo="Aún no hay con qué proponerte topes">
+          Hace falta más historial para calcular lo que sueles gastar. Mientras
+          tanto puedes poner los topes a mano.
+        </Vacio>
       )}
 
       {/* FR-006: se orienta a poner tope a pocas categorías, las que se pueden

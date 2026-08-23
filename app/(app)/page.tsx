@@ -98,9 +98,9 @@ export default async function InicioPage() {
   // acción, en lugar de mostrar cifras en cero sin contexto.
   if (total === 0) {
     return (
-      <div className="mx-auto max-w-md space-y-6 py-12 text-center">
-        <div className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">{saludo.titulo}</h1>
+      <div className="mx-auto max-w-md space-y-8 py-16 text-center">
+        <div className="space-y-3">
+          <h1 className="text-3xl font-semibold tracking-tight">{saludo.titulo}</h1>
           <p className="text-muted-foreground">
             Aquí vas a ver a dónde se va tu dinero. Para empezar, registra tu primer
             gasto: toma unos segundos.
@@ -125,17 +125,17 @@ export default async function InicioPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">{saludo.titulo}</h1>
-          <p className="text-sm text-muted-foreground">
-            {saludo.subtitulo ? (
-              <>
-                {saludo.subtitulo} ·{' '}
-              </>
-            ) : null}
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+        <div className="space-y-1.5">
+          <p className="eyebrow text-muted-foreground">
             <EtiquetaPeriodo periodo={periodo} locale={settings.locale} />
           </p>
+          <h1 className="text-3xl font-semibold tracking-tight text-balance">
+            {saludo.titulo}
+          </h1>
+          {saludo.subtitulo && (
+            <p className="text-sm text-muted-foreground">{saludo.subtitulo}</p>
+          )}
         </div>
 
         <Link href="/registro" className={buttonVariants({ size: 'lg' })}>
@@ -143,58 +143,41 @@ export default async function InicioPage() {
         </Link>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Ingresos
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-2xl font-semibold tabular-nums">
-              {formatear(totales.income.cents)}
-            </p>
-          </CardContent>
-        </Card>
+      {/*
+        Las tres cifras del período comparten una sola superficie separada por
+        filetes. Tres tarjetas sueltas se leen como tres cosas distintas; esto
+        es una sola: el estado del mes.
+      */}
+      <div className="superficie grid divide-y divide-border/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+        <div className="space-y-2 px-5 py-5">
+          <p className="eyebrow text-muted-foreground">Ingresos</p>
+          <p className="cifra text-2xl">{formatear(totales.income.cents)}</p>
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Gastos
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-1">
-            <p className="text-2xl font-semibold tabular-nums">
-              {formatear(totales.expense.cents)}
+        <div className="space-y-2 px-5 py-5">
+          <p className="eyebrow text-muted-foreground">Gastos</p>
+          <p className="cifra text-2xl">{formatear(totales.expense.cents)}</p>
+          {/* Ninguna cifra destacada se muestra sin comparación: un número
+              suelto no dice si es mucho o poco. */}
+          {comparacionGasto.percentageChange !== null && (
+            <p className="text-xs text-muted-foreground">
+              {comparacionGasto.percentageChange > 0 ? '↑' : '↓'}{' '}
+              {Math.abs(comparacionGasto.percentageChange)}% frente al período
+              anterior
             </p>
-            {/* Ninguna cifra destacada se muestra sin comparación: un número
-                suelto no dice si es mucho o poco. */}
-            {comparacionGasto.percentageChange !== null && (
-              <p className="text-xs text-muted-foreground">
-                {comparacionGasto.percentageChange > 0 ? '↑' : '↓'}{' '}
-                {Math.abs(comparacionGasto.percentageChange)}% frente al período
-                anterior
-              </p>
-            )}
-          </CardContent>
-        </Card>
+          )}
+        </div>
 
-        <Card>
-          <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Saldo
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p
-              className={`text-2xl font-semibold tabular-nums ${
-                totales.balance.cents < 0 ? 'text-destructive' : ''
-              }`}
-            >
-              {formatear(totales.balance.cents)}
-            </p>
-          </CardContent>
-        </Card>
+        <div className="space-y-2 px-5 py-5">
+          <p className="eyebrow text-muted-foreground">Saldo</p>
+          <p
+            className={`cifra text-2xl ${
+              totales.balance.cents < 0 ? 'text-destructive' : 'text-primary'
+            }`}
+          >
+            {formatear(totales.balance.cents)}
+          </p>
+        </div>
       </div>
 
       {desglose.length > 0 && (
@@ -214,9 +197,11 @@ export default async function InicioPage() {
                     />
                     {entrada.category.name}
                   </span>
-                  <span className="tabular-nums text-muted-foreground">
-                    {formatear(entrada.amount.cents)}
-                    <span className="ml-2 text-xs">{entrada.percentage}%</span>
+                  <span className="flex shrink-0 items-baseline gap-2">
+                    <span className="cifra">{formatear(entrada.amount.cents)}</span>
+                    <span className="cifra w-10 text-right text-xs text-muted-foreground">
+                      {entrada.percentage}%
+                    </span>
                   </span>
                 </div>
                 {/* Barras horizontales ordenadas de mayor a menor: comparar
@@ -278,9 +263,12 @@ export default async function InicioPage() {
 
       {conEjemplos && <BorrarEjemplo />}
 
-      <p className="text-center text-sm">
-        <Link href="/historial" className="text-muted-foreground hover:text-foreground">
-          Ver todos los movimientos
+      <p className="text-center">
+        <Link
+          href="/historial"
+          className="eyebrow text-muted-foreground transition-colors hover:text-foreground"
+        >
+          Ver todos los movimientos <span aria-hidden>→</span>
         </Link>
       </p>
     </div>

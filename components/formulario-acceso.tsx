@@ -52,7 +52,18 @@ export function FormularioAcceso() {
   }
 
   return (
-    <form onSubmit={enviar} className="space-y-4 rounded-lg border bg-card p-6 shadow-sm">
+    <form onSubmit={enviar} className="superficie space-y-5 p-6 sm:p-7">
+      <div className="space-y-1">
+        <h2 className="text-xl font-semibold tracking-tight">
+          {modo === 'crear' ? 'Crea tu cuenta' : 'Entra a tu cuenta'}
+        </h2>
+        <p className="text-sm text-muted-foreground">
+          {modo === 'crear'
+            ? 'Toma menos de un minuto.'
+            : 'Te dejamos donde lo dejaste.'}
+        </p>
+      </div>
+
       {modo === 'crear' && (
         <div className="space-y-2">
           <Label htmlFor="name">¿Cómo te llamas?</Label>

@@ -142,13 +142,13 @@ function FilaPendiente({
               onChange={(e) => setMonto(formatWhileTyping(e.target.value, locale))}
               inputMode="decimal"
               aria-label={`Monto de ${pendiente.descripcion}`}
-              className="h-8 w-32 text-right tabular-nums"
+              className="cifra h-8 w-32 text-right"
               autoFocus
             />
           ) : (
             <button
               onClick={() => setEditandoMonto(true)}
-              className="rounded px-2 py-1 text-sm tabular-nums hover:bg-muted"
+              className="cifra rounded px-2 py-1 text-sm hover:bg-muted"
               aria-label={`Cambiar el monto de ${pendiente.descripcion}`}
             >
               {formatMoney({ cents: pendiente.amountCents, currency }, locale)}

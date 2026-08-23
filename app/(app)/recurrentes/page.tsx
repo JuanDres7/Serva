@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { PendientesRecurrentes } from '@/components/pendientes-recurrentes'
 import { NuevoRecurrente } from '@/components/nuevo-recurrente'
 import { BorrarRecurrente } from '@/components/borrar-recurrente'
+import { Vacio } from '@/components/vacio'
 
 export default async function RecurrentesPage() {
   const userId = await requireUserIdOrRedirect()
@@ -34,7 +35,7 @@ export default async function RecurrentesPage() {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="space-y-1">
-          <h1 className="text-2xl font-semibold tracking-tight">Movimientos recurrentes</h1>
+          <h1 className="text-3xl font-semibold tracking-tight">Movimientos recurrentes</h1>
           <p className="text-sm text-muted-foreground">
             Lo que se repite cada mes: arriendo, suscripciones, tu salario.
           </p>
@@ -58,12 +59,10 @@ export default async function RecurrentesPage() {
       />
 
       {todos.length === 0 ? (
-        <div className="rounded-lg border border-dashed py-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            Aún no has definido ninguno. Con ellos, tu historial se llena casi
-            solo y no tienes que registrar cada mes lo mismo.
-          </p>
-        </div>
+        <Vacio titulo="Todavía no has programado ninguno">
+          Define aquí lo que se cobra siempre igual y el historial se llena casi
+          solo: dejas de anotar lo mismo mes tras mes.
+        </Vacio>
       ) : (
         <Card>
           <CardHeader>
@@ -106,9 +105,9 @@ export default async function RecurrentesPage() {
 
                   <div className="flex items-center gap-3">
                     <span
-                      className={`text-sm tabular-nums ${
+                      className={`cifra text-sm ${
                         recurrente.type === 'income'
-                          ? 'text-emerald-600 dark:text-emerald-400'
+                          ? 'text-primary'
                           : ''
                       }`}
                     >

@@ -46,15 +46,18 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**Las diez features están construidas.** `npm run verify` pasa con 428
+**Las diez features están construidas.** `npm run verify` pasa con 432
 comprobaciones, ninguna de las cuales requiere un modelo instalado.
 
 **El asistente está verificado en ejecución** con Gemini: elige bien la
 herramienta, las cifras coinciden y respeta sus límites (D-057). Con modelo local
 en esta máquina no es viable (D-056).
 
-**Siguiente paso:** desplegar en Vercel y Neon, y elegir licencia para el
-repositorio (P-020).
+**La interfaz tiene sistema visual propio** desde D-062: crema, salvia y
+terracota, con `.eyebrow` para etiquetas y `.cifra` para montos. Los tokens
+viven en `app/globals.css`; no metas colores sueltos de la paleta de Tailwind.
+
+**Siguiente paso:** desplegar en Vercel y Neon.
 
 ## Documentos
 
@@ -62,7 +65,7 @@ repositorio (P-020).
 |---|---|
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
 | `docs/vision.md` | Qué es Finzen, para quién y qué no es. |
-| `docs/decisiones.md` | Las 61 decisiones tomadas, con su razón. |
+| `docs/decisiones.md` | Las 62 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |

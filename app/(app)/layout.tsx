@@ -1,9 +1,9 @@
 import { redirect } from 'next/navigation'
-import Link from 'next/link'
 import { currentUserId } from '@/lib/session'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
 import { CerrarSesion } from '@/components/cerrar-sesion'
 import { ChatPanel } from '@/components/chat-panel'
+import { Marca, NavegacionLateral, NavegacionCompacta } from '@/components/navegacion'
 import { hayProveedor } from '@/lib/ai/provider'
 
 /**
@@ -11,7 +11,10 @@ import { hayProveedor } from '@/lib/ai/provider'
  *
  * Ninguna página con datos del usuario es accesible sin sesión válida (FR-008 de
  * la spec 000). La comprobación vive aquí, en el servidor, y no en cada página:
- * olvidarla en una sola página sería suficiente para exponer datos.
+ * olvidarla en una sola bastaría para exponer datos.
+ *
+ * En pantalla ancha la navegación va a un lado y el contenido respira; en
+ * estrecha se convierte en una tira sobre el contenido.
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const userId = await currentUserId()
@@ -25,58 +28,34 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!settings.onboardedAt) redirect('/bienvenida')
 
   return (
-    <div className="min-h-screen bg-background">
-      <header className="border-b">
-        <div className="mx-auto flex h-14 max-w-5xl items-center justify-between gap-3 px-4">
-          {/* Con varias secciones, en pantalla estrecha la navegación no cabe.
-              Se desplaza dentro de su propio espacio en lugar de empujar la
-              página, que es lo que hace que una web se sienta rota. */}
-          <nav className="flex min-w-0 items-center gap-4 overflow-x-auto sm:gap-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            <Link href="/" className="shrink-0 font-semibold tracking-tight">
-              Finzen
-            </Link>
-            <Link
-              href="/historial"
-              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-            >
-              Historial
-            </Link>
-            <Link
-              href="/presupuestos"
-              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-            >
-              Presupuestos
-            </Link>
-            <Link
-              href="/metas"
-              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-            >
-              Metas
-            </Link>
-            <Link
-              href="/recurrentes"
-              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-            >
-              Recurrentes
-            </Link>
-            <Link
-              href="/ajustes"
-              className="shrink-0 text-sm text-muted-foreground hover:text-foreground"
-            >
-              Ajustes
-            </Link>
-          </nav>
+    <div className="flex min-h-screen">
+      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col justify-between border-r border-sidebar-border bg-sidebar px-4 py-6 lg:flex">
+        <div className="space-y-8">
+          <Marca className="px-3" />
+          <NavegacionLateral />
+        </div>
 
-          <div className="flex shrink-0 items-center gap-4">
-            <span className="hidden text-sm text-muted-foreground sm:inline">
-              {settings.displayName}
-            </span>
+        <div className="space-y-2 px-3">
+          <p className="truncate text-sm font-medium">{settings.displayName}</p>
+          <CerrarSesion />
+        </div>
+      </aside>
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur lg:hidden">
+          <div className="flex items-center justify-between gap-3 px-4 py-3">
+            <Marca />
             <CerrarSesion />
           </div>
-        </div>
-      </header>
+          <div className="px-2 pb-2">
+            <NavegacionCompacta />
+          </div>
+        </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-8">{children}</main>
+        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+          {children}
+        </main>
+      </div>
 
       {/* Sin proveedor de IA el botón no aparece: mejor que no exista a que
           exista y no funcione (spec 003, degradación). */}

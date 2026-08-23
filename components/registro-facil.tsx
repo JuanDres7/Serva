@@ -15,10 +15,23 @@ import {
 } from '@/components/ui/select'
 import { categoriesFor, findCategory, type MovementKind } from '@/lib/domain/categories'
 import { descripcionCorta as recortarDescripcion } from '@/lib/domain/keywords'
-import { formatWhileTyping, parseAmount, formatMoney } from '@/lib/domain/money-format'
+import {
+  formatWhileTyping,
+  parseAmount,
+  formatMoney,
+  currencySymbol,
+} from '@/lib/domain/money-format'
 import { money, add, zero } from '@/lib/domain/money'
 import { registrarMovimiento, anularMovimiento } from '@/lib/actions/transactions'
 import { sugerirCategoria } from '@/lib/actions/categorize'
+
+/* FR-003: ambas opciones visibles a la vez, con gasto preseleccionado. Un
+   control que alterna entre estados no deja claro si muestra lo que es o lo que
+   hará, y aquí ese error invierte el signo del monto. */
+const TIPOS = [
+  ['expense', 'Gasto'],
+  ['income', 'Ingreso'],
+] as const satisfies readonly (readonly [MovementKind, string])[]
 
 type Props = {
   readonly currency: string
@@ -59,6 +72,7 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
   }, [])
 
   const categorias = categoriesFor(tipo)
+  const simbolo = currencySymbol(currency, locale)
 
   function cambiarTipo(nuevo: MovementKind) {
     setTipo(nuevo)
@@ -190,43 +204,54 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
 
   return (
     <form onSubmit={guardar} className="space-y-6">
-      {/* FR-003: ambas opciones visibles a la vez, con gasto preseleccionado. Un
-          control que alterna entre estados no deja claro si muestra lo que es o lo
-          que hará, y aquí ese error invierte el signo del monto. */}
-      <div className="grid grid-cols-2 gap-2" role="group" aria-label="Tipo de movimiento">
-        <Button
-          type="button"
-          variant={tipo === 'expense' ? 'default' : 'outline'}
-          aria-pressed={tipo === 'expense'}
-          onClick={() => cambiarTipo('expense')}
-        >
-          Gasto
-        </Button>
-        <Button
-          type="button"
-          variant={tipo === 'income' ? 'default' : 'outline'}
-          aria-pressed={tipo === 'income'}
-          onClick={() => cambiarTipo('income')}
-        >
-          Ingreso
-        </Button>
+      <div
+        className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1"
+        role="group"
+        aria-label="Tipo de movimiento"
+      >
+        {TIPOS.map(([valor, etiqueta]) => (
+          <button
+            key={valor}
+            type="button"
+            aria-pressed={tipo === valor}
+            onClick={() => cambiarTipo(valor)}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              tipo === valor
+                ? 'bg-card text-foreground shadow-sm'
+                : 'text-muted-foreground hover:text-foreground'
+            }`}
+          >
+            {etiqueta}
+          </button>
+        ))}
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="monto" className="text-base">
+      {/*
+        El monto es lo primero que se teclea y lo único que no se puede omitir,
+        así que ocupa el lugar y el tamaño que le corresponde: una superficie
+        propia con la cifra grande, sin la caja de un campo cualquiera. El
+        símbolo va aparte porque no se escribe, se lee.
+      */}
+      <div className="superficie px-5 py-6 transition-colors focus-within:border-ring/60 sm:px-7 sm:py-7">
+        <Label htmlFor="monto" className="eyebrow text-muted-foreground">
           ¿De cuánto fue {tipo === 'expense' ? 'el gasto' : 'el ingreso'}?
         </Label>
-        <Input
-          id="monto"
-          ref={montoRef}
-          name="monto"
-          inputMode="decimal"
-          autoComplete="off"
-          placeholder="0"
-          value={montoTexto}
-          onChange={(e) => setMontoTexto(formatWhileTyping(e.target.value, locale))}
-          className="h-14 text-2xl font-medium"
-        />
+        <div className="mt-3 flex items-baseline gap-2">
+          <span aria-hidden className="cifra text-2xl text-muted-foreground">
+            {simbolo}
+          </span>
+          <input
+            id="monto"
+            ref={montoRef}
+            name="monto"
+            inputMode="decimal"
+            autoComplete="off"
+            placeholder="0"
+            value={montoTexto}
+            onChange={(e) => setMontoTexto(formatWhileTyping(e.target.value, locale))}
+            className="cifra w-full min-w-0 bg-transparent text-4xl font-medium outline-none placeholder:text-muted-foreground/40 sm:text-5xl"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">

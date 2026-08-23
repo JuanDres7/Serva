@@ -12,6 +12,10 @@
  *
  * El color es parte de la identidad de la categoría y debe ser el mismo en los
  * gráficos, el historial y el chat (FR-029).
+ *
+ * Los tonos son desaturados a propósito: una paleta saturada convierte una lista
+ * de gastos en un semáforo, y en una aplicación de dinero eso se lee como
+ * juicio. Aquí el color distingue, no alarma.
  */
 
 export type MovementKind = 'expense' | 'income'
@@ -26,26 +30,26 @@ export type Category = {
 
 export const CATEGORIES: readonly Category[] = [
   // Gasto
-  { key: 'groceries', name: 'Mercado', kind: 'expense', color: '#16a34a', order: 1 },
-  { key: 'eating_out', name: 'Comidas fuera', kind: 'expense', color: '#ea580c', order: 2 },
-  { key: 'transport', name: 'Transporte', kind: 'expense', color: '#2563eb', order: 3 },
-  { key: 'housing', name: 'Vivienda', kind: 'expense', color: '#4f46e5', order: 4 },
-  { key: 'utilities', name: 'Servicios', kind: 'expense', color: '#0891b2', order: 5 },
-  { key: 'health', name: 'Salud', kind: 'expense', color: '#dc2626', order: 6 },
-  { key: 'education', name: 'Educación', kind: 'expense', color: '#7c3aed', order: 7 },
-  { key: 'entertainment', name: 'Entretenimiento', kind: 'expense', color: '#db2777', order: 8 },
-  { key: 'subscriptions', name: 'Suscripciones', kind: 'expense', color: '#9333ea', order: 9 },
-  { key: 'shopping', name: 'Compras', kind: 'expense', color: '#d97706', order: 10 },
-  { key: 'pets', name: 'Mascotas', kind: 'expense', color: '#65a30d', order: 11 },
-  { key: 'debt', name: 'Deudas y créditos', kind: 'expense', color: '#b91c1c', order: 12 },
-  { key: 'other_expense', name: 'Otros', kind: 'expense', color: '#64748b', order: 13 },
+  { key: 'groceries', name: 'Mercado', kind: 'expense', color: '#6f9c6b', order: 1 },
+  { key: 'eating_out', name: 'Comidas fuera', kind: 'expense', color: '#d98b62', order: 2 },
+  { key: 'transport', name: 'Transporte', kind: 'expense', color: '#6d92c4', order: 3 },
+  { key: 'housing', name: 'Vivienda', kind: 'expense', color: '#8b86c8', order: 4 },
+  { key: 'utilities', name: 'Servicios', kind: 'expense', color: '#5fa3ad', order: 5 },
+  { key: 'health', name: 'Salud', kind: 'expense', color: '#cf7f86', order: 6 },
+  { key: 'education', name: 'Educación', kind: 'expense', color: '#9b7fc0', order: 7 },
+  { key: 'entertainment', name: 'Entretenimiento', kind: 'expense', color: '#d081a8', order: 8 },
+  { key: 'subscriptions', name: 'Suscripciones', kind: 'expense', color: '#a985c9', order: 9 },
+  { key: 'shopping', name: 'Compras', kind: 'expense', color: '#c9a05c', order: 10 },
+  { key: 'pets', name: 'Mascotas', kind: 'expense', color: '#8fa85e', order: 11 },
+  { key: 'debt', name: 'Deudas y créditos', kind: 'expense', color: '#b8706b', order: 12 },
+  { key: 'other_expense', name: 'Otros', kind: 'expense', color: '#96968c', order: 13 },
 
   // Ingreso
-  { key: 'salary', name: 'Salario', kind: 'income', color: '#059669', order: 14 },
-  { key: 'business', name: 'Ventas o negocio', kind: 'income', color: '#0d9488', order: 15 },
-  { key: 'gifts', name: 'Regalos y ayudas', kind: 'income', color: '#e11d48', order: 16 },
-  { key: 'refunds', name: 'Reembolsos', kind: 'income', color: '#0284c7', order: 17 },
-  { key: 'other_income', name: 'Otros ingresos', kind: 'income', color: '#64748b', order: 18 },
+  { key: 'salary', name: 'Salario', kind: 'income', color: '#5f9e7d', order: 14 },
+  { key: 'business', name: 'Ventas o negocio', kind: 'income', color: '#5c9c99', order: 15 },
+  { key: 'gifts', name: 'Regalos y ayudas', kind: 'income', color: '#cd7f9b', order: 16 },
+  { key: 'refunds', name: 'Reembolsos', kind: 'income', color: '#6b96b8', order: 17 },
+  { key: 'other_income', name: 'Otros ingresos', kind: 'income', color: '#96968c', order: 18 },
 ]
 
 const BY_KEY = new Map(CATEGORIES.map((c) => [c.key, c]))

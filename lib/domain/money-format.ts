@@ -128,3 +128,20 @@ export function formatWhileTyping(input: string, locale: string): string {
 function escapeRegExp(value: string): string {
   return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
+
+/**
+ * El símbolo de la moneda, aislado del número.
+ *
+ * Sirve para los campos donde el símbolo se dibuja aparte y el usuario solo
+ * teclea la cifra. Es una función de presentación: nunca participa en un
+ * cálculo, y por eso puede apoyarse en `Intl` sin contradecir el Artículo I.
+ */
+export function currencySymbol(currency: string, locale: string): string {
+  const parts = new Intl.NumberFormat(locale, {
+    style: 'currency',
+    currency,
+    currencyDisplay: 'narrowSymbol',
+  }).formatToParts(0)
+
+  return parts.find((p) => p.type === 'currency')?.value ?? currency
+}
