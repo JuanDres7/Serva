@@ -27,8 +27,8 @@ falta ninguna IA para arrancar.
 ### 1. Traer el código e instalar
 
 ```bash
-git clone https://github.com/TU-USUARIO/serva.git
-cd serva
+git clone https://github.com/JuanDres7/Serva.git
+cd Serva
 npm install
 ```
 
