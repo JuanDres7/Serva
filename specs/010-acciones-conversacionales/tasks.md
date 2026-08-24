@@ -18,21 +18,21 @@ falsable el Artículo II, y todo lo demás se apoya en ella.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-401 | `lib/domain/puerta.ts`: `decidir()` con las cinco reglas en su orden | Función pura, sin `import` de base de datos ni de red |
-| ⬜ T-402 | Tabla de verdad completa en vitest | Las ~20 combinaciones de tipo × cantidad × activación, cada una con su resultado esperado |
-| ⬜ T-403 | Lo destructivo confirma incluso con el automático puesto | `corregir` y `anular` devuelven `confirmar` con `automaticoActivo: true` y `cuantos: 1` |
-| ⬜ T-404 | Más de cinco se rechaza; más de tres confirma | El límite de FR-021 y el de FR-022 se comprueban por separado |
+| ✅ T-401 | `lib/domain/puerta.ts`: `decidir()` con las cinco reglas en su orden | Función pura, sin `import` de base de datos ni de red |
+| ✅ T-402 | Tabla de verdad completa en vitest | Las ~20 combinaciones de tipo × cantidad × activación, cada una con su resultado esperado |
+| ✅ T-403 | Lo destructivo confirma incluso con el automático puesto | `corregir` y `anular` devuelven `confirmar` con `automaticoActivo: true` y `cuantos: 1` |
+| ✅ T-404 | Más de cinco se rechaza; más de tres confirma | El límite de FR-021 y el de FR-022 se comprueban por separado |
 
 ## Fase 2 — Modelo de datos
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-405 | Enums `movement_origin`, `assistant_write_kind`, `assistant_write_status` | `revertida` y `caducada` presentes desde el principio |
-| ⬜ T-406 | Columnas `createdBy` y `assistantWriteId` en `transactions` | Migración leída a mano antes de aplicarla; los movimientos existentes quedan como `'user'` |
-| ⬜ T-407 | Tabla `assistant_writes` con su índice por usuario y estado | Ningún tipo de coma flotante salvo `confidence`, igual que en `categorization_log` |
-| ⬜ T-408 | `autoRegisterEnabledAt` en `user_settings` | Anulable; una cuenta existente queda con el automático apagado |
-| ⬜ T-409 | Periodicidad `once` en `Periodicidad`, y `archivedAt` en recurrentes | TypeScript señala todos los `switch` que no contemplan el caso nuevo |
-| ⬜ T-410 | Un `once` confirmado se archiva, no se reprograma ni se borra | Tras confirmarlo deja de aparecer entre pendientes y su fila sigue existiendo (Art. VII) |
+| ✅ T-405 | Enums `movement_origin`, `assistant_write_kind`, `assistant_write_status` | `revertida` y `caducada` presentes desde el principio |
+| ✅ T-406 | Columnas `createdBy` y `assistantWriteId` en `transactions` | Migración leída a mano antes de aplicarla; los movimientos existentes quedan como `'user'` |
+| ✅ T-407 | Tabla `assistant_writes` con su índice por usuario y estado | Ningún tipo de coma flotante salvo `confidence`, igual que en `categorization_log` |
+| ✅ T-408 | `autoRegisterEnabledAt` en `user_settings` | Anulable; una cuenta existente queda con el automático apagado |
+| ✅ T-409 | Periodicidad `once` en `Periodicidad`, y `archivedAt` en recurrentes | TypeScript señala todos los `switch` que no contemplan el caso nuevo |
+| ✅ T-410 | Un `once` confirmado se archiva, no se reprograma ni se borra | Tras confirmarlo deja de aparecer entre pendientes y su fila sigue existiendo (Art. VII) |
 
 ## Fase 3 — Extracción
 

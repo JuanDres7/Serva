@@ -1,4 +1,4 @@
-import { and, asc, eq, lte, sql } from 'drizzle-orm'
+import { and, asc, eq, isNull, lte, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { recurringMovements, transactions, type RecurringRow } from '@/lib/db/schema'
@@ -7,6 +7,7 @@ import { toISO, type CivilDate } from '@/lib/domain/civil-date'
 import {
   primeraFecha,
   proximaFecha,
+  seRepite,
   validarPeriodicidad,
   type Periodicidad,
 } from '@/lib/domain/recurrence'
@@ -20,6 +21,15 @@ import {
 export const periodicidadSchema = z.union([
   z.object({ kind: z.literal('monthly'), day: z.number().int().min(1).max(31) }),
   z.object({ kind: z.literal('every-n-days'), n: z.number().int().min(1).max(365) }),
+  // Una sola vez, en una fecha (spec 010, E5). Se archiva al confirmarse.
+  z.object({
+    kind: z.literal('once'),
+    on: z.object({
+      year: z.number().int().min(1900).max(2200),
+      month: z.number().int().min(1).max(12),
+      day: z.number().int().min(1).max(31),
+    }),
+  }),
 ])
 
 export const recurrenteSchema = z
@@ -75,7 +85,9 @@ export async function listarRecurrentes(userId: string): Promise<RecurringRow[]>
   return db
     .select()
     .from(recurringMovements)
-    .where(eq(recurringMovements.userId, userId))
+    // Los archivados no se muestran: ya cumplieron y no hay nada que confirmar
+    // ni que editar en ellos. Siguen existiendo (Art. VII).
+    .where(and(eq(recurringMovements.userId, userId), isNull(recurringMovements.archivedAt)))
     .orderBy(asc(recurringMovements.nextDueOn))
 }
 
@@ -90,6 +102,7 @@ export async function pendientesDeConfirmar(
     .where(
       and(
         eq(recurringMovements.userId, userId),
+        isNull(recurringMovements.archivedAt),
         lte(recurringMovements.nextDueOn, toISO(hoy)),
       ),
     )
@@ -103,6 +116,7 @@ export async function contarPendientes(userId: string, hoy: CivilDate): Promise<
     .where(
       and(
         eq(recurringMovements.userId, userId),
+        isNull(recurringMovements.archivedAt),
         lte(recurringMovements.nextDueOn, toISO(hoy)),
       ),
     )
@@ -112,7 +126,8 @@ export async function contarPendientes(userId: string, hoy: CivilDate): Promise<
 
 export type ResultadoConfirmacion = {
   readonly transactionId: string
-  readonly proximaFecha: string
+  /** `null` cuando el cobro era de una sola vez y quedó archivado. */
+  readonly proximaFecha: string | null
 }
 
 /**
@@ -159,8 +174,27 @@ export async function confirmarCobro(
     })
     .returning({ id: transactions.id })
 
+  const periodicidad = periodicidadDe(recurrente)
+
+  // Un cobro de una sola vez no tiene siguiente: se archiva. Borrarlo
+  // eliminaría el rastro de un cobro que sí ocurrió (Art. VII), y dejarlo
+  // vigente lo devolvería a los pendientes al día siguiente (spec 010, T-410).
+  if (!seRepite(periodicidad)) {
+    await db
+      .update(recurringMovements)
+      .set({
+        archivedAt: new Date(),
+        lastConfirmedOn: recurrente.nextDueOn,
+        amountCents: monto,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(recurringMovements.userId, userId), eq(recurringMovements.id, id)))
+
+    return { transactionId: movimiento!.id, proximaFecha: null }
+  }
+
   const siguiente = proximaFecha(
-    periodicidadDe(recurrente),
+    periodicidad,
     // La fecha se calcula desde el cobro que se acaba de confirmar, no desde
     // hoy: así un usuario que entra tarde no desplaza toda la serie (RN-002).
     { ...fechaDesdeISO(recurrente.nextDueOn) },

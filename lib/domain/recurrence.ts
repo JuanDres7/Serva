@@ -21,6 +21,17 @@ import {
 export type Periodicidad =
   | { readonly kind: 'monthly'; readonly day: number }
   | { readonly kind: 'every-n-days'; readonly n: number }
+  /**
+   * Una sola vez, en una fecha concreta (spec 010, E5).
+   *
+   * Sí, «un movimiento recurrente que ocurre una sola vez» es un oxímoron. Se
+   * asume el nombre a cambio de reutilizar toda la maquinaria de la spec 007
+   * —pendientes, confirmar, reprogramar, «¿te cobraron el monto de siempre?»—,
+   * que es exactamente lo que pide «tengo que pagar 200 mil el martes»: que
+   * aparezca para confirmar cuando llegue el día. Una entidad paralela la
+   * duplicaría entera para ganar solo un nombre más exacto (Art. VIII).
+   */
+  | { readonly kind: 'once'; readonly on: CivilDate }
 
 export class RecurrenceError extends Error {
   constructor(message: string) {
@@ -30,6 +41,14 @@ export class RecurrenceError extends Error {
 }
 
 export function validarPeriodicidad(periodicidad: Periodicidad): void {
+  if (periodicidad.kind === 'once') {
+    // La fecha ya viene validada por el tipo `CivilDate`; lo único que hay que
+    // impedir es que se cuele una fecha imposible por otra vía.
+    if (!Number.isInteger(periodicidad.on.year) || periodicidad.on.month < 1) {
+      throw new RecurrenceError('Fecha inválida para un cobro de una sola vez')
+    }
+    return
+  }
   if (periodicidad.kind === 'monthly') {
     if (!Number.isInteger(periodicidad.day) || periodicidad.day < 1 || periodicidad.day > 31) {
       throw new RecurrenceError(`Día fuera de rango: ${periodicidad.day}`)
@@ -51,6 +70,12 @@ export function validarPeriodicidad(periodicidad: Periodicidad): void {
 export function proximaFecha(periodicidad: Periodicidad, desde: CivilDate): CivilDate {
   validarPeriodicidad(periodicidad)
 
+  if (periodicidad.kind === 'once') {
+    // No hay siguiente. Quien confirma un cobro de una sola vez lo archiva en
+    // lugar de reprogramarlo, así que llegar aquí es un error de llamada.
+    throw new RecurrenceError('Un cobro de una sola vez no se reprograma: se archiva')
+  }
+
   if (periodicidad.kind === 'every-n-days') {
     return addDays(desde, periodicidad.n)
   }
@@ -66,6 +91,8 @@ export function proximaFecha(periodicidad: Periodicidad, desde: CivilDate): Civi
 export function primeraFecha(periodicidad: Periodicidad, hoy: CivilDate): CivilDate {
   validarPeriodicidad(periodicidad)
 
+  if (periodicidad.kind === 'once') return periodicidad.on
+
   if (periodicidad.kind === 'every-n-days') {
     return addDays(hoy, periodicidad.n)
   }
@@ -76,6 +103,11 @@ export function primeraFecha(periodicidad: Periodicidad, hoy: CivilDate): CivilD
   return hoy.day < diaEsteMes
     ? civilDateClamped(hoy.year, hoy.month, periodicidad.day)
     : civilDateClamped(hoy.year, hoy.month + 1, periodicidad.day)
+}
+
+/** Un cobro de una sola vez no se repite: al confirmarlo se archiva. */
+export function seRepite(periodicidad: Periodicidad): boolean {
+  return periodicidad.kind !== 'once'
 }
 
 /** Un cobro está vencido cuando su fecha ya llegó o pasó. */
@@ -92,6 +124,8 @@ export function diasDeRetraso(fecha: CivilDate, hoy: CivilDate): number {
  * Describe la periodicidad en palabras, para mostrarla.
  */
 export function describirPeriodicidad(periodicidad: Periodicidad): string {
+  if (periodicidad.kind === 'once') return 'Una sola vez'
+
   if (periodicidad.kind === 'every-n-days') {
     if (periodicidad.n === 7) return 'Cada semana'
     if (periodicidad.n === 14) return 'Cada dos semanas'

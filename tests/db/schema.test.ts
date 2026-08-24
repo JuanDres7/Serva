@@ -28,19 +28,23 @@ describe('esquema de datos', () => {
     // Criterio 4 de la spec 001 y Artículo I: un `real` o `double precision`
     // rompería la exactitud de los montos.
     //
-    // La excepción es nominal, no categórica: `categorization_log.confidence`.
-    // El Artículo I prohíbe la coma flotante *para montos*, donde un céntimo
-    // perdido corrompe el historial. Una confianza es aproximada por naturaleza
-    // —0,7341 y 0,7342 significan lo mismo— y aplicarle la regla del dinero
-    // sería obedecer la letra ignorando la razón (plan 002, §5).
+    // Las excepciones son nominales, no categóricas: las dos columnas
+    // `confidence`. El Artículo I prohíbe la coma flotante *para montos*, donde
+    // un céntimo perdido corrompe el historial. Una confianza es aproximada por
+    // naturaleza —0,7341 y 0,7342 significan lo mismo— y aplicarle la regla del
+    // dinero sería obedecer la letra ignorando la razón (plan 002, §5).
     //
-    // Cualquier otra columna de coma flotante que aparezca hace fallar esto.
+    // `assistant_writes.confidence` se añadió con la feature 010 por el mismo
+    // motivo, y hubo que añadirla aquí a mano: esta prueba falló al aparecer,
+    // que es exactamente lo que se espera de ella. Cualquier otra columna de
+    // coma flotante que aparezca vuelve a hacerla fallar.
     const columnas = await db.execute<{ table_name: string; column_name: string }>(sql`
       SELECT table_name, column_name, data_type
       FROM information_schema.columns
       WHERE table_schema = 'public'
         AND data_type IN ('real', 'double precision', 'float', 'money')
         AND NOT (table_name = 'categorization_log' AND column_name = 'confidence')
+        AND NOT (table_name = 'assistant_writes' AND column_name = 'confidence')
     `)
     expect(columnas).toHaveLength(0)
   })
