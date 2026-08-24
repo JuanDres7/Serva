@@ -36,6 +36,13 @@ export const transactionInputSchema = z
       .enum(['user', 'keywords', 'similarity', 'model'])
       .optional()
       .default('user'),
+    /**
+     * Quién escribió el movimiento (spec 010, FR-011). Por defecto la persona:
+     * todo lo que no venga marcado explícitamente como del asistente lo es.
+     */
+    createdBy: z.enum(['user', 'assistant']).optional().default('user'),
+    /** La escritura del asistente de la que salió, para poder rastrearla. */
+    assistantWriteId: z.string().uuid().nullable().optional(),
   })
   .superRefine((value, ctx) => {
     if (value.type === 'saving') {
@@ -65,7 +72,14 @@ export const transactionInputSchema = z
     }
   })
 
-export type TransactionInput = z.infer<typeof transactionInputSchema>
+/**
+ * Lo que se le pasa a `createTransaction`, no lo que sale del esquema.
+ *
+ * `z.input` y no `z.infer`: los campos con valor por defecto —`categorySource`,
+ * `createdBy`— son opcionales para quien llama y obligatorios ya dentro, que es
+ * justo lo que hace un esquema con defectos.
+ */
+export type TransactionInput = z.input<typeof transactionInputSchema>
 
 export type ListFilters = {
   readonly period?: Period
@@ -115,6 +129,8 @@ export async function createTransaction(
       occurredOn: values.occurredOn,
       description: values.description ?? null,
       descriptionShort: values.descriptionShort ?? null,
+      createdBy: values.createdBy,
+      assistantWriteId: values.assistantWriteId ?? null,
     })
     .returning()
 

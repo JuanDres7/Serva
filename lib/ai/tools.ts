@@ -14,6 +14,14 @@ import { formatMoney } from '@/lib/domain/money-format'
 import { findCategory, CATEGORIES } from '@/lib/domain/categories'
 import { extraerPalabrasClave } from '@/lib/domain/keywords'
 import { nombrarPeriodo } from '@/components/etiqueta-periodo'
+import { currencyDecimals } from '@/lib/domain/money'
+import { movimientoPropuestoSchema, prepararMovimientos } from '@/lib/ai/propuesta'
+import { decidir, explicar } from '@/lib/domain/puerta'
+import {
+  guardarPropuesta,
+  aplicarCreacion,
+  automaticoActivo,
+} from '@/lib/db/queries/assistant-writes'
 
 /**
  * Las consultas que el asistente puede hacer (spec 003, plan §2).
@@ -273,6 +281,202 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
         }
       },
     }),
+
+    /* Escritura (spec 010).
+     *
+     * Se llaman `proponer*` y no `registrar*` porque eso es lo que hacen: el
+     * modelo entrega una propuesta y **la puerta decide**. Si la salvaguarda
+     * viviera en el prompt sería algo que le pedimos que recuerde, y un modelo
+     * olvida y obedece a texto que venga dentro de los datos del usuario. */
+
+    proponerMovimientos: tool({
+      description:
+        'Registra uno o varios gastos o ingresos que la persona acaba de contar. ' +
+        'Usala cuando describa algo que gasto o recibio. Si no dice el monto de ' +
+        'alguno, mandalo igual con monto null: se le preguntara. Nunca inventes un monto.',
+      inputSchema: z.object({
+        movimientos: z.array(movimientoPropuestoSchema).min(1).max(10),
+      }),
+      execute: async ({ movimientos }) => {
+        const hoy = todayIn(contexto.timeZone)
+        const { listos, incompletos } = prepararMovimientos(movimientos, {
+          currency: contexto.currency,
+          hoy,
+        })
+
+        const automatico = await automaticoActivo(contexto.userId)
+        const decision = decidir({
+          tipo: 'crear',
+          cuantos: listos.length,
+          automaticoActivo: automatico,
+        })
+
+        if (decision.accion === 'rechazar') {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: explicar(decision),
+            faltan: incompletos,
+          }
+        }
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'crear',
+          inputText: movimientos.map((m) => m.descripcion).join(' - '),
+          proposal: { movimientos: listos },
+        })
+
+        if (decision.accion === 'ejecutar') {
+          await aplicarCreacion({
+            userId: contexto.userId,
+            id: propuestaId,
+            currency: contexto.currency,
+            hoy,
+          })
+
+          return {
+            resultado: 'registrado' as const,
+            propuestaId,
+            movimientos: paraMostrar(listos, dinero),
+            faltan: incompletos,
+            // Se puede deshacer de un toque, y por eso pudo escribirse sola.
+            revertible: true,
+          }
+        }
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: decision.motivo,
+          explicacion: explicar(decision),
+          movimientos: paraMostrar(listos, dinero),
+          faltan: incompletos,
+          primeraVez: !automatico,
+        }
+      },
+    }),
+
+    proponerCorreccion: tool({
+      description:
+        'Corrige el monto o la categoria de un movimiento ya registrado. Usala ' +
+        'cuando la persona diga que algo quedo mal, por ejemplo "no, fueron 20 mil".',
+      inputSchema: z.object({
+        descripcion: z.string().max(80).describe('Como se refiere al movimiento'),
+        montoNuevo: z.number().positive().nullable(),
+        categoriaNueva: z.enum(clavesCategoria).nullable(),
+      }),
+      execute: async ({ descripcion, montoNuevo, categoriaNueva }) =>
+        proponerSobreExistente(contexto, dinero, 'corregir', descripcion, {
+          montoNuevo,
+          categoriaNueva,
+        }),
+    }),
+
+    proponerAnulacion: tool({
+      description:
+        'Anula un movimiento ya registrado. Usala cuando la persona diga que algo ' +
+        'no fue, se lo devolvieron, o lo pago otra persona.',
+      inputSchema: z.object({
+        descripcion: z.string().max(80).describe('Como se refiere al movimiento'),
+      }),
+      execute: async ({ descripcion }) =>
+        proponerSobreExistente(contexto, dinero, 'anular', descripcion, {}),
+    }),
+  }
+}
+
+/** Lo minimo que la tarjeta necesita para contar que paso. */
+function paraMostrar(
+  movimientos: readonly {
+    descripcion: string
+    amountCents: number
+    categoria: string
+    occurredOn: string
+    tipo: string
+    esFuturo: boolean
+  }[],
+  dinero: (cents: number) => string,
+) {
+  return movimientos.map((m) => ({
+    descripcion: m.descripcion,
+    monto: dinero(m.amountCents),
+    montoCents: m.amountCents,
+    categoria: findCategory(m.categoria)?.name ?? 'Otros',
+    clave: m.categoria,
+    fecha: m.occurredOn,
+    tipo: m.tipo,
+    programado: m.esFuturo,
+  }))
+}
+
+/**
+ * Corregir y anular comparten casi todo: encontrar de que movimiento habla la
+ * persona y dejar la propuesta pendiente. **Nunca se ejecutan solas** (FR-010),
+ * asi que aqui no hace falta consultar la activacion: la puerta ya lo decide.
+ *
+ * El modelo no envia un identificador. Envia una descripcion, y **el sistema**
+ * busca la coincidencia: dejarle inventar un UUID seria darle una forma de
+ * apuntar a una fila que no vio.
+ */
+async function proponerSobreExistente(
+  contexto: ContextoHerramientas,
+  dinero: (cents: number) => string,
+  tipo: 'corregir' | 'anular',
+  descripcion: string,
+  cambios: { montoNuevo?: number | null; categoriaNueva?: string | null },
+) {
+  const movimientos = await listTransactions(contexto.userId, { limit: 200 })
+  const buscadas = extraerPalabrasClave(descripcion)
+
+  const candidatos = movimientos.filter((m) => {
+    const propias = extraerPalabrasClave(`${m.description ?? ''} ${m.descriptionShort ?? ''}`)
+    return buscadas.some((palabra) => propias.includes(palabra))
+  })
+
+  if (candidatos.length === 0) {
+    return { resultado: 'no-encontrado' as const, buscado: descripcion }
+  }
+
+  // Con varias coincidencias no se elige por el usuario: se le muestran y elige.
+  if (candidatos.length > 1) {
+    return {
+      resultado: 'varias-coincidencias' as const,
+      candidatos: candidatos.slice(0, 5).map((m) => ({
+        descripcion: m.descriptionShort ?? m.description ?? 'Sin descripcion',
+        monto: dinero(m.amountCents),
+        fecha: m.occurredOn,
+      })),
+    }
+  }
+
+  const elegido = candidatos[0]!
+  const montoCents =
+    cambios.montoNuevo != null
+      ? Math.round(cambios.montoNuevo * 10 ** currencyDecimals(contexto.currency))
+      : null
+
+  const propuestaId = await guardarPropuesta({
+    userId: contexto.userId,
+    kind: tipo,
+    inputText: descripcion,
+    proposal: {
+      transactionId: elegido.id,
+      ...(montoCents ? { amountCents: montoCents } : {}),
+      ...(cambios.categoriaNueva ? { category: cambios.categoriaNueva } : {}),
+    },
+  })
+
+  return {
+    resultado: 'por-confirmar' as const,
+    propuestaId,
+    motivo: 'destructivo' as const,
+    explicacion: explicar({ accion: 'confirmar', motivo: 'destructivo' }),
+    afectado: {
+      descripcion: elegido.descriptionShort ?? elegido.description ?? 'Sin descripcion',
+      montoAntes: dinero(elegido.amountCents),
+      montoDespues: montoCents ? dinero(montoCents) : null,
+      fecha: elegido.occurredOn,
+    },
   }
 }
 

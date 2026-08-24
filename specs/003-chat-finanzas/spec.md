@@ -127,7 +127,7 @@ resto de la aplicación sigue funcionando con normalidad.
 | FR-007 | El sistema debe indicar a qué período corresponde cada cifra que reporta. |
 | FR-008 | Ante una pregunta que no puede responder con los datos disponibles, el sistema debe decirlo explícitamente y explicar por qué. |
 | FR-009 | Cuando el historial sea insuficiente para una comparación o tendencia, el sistema debe advertirlo en lugar de responder. |
-| FR-010 | El chat no debe poder crear, modificar ni anular movimientos. Es de solo lectura. |
+| FR-010 | ~~El chat no debe poder crear, modificar ni anular movimientos. Es de solo lectura.~~ **Revocado por la spec 010** (D-066): el asistente puede escribir dentro de los límites que aquella fija. La garantía deja de ser por construcción y pasa a ser por enumeración. |
 | FR-011 | El sistema no debe recomendar productos financieros, inversiones ni decisiones de inversión. Las sugerencias de ahorro se limitan a describir el gasto propio del usuario. |
 | FR-012 | Si el modelo no está disponible o falla, el chat debe informarlo sin afectar al resto de la aplicación. Sin proveedor configurado, la sección no debe ofrecerse en la navegación. |
 | FR-013 | El usuario debe poder ver la conversación anterior mientras permanezca en la pantalla del asistente. |

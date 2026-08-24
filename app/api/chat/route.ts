@@ -60,10 +60,11 @@ export async function POST(peticion: Request) {
       system: instruccionesDelAsistente(settings.displayName),
       messages: await convertToModelMessages(messages.slice(-TURNOS_AL_MODELO)),
       tools,
-      // Consultar, leer el resultado y responder. Cada paso es una generación
-      // completa, que en CPU cuesta segundos: el tope evita que un modelo
-      // confundido encadene llamadas sin fin y deje al usuario esperando.
-      stopWhen: stepCountIs(3),
+      // Proponer, escribir y después consultar: el FR-020 exige que un mismo
+      // turno pueda registrar y responder una pregunta, y la respuesta debe
+      // reflejar el estado posterior a la escritura (RN-009). Sigue habiendo
+      // tope: un modelo confundido no puede encadenar llamadas sin fin.
+      stopWhen: stepCountIs(5),
       temperature: 0.3,
     })
 

@@ -323,6 +323,12 @@ describe('límites del asistente', () => {
     'mayoresGastos',
     'buscarMovimientos',
     'ritmoDelPeriodo',
+    // Escritura (spec 010). Cada una de estas tres es una decision deliberada:
+    // el asistente dejo de ser de solo lectura y la garantia pasa de ser por
+    // construccion a ser por enumeracion (D-066).
+    'proponerMovimientos',
+    'proponerCorreccion',
+    'proponerAnulacion',
   ] as const
 
   it('solo existen las herramientas aprobadas', () => {
@@ -342,7 +348,7 @@ describe('límites del asistente', () => {
     // Mientras la spec 010 no entre, sigue siendo cierto por construcción. La
     // prueba lo deja escrito para que dejar de serlo requiera cambiarla.
     for (const nombre of PERMITIDAS) {
-      expect(nombre).toMatch(/^(totales|gasto|comparar|mayores|buscar|ritmo)/)
+      expect(nombre).not.toMatch(/^(registrar|crear|guardar|actualizar|borrar|eliminar)/)
     }
   })
 })

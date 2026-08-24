@@ -38,36 +38,36 @@ falsable el Artículo II, y todo lo demás se apoya en ella.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-411 | Esquema Zod de la propuesta: monto entero positivo, fecha, categoría del conjunto cerrado | Una categoría inventada, un monto con decimales en moneda sin decimales o un monto cero son rechazados |
-| ⬜ T-412 | Conversión de unidades corrientes a la unidad menor con `currencyDecimals` | El modelo devuelve `18000`; en pesos colombianos se guardan `1800000` centavos, sin coma flotante en ningún paso |
-| ⬜ T-413 | Resolución de fechas contra `todayIn(timeZone)` del usuario | «Ayer» a las 19:30 de Bogotá resuelve al día correcto y no al de UTC |
-| ⬜ T-414 | «El martes» resuelve al próximo martes futuro | Dicho un martes, resuelve al siguiente, no a hoy |
-| ⬜ T-415 | Sin monto no hay propuesta: se devuelve la petición de dato | «Me tomé unas cervezas» no produce ninguna fila ni ningún cero (E2, FR-003) |
+| ✅ T-411 | Esquema Zod de la propuesta: monto entero positivo, fecha, categoría del conjunto cerrado | Una categoría inventada, un monto con decimales en moneda sin decimales o un monto cero son rechazados |
+| ✅ T-412 | Conversión de unidades corrientes a la unidad menor con `currencyDecimals` | El modelo devuelve `18000`; en pesos colombianos se guardan `1800000` centavos, sin coma flotante en ningún paso |
+| ✅ T-413 | Resolución de fechas contra `todayIn(timeZone)` del usuario | «Ayer» a las 19:30 de Bogotá resuelve al día correcto y no al de UTC |
+| ✅ T-414 | «El martes» resuelve al próximo martes futuro | Dicho un martes, resuelve al siguiente, no a hoy |
+| ✅ T-415 | Sin monto no hay propuesta: se devuelve la petición de dato | «Me tomé unas cervezas» no produce ninguna fila ni ningún cero (E2, FR-003) |
 
 ## Fase 4 — Las herramientas
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-416 | `proponerMovimientos`, ligada al usuario por cierre | No acepta identificador de usuario como parámetro |
-| ⬜ T-417 | `proponerCorreccion` y `proponerAnulacion` resuelven el movimiento por búsqueda del sistema | El modelo nunca envía un UUID; si hay varias candidatas, la propuesta las lista |
-| ⬜ T-418 | Encaminar por fecha: pasado a `transactions`, futuro a `recurringMovements` | «Pagar 200 mil el 7 de septiembre» no crea un movimiento con fecha futura (E5) |
-| ⬜ T-419 | Ampliar la lista permitida de T-318 a nueve herramientas | La prueba falla si aparece una décima sin aprobar |
-| ⬜ T-420 | `stopWhen` sube a 5 pasos | Un turno puede proponer, escribir y consultar después (FR-020) |
-| ⬜ T-421 | Prompt reescrito: qué puede hacer y que el monto se pregunta | Deja de declarar «solo consultas»; la spec 003 FR-010 se actualiza en el mismo cambio |
+| ✅ T-416 | `proponerMovimientos`, ligada al usuario por cierre | No acepta identificador de usuario como parámetro |
+| ✅ T-417 | `proponerCorreccion` y `proponerAnulacion` resuelven el movimiento por búsqueda del sistema | El modelo nunca envía un UUID; si hay varias candidatas, la propuesta las lista |
+| ✅ T-418 | Encaminar por fecha: pasado a `transactions`, futuro a `recurringMovements` | «Pagar 200 mil el 7 de septiembre» no crea un movimiento con fecha futura (E5) |
+| ✅ T-419 | Ampliar la lista permitida de T-318 a nueve herramientas | La prueba falla si aparece una décima sin aprobar |
+| ✅ T-420 | `stopWhen` sube a 5 pasos | Un turno puede proponer, escribir y consultar después (FR-020) |
+| ✅ T-421 | Prompt reescrito: qué puede hacer y que el monto se pregunta | Deja de declarar «solo consultas»; la spec 003 FR-010 se actualiza en el mismo cambio |
 
 ## Fase 5 — Ejecución y puerta de confirmación
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-422 | Persistir la propuesta antes de mostrarla | La acción de confirmación recibe un identificador, nunca un cuerpo de movimientos |
-| ⬜ T-423 | Ejecutar una propuesta: escribe y marca origen y `assistantWriteId` | El movimiento resultante es rastreable hasta la frase que lo originó (FR-011) |
-| ⬜ T-424 | Cada movimiento se evalúa por separado | «20 mil de almuerzo, 5 mil de bus y unas cervezas» registra dos y pregunta por el tercero (E11, FR-018) |
-| ⬜ T-425 | Confirmar una propuesta ajena no escribe nada | Con dos usuarios, aplicar el identificador del otro devuelve error y no toca ninguna fila |
-| ⬜ T-426 | Una propuesta `aplicada`, `revertida`, `rechazada` o `caducada` no se puede volver a aplicar | Pulsar dos veces confirmar escribe una vez (FR-025) |
-| ⬜ T-427 | Caducidad a las 24 horas | Una propuesta de ayer no se aplica; devuelve el motivo, no un error genérico |
-| ⬜ T-428 | Revertir es inmediato y no pide confirmación adicional | Anula lo escrito y deja la propuesta en `revertida` (FR-023) |
-| ⬜ T-429 | Con el automático apagado, ninguna ruta escribe sin confirmación | Prueba que siembra una propuesta e intenta ejecutarla directamente |
-| ⬜ T-430 | Activar y revocar el automático desde el chat | Activar deja marca de tiempo; revocar la pone a `NULL` (E6, E7) |
+| ✅ T-422 | Persistir la propuesta antes de mostrarla | La acción de confirmación recibe un identificador, nunca un cuerpo de movimientos |
+| ✅ T-423 | Ejecutar una propuesta: escribe y marca origen y `assistantWriteId` | El movimiento resultante es rastreable hasta la frase que lo originó (FR-011) |
+| ✅ T-424 | Cada movimiento se evalúa por separado | «20 mil de almuerzo, 5 mil de bus y unas cervezas» registra dos y pregunta por el tercero (E11, FR-018) |
+| ✅ T-425 | Confirmar una propuesta ajena no escribe nada | Con dos usuarios, aplicar el identificador del otro devuelve error y no toca ninguna fila |
+| ✅ T-426 | Una propuesta `aplicada`, `revertida`, `rechazada` o `caducada` no se puede volver a aplicar | Pulsar dos veces confirmar escribe una vez (FR-025) |
+| ✅ T-427 | Caducidad a las 24 horas | Una propuesta de ayer no se aplica; devuelve el motivo, no un error genérico |
+| ✅ T-428 | Revertir es inmediato y no pide confirmación adicional | Anula lo escrito y deja la propuesta en `revertida` (FR-023) |
+| ✅ T-429 | Con el automático apagado, ninguna ruta escribe sin confirmación | Prueba que siembra una propuesta e intenta ejecutarla directamente |
+| ✅ T-430 | Activar y revocar el automático desde el chat | Activar deja marca de tiempo; revocar la pone a `NULL` (E6, E7) |
 
 ## Fase 6 — Interfaz
 
