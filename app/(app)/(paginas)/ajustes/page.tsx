@@ -20,7 +20,7 @@ export default async function AjustesPage() {
   ])
 
   return (
-    <div className="mx-auto max-w-2xl space-y-6">
+    <div className="escalonado mx-auto max-w-2xl space-y-6">
       <h1 className="text-3xl font-semibold tracking-tight">Ajustes</h1>
 
       <Card>

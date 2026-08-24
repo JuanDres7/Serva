@@ -9,7 +9,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 
 async function crearCuentaConDatos(page: Page) {
-  const email = `exp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@finzen.local`
+  const email = `exp-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@serva.local`
 
   await page.goto('/entrar')
   await page.getByLabel('¿Cómo te llamas?').fill('Juan')
@@ -35,7 +35,7 @@ test('E1 — se descarga un archivo de hoja de cálculo', async ({ page }) => {
   await page.getByRole('link', { name: 'Exportar mis datos' }).click()
 
   const archivo = await descarga
-  expect(archivo.suggestedFilename()).toMatch(/^finzen-movimientos-\d{4}-\d{2}-\d{2}\.xlsx$/)
+  expect(archivo.suggestedFilename()).toMatch(/^serva-movimientos-\d{4}-\d{2}-\d{2}\.xlsx$/)
 })
 
 test('E3 — los montos son números sumables y las fechas son fechas', async ({
@@ -66,7 +66,7 @@ test('E4 — sin movimientos se avisa en lugar de entregar un archivo vacío', a
   page,
   request,
 }) => {
-  const email = `exp-vacio-${Date.now()}@finzen.local`
+  const email = `exp-vacio-${Date.now()}@serva.local`
   await page.goto('/entrar')
   await page.getByLabel('¿Cómo te llamas?').fill('Vacío')
   await page.getByLabel('Correo').fill(email)

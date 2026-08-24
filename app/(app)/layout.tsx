@@ -2,7 +2,6 @@ import { redirect } from 'next/navigation'
 import { currentUserId } from '@/lib/session'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
 import { CerrarSesion } from '@/components/cerrar-sesion'
-import { ChatPanel } from '@/components/chat-panel'
 import { Marca, NavegacionLateral, NavegacionCompacta } from '@/components/navegacion'
 import { hayProveedor } from '@/lib/ai/provider'
 
@@ -27,12 +26,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   // fuera de este contenedor, de modo que no puede redirigirse a sí misma.
   if (!settings.onboardedAt) redirect('/bienvenida')
 
+  // Sin proveedor de IA, Serva AI no aparece en la navegación: mejor que no
+  // exista a que exista y no funcione (spec 003, degradación).
+  const conAsistente = hayProveedor()
+
   return (
-    <div className="flex min-h-screen">
-      <aside className="sticky top-0 hidden h-screen w-56 shrink-0 flex-col justify-between border-r border-sidebar-border bg-sidebar px-4 py-6 lg:flex">
+    <div className="flex h-screen">
+      <aside className="hidden h-screen w-56 shrink-0 flex-col justify-between border-r border-sidebar-border bg-sidebar px-4 py-6 lg:flex">
         <div className="space-y-8">
           <Marca className="px-3" />
-          <NavegacionLateral />
+          <NavegacionLateral conAsistente={conAsistente} />
         </div>
 
         <div className="space-y-2 px-3">
@@ -41,25 +44,21 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         </div>
       </aside>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 border-b border-border bg-background/85 backdrop-blur lg:hidden">
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+        <header className="z-30 shrink-0 border-b border-border bg-background/85 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <Marca />
             <CerrarSesion />
           </div>
           <div className="px-2 pb-2">
-            <NavegacionCompacta />
+            <NavegacionCompacta conAsistente={conAsistente} />
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-4xl flex-1 px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
-          {children}
-        </main>
+        {/* `overflow-y-auto` y no scroll del documento: así el campo de Serva AI
+            puede quedarse fijo abajo sin que el resto de pantallas cambie. */}
+        <main className="flex min-h-0 flex-1 flex-col overflow-y-auto">{children}</main>
       </div>
-
-      {/* Sin proveedor de IA el botón no aparece: mejor que no exista a que
-          exista y no funcione (spec 003, degradación). */}
-      {hayProveedor() && <ChatPanel nombre={settings.displayName} />}
     </div>
   )
 }

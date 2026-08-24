@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test'
  */
 
 test('sin proveedor de IA, el asistente no se ofrece', async ({ page }) => {
-  const email = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@finzen.local`
+  const email = `chat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@serva.local`
 
   await page.goto('/entrar')
   await page.getByLabel('¿Cómo te llamas?').fill('Juan')
@@ -23,10 +23,15 @@ test('sin proveedor de IA, el asistente no se ofrece', async ({ page }) => {
   await page.getByRole('button', { name: 'Empezar' }).click()
   await expect(page.getByRole('heading', { name: /Juan/ })).toBeVisible()
 
-  // Mejor que el botón no exista a que exista y no funcione.
-  await expect(page.getByRole('button', { name: 'Abrir el asistente' })).toHaveCount(0)
+  // Mejor que el enlace no exista a que exista y no lleve a nada útil.
+  await expect(page.getByRole('link', { name: 'Serva AI' })).toHaveCount(0)
 
-  // Y el resto de la aplicación sigue intacta.
+  // Y quien llegue por la dirección directa vuelve al resumen, no a un chat
+  // mudo.
+  await page.goto('/asistente')
+  await expect(page).toHaveURL(/\/$/)
+
+  // El resto de la aplicación sigue intacta.
   await expect(page.getByRole('link', { name: 'Historial' })).toBeVisible()
 })
 

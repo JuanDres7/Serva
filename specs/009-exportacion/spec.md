@@ -15,7 +15,7 @@ papel: nadie abre un archivo así para revisar sus gastos.
 
 La gente revisa, filtra y hace cuentas en hojas de cálculo. Exportar en ese formato
 convierte una obligación en una funcionalidad útil: permite hacer con los datos
-cosas que Finzen no hace.
+cosas que Serva no hace.
 
 ## 2. Alcance
 
@@ -51,7 +51,7 @@ movimiento y las columnas separadas.
 
 **Dado** que abrí el archivo exportado,
 **cuando** sumo la columna de montos con las funciones de la hoja de cálculo,
-**entonces** el total coincide exactamente con el que muestra Finzen.
+**entonces** el total coincide exactamente con el que muestra Serva.
 
 ### E4 — Sin datos
 
@@ -89,7 +89,7 @@ explicación.
 1. Los cuatro escenarios E1–E4 se ejecutan correctamente.
 2. El archivo exportado se abre en Excel sin advertencias ni pasos de conversión.
 3. La suma de la columna de montos en la hoja de cálculo coincide exactamente con
-   el total que muestra Finzen para el mismo conjunto de movimientos, incluyendo
+   el total que muestra Serva para el mismo conjunto de movimientos, incluyendo
    casos con decimales.
 4. Las fechas son reconocidas como fechas por la hoja de cálculo, no como texto.
 5. La exportación no modifica ningún dato.

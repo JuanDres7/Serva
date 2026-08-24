@@ -47,7 +47,7 @@ export async function construirLibro(
   opciones: { locale: string; currency: string },
 ): Promise<Buffer> {
   const libro = new ExcelJS.Workbook()
-  libro.creator = 'Finzen'
+  libro.creator = 'Serva'
   libro.created = new Date()
 
   const hoja = libro.addWorksheet('Movimientos')
@@ -89,5 +89,5 @@ export async function construirLibro(
 }
 
 export function nombreDeArchivo(hoy: string): string {
-  return `finzen-movimientos-${hoy}.xlsx`
+  return `serva-movimientos-${hoy}.xlsx`
 }

@@ -9,7 +9,7 @@ import { primeraFecha } from '@/lib/domain/recurrence'
  * Datos de ejemplo (D-046).
  *
  * Quien crea una cuenta y encuentra formularios en blanco y gráficos vacíos no
- * ve nada de lo que distingue a Finzen: ni la categorización, ni las cifras
+ * ve nada de lo que distingue a Serva: ni la categorización, ni las cifras
  * comparadas, ni el desglose. Se marcha con la impresión de un formulario de
  * registro. Todo el proyecto se juega en esos dos minutos.
  *
@@ -80,7 +80,7 @@ export type ResultadoEjemplo = {
  * Recurrentes de ejemplo.
  *
  * Uno de ellos vence hoy, a propósito: sin un cobro pendiente, quien visita el
- * proyecto no vería nunca la parte que da sentido a la funcionalidad —que Finzen
+ * proyecto no vería nunca la parte que da sentido a la funcionalidad —que Serva
  * pregunta en lugar de asumir— porque tendría que esperar a que llegara una
  * fecha.
  */

@@ -67,11 +67,11 @@ export function PresupuestosLista({
   return (
     <div className="space-y-6">
       {presupuestos.length > 0 && (
-        <div className="space-y-4">
+        <div className="escalonado space-y-4">
           {presupuestos.map((presupuesto) => {
             const categoria = findCategory(presupuesto.categoria)
             return (
-              <div key={presupuesto.id} className="space-y-2 rounded-lg border p-4">
+              <div key={presupuesto.id} className="superficie space-y-2 p-4">
                 <div className="flex flex-wrap items-baseline justify-between gap-2">
                   <span className="flex items-center gap-2 font-medium">
                     {categoria && (
@@ -90,7 +90,7 @@ export function PresupuestosLista({
 
                 <div className="h-2.5 overflow-hidden rounded-full bg-muted">
                   <div
-                    className={`h-full rounded-full transition-all ${COLOR_POR_NIVEL[presupuesto.nivel]}`}
+                    className={`barra-crece h-full rounded-full ${COLOR_POR_NIVEL[presupuesto.nivel]}`}
                     style={{ width: `${Math.min(100, presupuesto.porcentaje)}%` }}
                   />
                 </div>

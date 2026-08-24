@@ -1,7 +1,7 @@
 /**
  * Períodos y ciclos.
  *
- * Todo total, filtro y comparación de Finzen se calcula sobre un período, y un
+ * Todo total, filtro y comparación de Serva se calcula sobre un período, y un
  * período se deriva de un ciclo. El mes calendario es solo uno de los ciclos
  * posibles, no un caso especial (D-025).
  *

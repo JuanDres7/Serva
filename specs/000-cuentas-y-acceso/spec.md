@@ -9,11 +9,11 @@
 
 ## 1. Contexto y motivación
 
-Finzen es una aplicación web que varias personas usan a la vez. Para que cada una
+Serva es una aplicación web que varias personas usan a la vez. Para que cada una
 vea únicamente sus propias finanzas, el sistema necesita saber quién está
 consultando. Eso es todo lo que esta feature aporta.
 
-No es una funcionalidad de producto: nadie usa Finzen *para* tener una cuenta. Es
+No es una funcionalidad de producto: nadie usa Serva *para* tener una cuenta. Es
 el mecanismo mínimo que hace posible el aislamiento entre usuarios, y se construye
 con esa modestia — sin roles, sin permisos, sin equipos, sin organizaciones.
 
@@ -46,7 +46,7 @@ migrar todo lo construido.
 
 ### E1 — Crear una cuenta
 
-**Dado** que llego a Finzen por primera vez,
+**Dado** que llego a Serva por primera vez,
 **cuando** me registro con mi correo y una contraseña,
 **entonces** entro a la aplicación y se me ofrece empezar de cero o poblarla con
 datos de ejemplo.
@@ -60,7 +60,7 @@ gráficos poblados y el asistente en condiciones de responder sobre ellos.
 
 ### E3 — Descartar los datos de ejemplo
 
-**Dado** que probé con datos de ejemplo y quiero usar Finzen en serio,
+**Dado** que probé con datos de ejemplo y quiero usar Serva en serio,
 **cuando** los elimino,
 **entonces** desaparecen todos de una vez, sin dejar movimientos inventados
 mezclados con los míos.
@@ -80,14 +80,14 @@ nueva.
 
 ### E6 — Nadie ve lo que no es suyo
 
-**Dado** que hay varias personas usando Finzen al mismo tiempo,
+**Dado** que hay varias personas usando Serva al mismo tiempo,
 **cuando** consulto cualquier pantalla,
 **entonces** veo exclusivamente mis propios movimientos, categorías y
 configuración.
 
 ### E7 — Irse del todo
 
-**Dado** que quiero dejar de usar Finzen,
+**Dado** que quiero dejar de usar Serva,
 **cuando** elimino mi cuenta,
 **entonces** puedo exportar mis datos antes y, al confirmar, todo lo mío se elimina.
 
@@ -114,7 +114,7 @@ configuración.
 
 | ID | Requisito |
 |---|---|
-| FR-015 | La pantalla de registro debe advertir de forma visible que Finzen es una aplicación de demostración y que no deben introducirse datos financieros reales. |
+| FR-015 | La pantalla de registro debe advertir de forma visible que Serva es una aplicación de demostración y que no deben introducirse datos financieros reales. |
 | FR-016 | El registro debe exigir una autorización explícita del tratamiento de datos. La casilla no puede venir marcada por defecto. |
 | FR-017 | Debe existir un aviso de privacidad accesible desde el registro y desde los ajustes, que indique qué datos se guardan, con qué finalidad, que las descripciones se envían a un proveedor externo de IA para categorizarlas, y cómo eliminarlo todo. |
 | FR-018 | El aviso de privacidad debe declarar que los datos se almacenan en servidores fuera de Colombia. |

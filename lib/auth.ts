@@ -13,7 +13,7 @@ import {
  *
  * Alcance deliberadamente mínimo (D-048): correo y contraseña, sin roles,
  * permisos, equipos ni proveedores externos. No es una funcionalidad de producto
- * —nadie usa Finzen para tener una cuenta— sino el mecanismo que hace posible el
+ * —nadie usa Serva para tener una cuenta— sino el mecanismo que hace posible el
  * aislamiento entre usuarios exigido por el Artículo VI.
  *
  * La verificación de correo y el restablecimiento de contraseña pertenecen a la

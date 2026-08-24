@@ -18,7 +18,7 @@ siente mal y no vuelve.
 El presupuesto no falló porque gastara mucho, sino porque **el número era
 ficción**.
 
-Finzen ya tiene el historial categorizado, así que puede partir de la realidad
+Serva ya tiene el historial categorizado, así que puede partir de la realidad
 medida: «gastas en promedio esto; ¿ponemos aquello?». Un tope alcanzable es uno
 que no se abandona.
 
@@ -33,7 +33,7 @@ que no se abandona.
 
 ### Fuera
 - Método de sobres: asignar cada peso del ingreso a un destino. Exige entender un
-  método y dedicarle tiempo cada semana, y contradice que Finzen sea para quien
+  método y dedicarle tiempo cada semana, y contradice que Serva sea para quien
   no sabe de finanzas.
 - Traspaso del sobrante al período siguiente.
 - Presupuestos semanales o diarios: la variación es demasiado alta para informar.

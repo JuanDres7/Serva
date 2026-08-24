@@ -74,7 +74,7 @@ export function MetaTarjeta({
   }
 
   return (
-    <article className="overflow-hidden rounded-lg border bg-card">
+    <article className="superficie superficie-viva overflow-hidden">
       {/* La imagen propia, no un icono genérico: cuando alguien duda entre
           gastar y no gastar, ver la moto que quiere pesa más que ver una cifra
           (D-029). */}
@@ -105,7 +105,7 @@ export function MetaTarjeta({
         <div className="space-y-1">
           <div className="h-2.5 overflow-hidden rounded-full bg-muted">
             <div
-              className="h-full rounded-full bg-primary transition-all"
+              className="barra-crece h-full rounded-full bg-primary"
               style={{ width: `${meta.porcentaje}%` }}
             />
           </div>

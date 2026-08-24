@@ -81,7 +81,7 @@ export function HistorialTabla({ movimientos, currency, locale, hoy }: Props) {
             <TableHead className="w-32" />
           </TableRow>
         </TableHeader>
-        <TableBody>
+        <TableBody className="escalonado">
           {creando && (
             <FilaNueva
               currency={currency}

@@ -3,7 +3,8 @@
 - **Estado:** aprobada
 - **Creada:** 2026-08-22
 - **Depende de:** 001 y 002 (necesita historial categorizado)
-- **Decisiones aplicables:** D-002, D-008, D-009, D-011, D-019, D-025, D-034
+- **Decisiones aplicables:** D-002, D-008, D-011, D-019, D-025, D-034, D-064
+- **Revisada:** 2026-08-23 — D-064 sustituye el panel flotante por una pantalla propia
 
 ---
 
@@ -15,13 +16,15 @@ finanzas no es guardar datos, sino que el usuario no los alcanza: para responder
 aplicar y cómo leer el resultado.
 
 Aquí se invierte la relación: el usuario pregunta en su idioma y la respuesta llega
-calculada sobre su propio historial. La conversación reemplaza a la navegación.
+calculada sobre su propio historial. La conversación reemplaza a la navegación, y
+por eso Serva AI ocupa una pantalla entera y no un recuadro en una esquina
+(D-064).
 
 ## 2. Alcance
 
 ### Dentro
 
-- Panel de chat accesible desde cualquier pantalla, sin perder el contexto visible.
+- Pantalla propia de Serva AI, con entrada permanente en la navegación.
 - Preguntas en lenguaje natural sobre movimientos, totales, categorías y períodos.
 - Respuestas calculadas sobre datos reales, acompañadas de visualizaciones cuando
   ayuden.
@@ -90,7 +93,7 @@ resto de la aplicación sigue funcionando con normalidad.
 
 | ID | Requisito |
 |---|---|
-| FR-001 | El chat debe abrirse desde un botón fijo, visible en cualquier pantalla, y mostrarse como panel superpuesto sin sacar al usuario de lo que estaba viendo. |
+| FR-001 | Serva AI debe tener una pantalla propia, alcanzable desde la navegación con ese nombre, que ocupe el alto disponible y mantenga el campo de escritura visible mientras se lee la conversación (D-064). |
 | FR-002 | El sistema debe responder preguntas sobre montos, totales, categorías, períodos y comparaciones, calculadas sobre el historial real del usuario. |
 | FR-003 | Toda cifra de una respuesta debe provenir de una consulta a los datos. El modelo no puede calcular ni estimar cifras por su cuenta. |
 | FR-004 | El acceso a los datos debe realizarse mediante un conjunto cerrado de consultas con parámetros tipados. El modelo nunca ejecuta consultas arbitrarias (Art. III.3). |
@@ -101,8 +104,8 @@ resto de la aplicación sigue funcionando con normalidad.
 | FR-009 | Cuando el historial sea insuficiente para una comparación o tendencia, el sistema debe advertirlo en lugar de responder. |
 | FR-010 | El chat no debe poder crear, modificar ni anular movimientos. Es de solo lectura. |
 | FR-011 | El sistema no debe recomendar productos financieros, inversiones ni decisiones de inversión. Las sugerencias de ahorro se limitan a describir el gasto propio del usuario. |
-| FR-012 | Si el modelo no está disponible o falla, el chat debe informarlo sin afectar al resto de la aplicación. |
-| FR-013 | El usuario debe poder ver la conversación anterior mientras el panel siga abierto. |
+| FR-012 | Si el modelo no está disponible o falla, el chat debe informarlo sin afectar al resto de la aplicación. Sin proveedor configurado, la sección no debe ofrecerse en la navegación. |
+| FR-013 | El usuario debe poder ver la conversación anterior mientras permanezca en la pantalla del asistente. |
 | FR-014 | El proveedor del modelo debe poder cambiarse por configuración (D-008). |
 | FR-015 | Cada consulta al modelo debe registrarse con su entrada, su salida, su latencia y su costo. |
 | FR-016 | Debe enviarse al modelo únicamente lo necesario para resolver la pregunta, nunca el historial completo por defecto (Art. VI.2). |
@@ -115,7 +118,7 @@ resto de la aplicación sigue funcionando con normalidad.
   como ausencia de datos, nunca como un cero calculado.
 - **RN-003** — Los movimientos anulados y los de tipo ahorro se excluyen de los
   cálculos de gasto, igual que en el resto del sistema (RN-003 de la spec 001).
-- **RN-004** — Finzen describe y estima; no aconseja qué hacer con el dinero
+- **RN-004** — Serva describe y estima; no aconseja qué hacer con el dinero
   (Art. II.4).
 - **RN-005** — El chat opera sobre el ciclo configurado del usuario, no sobre el
   mes calendario, cuando ambos difieran (D-025).
@@ -135,7 +138,7 @@ resto de la aplicación sigue funcionando con normalidad.
 
 ## 7. Métricas de éxito
 
-- El usuario obtiene una respuesta útil sin tocar un filtro ni cambiar de pantalla.
+- El usuario obtiene una respuesta útil sin tocar un filtro ni construir una consulta.
 - Cero cifras incorrectas en las respuestas: toda cifra reportada coincide con el
   cálculo directo sobre el historial.
 - El usuario descubre algo sobre sus gastos que no sabía antes de preguntar.

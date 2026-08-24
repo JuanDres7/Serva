@@ -1,5 +1,5 @@
 /**
- * Esquema de datos de Finzen.
+ * Esquema de datos de Serva.
  *
  * Reglas que rigen este esquema:
  * - Los montos son enteros de 64 bits en la unidad mínima de la moneda. Ningún
@@ -267,7 +267,7 @@ export type CategorizationLogRow = typeof categorizationLog.$inferSelect
 /**
  * Movimientos recurrentes (spec 007).
  *
- * Finzen no está conectada a ningún banco, así que no puede saber si un cobro
+ * Serva no está conectada a ningún banco, así que no puede saber si un cobro
  * ocurrió: guarda cuándo toca el próximo y pregunta al usuario cuando llega.
  */
 export const recurringMovements = pgTable(

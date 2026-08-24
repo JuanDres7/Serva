@@ -16,7 +16,7 @@ demás se construye encima. Un error aquí se paga en cada feature posterior.
 ## 2. Estructura del proyecto
 
 ```
-finzen/
+serva/
 ├── app/                     Rutas y páginas
 │   ├── (auth)/              Acceso — feature 000
 │   └── (app)/               Aplicación autenticada

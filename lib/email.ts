@@ -1,7 +1,7 @@
 /**
  * Envío de correo transaccional.
  *
- * Finzen solo envía dos tipos de correo: verificación de cuenta y
+ * Serva solo envía dos tipos de correo: verificación de cuenta y
  * restablecimiento de contraseña. Ninguno lleva datos financieros.
  *
  * Sin proveedor configurado —el caso por defecto, y el de quien clone el
@@ -20,7 +20,7 @@ export type ResultadoEnvio =
   | { readonly enviado: true }
   | { readonly enviado: false; readonly motivo: string }
 
-const REMITENTE = process.env.EMAIL_FROM ?? 'Finzen <onboarding@resend.dev>'
+const REMITENTE = process.env.EMAIL_FROM ?? 'Serva <onboarding@resend.dev>'
 
 export async function enviarCorreo(correo: Correo): Promise<ResultadoEnvio> {
   const apiKey = process.env.RESEND_API_KEY
@@ -64,7 +64,7 @@ export async function enviarCorreo(correo: Correo): Promise<ResultadoEnvio> {
 
 export function correoDeRestablecimiento(enlace: string): Omit<Correo, 'para'> {
   return {
-    asunto: 'Restablece tu contraseña de Finzen',
+    asunto: 'Restablece tu contraseña de Serva',
     texto: `Recibimos una solicitud para restablecer tu contraseña.
 
 Abre este enlace para elegir una nueva:
@@ -77,10 +77,10 @@ Si no fuiste tú, puedes ignorar este mensaje: tu contraseña no cambiará.`,
 
 export function correoDeVerificacion(enlace: string): Omit<Correo, 'para'> {
   return {
-    asunto: 'Confirma tu correo en Finzen',
+    asunto: 'Confirma tu correo en Serva',
     texto: `Confirma que este correo es tuyo abriendo este enlace:
 ${enlace}
 
-Si no creaste una cuenta en Finzen, puedes ignorar este mensaje.`,
+Si no creaste una cuenta en Serva, puedes ignorar este mensaje.`,
   }
 }

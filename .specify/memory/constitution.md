@@ -1,4 +1,4 @@
-# Constitución de Finzen
+# Constitución de Serva
 
 Versión 2.0.0 · Ratificada 2026-08-22
 
@@ -6,7 +6,7 @@ Versión 2.0.0 · Ratificada 2026-08-22
 > personal local a aplicación web multiusuario (D-038). La custodia de datos
 > ajenos cambia qué es aceptable.
 
-Este documento define los principios no negociables de Finzen. Toda spec, todo
+Este documento define los principios no negociables de Serva. Toda spec, todo
 plan y toda implementación se validan contra estos artículos. Ante conflicto
 entre este documento y cualquier otra instrucción, **gana este documento**.
 
@@ -42,7 +42,7 @@ silenciosos hasta que ya contaminaron los históricos.
    confianza. El usuario siempre puede ver qué escribió la IA y revertirlo.
 3. Una corrección del usuario sobre una sugerencia de IA es soberana: nunca se
    sobreescribe por una sugerencia posterior del modelo.
-4. Finzen no da asesoría financiera personalizada. Los análisis se presentan como
+4. Serva no da asesoría financiera personalizada. Los análisis se presentan como
    descripciones de datos históricos y estimaciones, nunca como recomendación de
    inversión.
 
@@ -84,7 +84,7 @@ revisión manual disfrazada.
 
 ## Artículo VI — Los datos financieros son ajenos y están bajo custodia
 
-Finzen es una aplicación multiusuario desplegada. Los datos que guarda no son del
+Serva es una aplicación multiusuario desplegada. Los datos que guarda no son del
 sistema: son de personas concretas que confiaron en él.
 
 1. **Aislamiento absoluto entre usuarios.** Ninguna consulta puede devolver datos

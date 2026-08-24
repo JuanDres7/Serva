@@ -73,7 +73,7 @@ describe('exportación a hoja de cálculo', () => {
   })
 
   it('la suma de la columna coincide con el total real', async () => {
-    // Criterio 3 de la spec: sumar en la hoja debe dar lo mismo que suma Finzen.
+    // Criterio 3 de la spec: sumar en la hoja debe dar lo mismo que suma Serva.
     const montos = [1541850, 41833, 999999, 1, 250075]
     const libro = await leer(montos.map((amountCents) => base({ amountCents })))
 
@@ -129,6 +129,6 @@ describe('exportación a hoja de cálculo', () => {
   })
 
   it('el nombre del archivo lleva la fecha', () => {
-    expect(nombreDeArchivo('2026-08-23')).toBe('finzen-movimientos-2026-08-23.xlsx')
+    expect(nombreDeArchivo('2026-08-23')).toBe('serva-movimientos-2026-08-23.xlsx')
   })
 })

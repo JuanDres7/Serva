@@ -94,7 +94,12 @@ es viable" cuando el problema es el modelo, no el diseño.
 **Consecuencia:** ninguna funcionalidad se recorta por limitaciones del modelo
 local sin antes comprobarla contra un modelo de nube.
 
-## D-009 · Chat como panel flotante, no como pantalla aparte (2026-08-22)
+## D-009 · ~~Chat como panel flotante, no como pantalla aparte~~ REVERTIDA (2026-08-22)
+
+> Revertida por **D-064**: Serva AI pasa a ser una pantalla propia con entrada en
+> la navegación. Se conserva por trazabilidad; el razonamiento de fondo —que la
+> conversación reemplaza a la navegación— sigue vigente y es justo el que obligó
+> al cambio.
 
 Botón de chat fijo abajo a la derecha que abre un panel conversacional sobre la
 interfaz, sin sacar al usuario de lo que estaba viendo. Las respuestas pueden
@@ -165,7 +170,7 @@ de segundos. Además, cada nivel mejora solo con el uso del propio usuario.
 
 ## D-014 · La personalización es del sistema, no del modelo (2026-08-22)
 
-Finzen se adapta al usuario mediante memoria de correcciones, ejemplos propios
+Serva se adapta al usuario mediante memoria de correcciones, ejemplos propios
 incluidos en la consulta al modelo y similitud contra su historial. **No** se hace
 ajuste fino de pesos del modelo.
 
@@ -237,7 +242,7 @@ categoría lo hace para ver ese gasto separado.
 lista ajena. Pero permitir crearlas implica que el conjunto de destino es dinámico
 y que la lista vigente debe viajar en cada consulta al modelo.
 
-## D-019 · El chat vive solo dentro de Finzen (2026-08-22)
+## D-019 · El chat vive solo dentro de Serva (2026-08-22)
 
 El asistente se usa desde el panel de la aplicación. No se expone acceso externo
 a los datos por ahora.
@@ -365,7 +370,7 @@ datos propios sería diseñar y probar a ciegas.
 
 1. **Creación manual siempre disponible.** Quien ya sabe qué tope quiere, lo pone
    y listo. Las sugerencias no son un requisito para usar la funcionalidad.
-2. **Sugerencia basada en el historial.** Cuando hay datos suficientes, Finzen
+2. **Sugerencia basada en el historial.** Cuando hay datos suficientes, Serva
    propone un tope partiendo del promedio real del usuario («gastas $418.000 en
    Comidas fuera; ¿ponemos $350.000?»). Un presupuesto derivado del propio gasto
    es alcanzable; uno inventado se abandona en la segunda semana.
@@ -536,7 +541,7 @@ equivocado, que es la forma más rápida de perder la confianza del usuario.
 
 ### Confirmación
 
-Finzen no está conectada a ningún banco: no puede saber si el cobro ocurrió. Por
+Serva no está conectada a ningún banco: no puede saber si el cobro ocurrió. Por
 eso **pregunta en lugar de asumir**. Al llegar la fecha, el movimiento queda
 pendiente de confirmación con tres salidas: **sí** (se registra), **no** (se
 reprograma eligiendo la nueva fecha en el calendario) y **eliminar** (el recurrente
@@ -718,15 +723,15 @@ contrastar.
   candidata a entrar si el MVP se amplía.**
 - *Sacar el chat del MVP.* Reduciría bastante el tiempo hasta tener algo usable y
   el riesgo técnico (es lo más exigente para un modelo local). Se descarta porque
-  el chat es el diferenciador del producto (D-002): sin él, Finzen es un
+  el chat es el diferenciador del producto (D-002): sin él, Serva es un
   registrador de gastos más.
 
 **Estimación de referencia:** del orden de 10 a 12 semanas a 10 horas semanales.
 Es un orden de magnitud, no un compromiso.
 
-## D-038 · Finzen es una aplicación web multiusuario desplegada (2026-08-22)
+## D-038 · Serva es una aplicación web multiusuario desplegada (2026-08-22)
 
-Cambio de premisa respecto al planteamiento inicial. Finzen deja de ser una
+Cambio de premisa respecto al planteamiento inicial. Serva deja de ser una
 aplicación personal que corre en el equipo del autor y pasa a ser una aplicación
 web real, usable por varias personas simultáneamente, con un servidor que debe
 sostener esa concurrencia.
@@ -852,7 +857,7 @@ niveles de pago no.
 
 **Regla adoptada:**
 
-- Mientras Finzen la use solo su autor o conocidos probando, se usa el nivel
+- Mientras Serva la use solo su autor o conocidos probando, se usa el nivel
   gratuito.
 - **Antes de abrirla a usuarios reales**, o se pasa a un nivel de pago, o se declara
   explícitamente a los usuarios qué ocurre con sus datos. No hay tercera opción
@@ -882,7 +887,7 @@ problema de privacidad de D-043— o ejecutar un modelo en el servidor, algo del
 en despliegue gratuito. Los otros dos niveles entregan la funcionalidad completa
 desde el primer día y el nivel 2 se añade sin rehacer nada.
 
-## D-045 · Finzen es un proyecto de portafolio (2026-08-22)
+## D-045 · Serva es un proyecto de portafolio (2026-08-22)
 
 Precisa D-038. La aplicación se despliega y admite varias personas usándola a la
 vez, pero su finalidad es demostrar el trabajo de su autor, no captar usuarios que
@@ -893,7 +898,7 @@ lleven allí sus finanzas reales.
 1. La restricción de uso no comercial del alojamiento gratuito no aplica (D-042).
 2. La frontera de privacidad de D-043 **queda vigente pero en suspenso**: con datos
    del propio autor y de quien entra a probar, el nivel gratuito de IA es
-   razonable. Se reactiva el día que alguien use Finzen para llevar sus finanzas de
+   razonable. Se reactiva el día que alguien use Serva para llevar sus finanzas de
    verdad.
 3. El multiusuario mantiene su sentido: quien visite el proyecto crea su cuenta,
    prueba y no ve datos ajenos.
@@ -909,7 +914,7 @@ períodos de movimientos verosímiles, ya categorizados.
 **Por qué:** quien entra a una cuenta recién creada encuentra formularios en blanco
 y gráficos sin datos. No ve la categorización automática, ni el chat respondiendo
 con cifras reales, ni un solo gráfico poblado —es decir, no ve nada de lo que
-distingue a Finzen— y se marcha con la impresión de un formulario de registro. Todo
+distingue a Serva— y se marcha con la impresión de un formulario de registro. Todo
 el proyecto se juega en esos primeros dos minutos.
 
 **Descartada** una cuenta de demostración compartida de solo lectura: es más simple,
@@ -947,7 +952,7 @@ construido y a revisar cada consulta ya escrita.
 
 **Alcance deliberadamente mínimo:** correo y contraseña, sin roles, permisos,
 equipos ni proveedores externos. No es una funcionalidad de producto —nadie usa
-Finzen para tener una cuenta— sino el mecanismo que hace posible el aislamiento.
+Serva para tener una cuenta— sino el mecanismo que hace posible el aislamiento.
 
 ## D-049 · Arquitectura final de la IA (2026-08-22)
 
@@ -986,7 +991,7 @@ Dos matices a favor:
 - La ley excluye las bases de datos de ámbito exclusivamente personal o doméstico.
   Mientras la aplicación la use solo su autor, queda fuera de su alcance.
 - No aplica el régimen especial de información crediticia (Ley 1266 de 2008):
-  Finzen no reporta a centrales de riesgo ni maneja historial crediticio.
+  Serva no reporta a centrales de riesgo ni maneja historial crediticio.
 
 Un matiz en contra, y es el relevante:
 
@@ -1009,7 +1014,7 @@ Un matiz en contra, y es el relevante:
 5. **Declaración de transferencia internacional:** los servidores están fuera de
    Colombia y así debe indicarse.
 
-**Si algún día Finzen deja de ser una demostración**, este marco es insuficiente y
+**Si algún día Serva deja de ser una demostración**, este marco es insuficiente y
 debe revisarse con asesoría profesional, junto con la reactivación de D-043.
 
 ## D-051 · El repositorio debe poder levantarse en minutos (2026-08-22)
@@ -1198,13 +1203,13 @@ que se vea, se pruebe y se valore, no controlar su explotación comercial. MIT e
 la licencia más reconocible y la que menos fricción genera.
 
 **Descartada AGPL**, que habría obligado a publicar el código a quien desplegara
-Finzen como servicio. Protege más, pero hace que menos gente lo toque, y aquí
+Serva como servicio. Protege más, pero hace que menos gente lo toque, y aquí
 importa más lo segundo.
 
 ## D-059 · Sin cifrado en la capa de aplicación (2026-08-23)
 
 Los datos se guardan en claro en la base, protegidos por el cifrado en reposo del
-proveedor. Finzen **no** cifra las descripciones antes de guardarlas.
+proveedor. Serva **no** cifra las descripciones antes de guardarlas.
 
 **Qué se gana no haciéndolo:** el texto se puede buscar e indexar. De eso dependen
 la búsqueda del asistente, el nivel 1 de la categorización —que compara palabras
@@ -1216,12 +1221,12 @@ quien obtenga las credenciales de la base ni a quien tenga acceso desde dentro d
 proveedor. Con acceso a la base, una descripción como «consulta con el
 psiquiatra» se lee tal cual.
 
-**Por qué es aceptable aquí:** Finzen es un prototipo de portafolio (D-045) que
+**Por qué es aceptable aquí:** Serva es un prototipo de portafolio (D-045) que
 pide explícitamente no introducir datos financieros reales y que viene con datos
 de ejemplo inventados. Cifrar contra un atacante que ya tiene las credenciales de
 la base es proteger una casa vacía.
 
-**Cuándo se revisa:** el día que Finzen deje de ser una demostración, junto con
+**Cuándo se revisa:** el día que Serva deje de ser una demostración, junto con
 D-043 —el uso del nivel gratuito de IA—. Las dos dependen de lo mismo: si los
 datos son reales o no.
 
@@ -1272,7 +1277,7 @@ que no significa nada.
 
 ## D-062 · Un sistema visual propio: crema, salvia y terracota (2026-08-23)
 
-**Decisión.** Finzen deja la apariencia por defecto de shadcn y adopta un sistema
+**Decisión.** Serva deja la apariencia por defecto de shadcn y adopta un sistema
 visual propio, definido en `app/globals.css` con tokens de color en OKLCH.
 
 - **Fondo crema, tarjetas casi blancas.** El contraste lo hace el fondo, no la
@@ -1280,7 +1285,7 @@ visual propio, definido en `app/globals.css` con tokens de color en OKLCH.
   existir; sobre crema flota sola.
 - **Nada de gris neutro.** La tinta tira a verde oscuro y los grises llevan un
   punto cálido. El gris puro es lo que hace que una interfaz se sienta
-  corporativa, y Finzen es para quien no sabe de finanzas y ya llega con
+  corporativa, y Serva es para quien no sabe de finanzas y ya llega con
   desconfianza.
 - **Salvia profunda como color principal**, terracota apagada para lo negativo.
   Un rojo de semáforo convierte cada gasto en un reproche. Esto vale también
@@ -1312,6 +1317,118 @@ visual propio, definido en `app/globals.css` con tokens de color en OKLCH.
 indistinguible de cualquier panel de administración, y el producto se apoya en
 que la persona se sienta acompañada y no juzgada. El tono de la interfaz es
 parte de eso, igual que lo son los mensajes (D-024).
+
+---
+
+## D-063 · El producto se llama Serva; el asistente, Serva AI (2026-08-23)
+
+**Decisión.** Finzen pasa a llamarse **Serva**, y el asistente del chat deja de
+ser «el asistente» sin nombre para llamarse **Serva AI**.
+
+El cambio alcanza todo lo que lee una persona —interfaz, correos, documentos,
+specs, la constitución— y también el nombre del paquete. En el prompt del
+asistente el nombre se declara de forma explícita, con la instrucción de no
+presentarse en cada respuesta: un asistente que repite su nombre a cada turno
+resulta pesado.
+
+**Lo que deliberadamente no cambia:** el usuario, la contraseña y el nombre de la
+base de datos del contenedor de desarrollo siguen siendo `finzen`, y el
+comentario de la migración `0005` conserva el nombre viejo.
+
+- Los identificadores de la base son del contenedor, no del producto. Cambiarlos
+  obliga a recrear el volumen, y con él se van los datos que ya haya dentro.
+  Queda anotado en `.env.example` para que no parezca un descuido.
+- Las migraciones aplicadas no se editan. Drizzle guarda una huella del archivo
+  para saber qué ya corrió; cambiar una línea, aunque sea un comentario,
+  la invalida. Es además coherente con el Artículo VII: el historial no se
+  reescribe.
+
+Cuando el despliegue cree una base nueva (Vercel y Neon), esos identificadores
+nacerán ya con el nombre correcto.
+
+---
+
+## D-064 · Serva AI es una pantalla, no un recuadro en la esquina (2026-08-23)
+
+**Decisión.** Serva AI deja de ser un panel flotante abajo a la derecha. Ahora
+tiene su propia entrada en la navegación lateral, con ese nombre, y ocupa la
+pantalla completa: la conversación en una columna centrada y el campo de
+escritura fijo abajo. Revierte **D-009**.
+
+**Por qué.** El razonamiento de D-009 era que consultar no debía obligar a
+cambiar de pantalla, para que la conversación reemplazara a la navegación en vez
+de competir con ella. Ese razonamiento sigue siendo correcto, pero el recuadro de
+24rem lo contradecía en la práctica: las respuestas de Serva AI son listas de
+categorías con cifras y porcentajes, y en un panel de ese tamaño llegaban
+partidas y con desplazamiento propio. Un asistente que hay que leer a través de
+una rendija no reemplaza nada; queda como accesorio encima de la aplicación.
+
+Con entrada propia en la navegación, además, se ve que existe. Un botón circular
+sin etiqueta en una esquina es un elemento que mucha gente no llega a pulsar
+nunca.
+
+**Consecuencias en la construcción:**
+
+- Un grupo de rutas, `(paginas)`, agrupa las pantallas con contenido y les aplica
+  la columna centrada con márgenes. Serva AI queda fuera de ese grupo y ocupa el
+  alto completo. Las direcciones no cambian y no hace falta código de cliente
+  para distinguir los dos casos.
+- El desplazamiento vive en el contenedor principal y no en el documento, que es
+  lo que permite que el campo de escritura se quede fijo abajo sin afectar a las
+  demás pantallas.
+- Sin proveedor de modelo, la sección no aparece en la navegación y `/asistente`
+  redirige al resumen. La degradación de FR-012 se mantiene.
+
+**De paso:** el prompt pide ahora responder en texto plano. La interfaz muestra
+la respuesta tal cual, así que el markdown del modelo se leía literal —
+`**Vivienda:**`— y en un panel pequeño pasaba desapercibido, pero a pantalla
+completa era lo primero que se veía. Se corrige donde nace, y no añadiendo un
+renderizador de markdown que el producto no necesita (Art. VIII).
+
+---
+
+## D-065 · Un lenguaje de movimiento, con reglas (2026-08-23)
+
+**Decisión.** La interfaz se mueve. Hay entrada de pantalla en cada navegación,
+listas que aparecen escalonadas, barras que crecen desde su origen, cifras que
+suben hasta su valor y una pastilla que recorre la barra lateral hasta la sección
+activa. Los tokens y las clases viven en `app/globals.css`.
+
+**Cuatro reglas que se siguen en todo el sistema:**
+
+1. **Solo `opacity` y `transform`.** Animar alto, ancho o posición obliga al
+   navegador a rehacer el diseño en cada fotograma, y eso se ve.
+2. **Nada se anima en bucle si se puede pulsar.** Una animación infinita sobre un
+   control impide que el navegador —y las pruebas— lo consideren quieto.
+3. **Nada empieza invisible y se queda invisible.** Toda entrada termina en su
+   estado final aunque la animación no llegue a correr.
+4. **Sin grados con `prefers-reduced-motion`.** Quien pide menos movimiento no
+   quiere menos, quiere ninguno. Solo se conservan las transiciones de color, que
+   no desplazan nada y son las que hacen legible el estado de un control.
+
+**Una sola curva** manda: una salida exponencial que arranca rápido y frena
+largo. El rebote es simpático la primera vez y cansa a la décima, así que el
+resorte se reserva para lo que la persona acaba de provocar con el dedo.
+
+**Sobre la cifra que sube** (`components/cifra-animada.tsx`): no roza el
+Artículo I. Interpola un entero de centavos entre dos enteros de centavos,
+redondea en cada fotograma y formatea con la misma función que el resto de la
+aplicación. El valor al terminar es exactamente el que llegó por props, nunca uno
+reconstruido.
+
+**Y una consecuencia que costó encontrar.** Los esqueletos de carga solo están en
+el resumen y en el historial, que por eso viven en el grupo de rutas `(datos)`.
+Puestos en todas las pantallas rompían Registro Fácil: el campo del monto recibe
+el foco al montarse, y lo que se tecleara antes de que el contenido sustituyera
+al esqueleto se perdía, porque el campo es controlado y la hidratación lo
+devolvía a su estado. En las pantallas que resuelven de inmediato un esqueleto
+además hace daño: las hace sentir más lentas de lo que son.
+
+**Tensión asumida.** El encargo pedía algo «muy vistoso y futurista», y la
+dirección visual vigente (D-062) pide calma. Se resuelve por precisión y no por
+espectáculo: el gesto llamativo —el barrido de luz— aparece en un solo sitio a la
+vez y nunca dos veces en pantalla. Un gestor de finanzas que destella por todas
+partes deja de transmitir confianza, que es lo primero que se le pidió.
 
 ---
 

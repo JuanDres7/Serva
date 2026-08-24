@@ -9,7 +9,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 
 async function entrarComoNuevoUsuario(page: Page, nombre = 'Juan') {
-  const email = `cat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@finzen.local`
+  const email = `cat-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@serva.local`
 
   await page.goto('/entrar')
   await page.getByLabel('¿Cómo te llamas?').fill(nombre)

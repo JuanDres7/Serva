@@ -13,7 +13,7 @@ Ahorrar sin un destino concreto es difícil de sostener. Con uno —una moto, un
 viaje— cada aporte significa algo, y cuando dudas si gastarte algo esta noche,
 ver la foto de lo que quieres pesa más que ver un número.
 
-**Finzen no sabe cuánto tienes ahorrado**: registra ingresos y gastos, no saldos
+**Serva no sabe cuánto tienes ahorrado**: registra ingresos y gastos, no saldos
 de cuentas. El progreso avanza con aportes que el usuario registra, porque el
 ahorro es una decisión, no un residuo del mes.
 

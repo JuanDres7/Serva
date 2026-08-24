@@ -5,7 +5,7 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Sistema visual de Finzen.
+ * Sistema visual de Serva.
  *
  * Dirección: tranquilo, cálido, cercano. Una aplicación de dinero que no
  * intimide a quien no sabe de finanzas.
@@ -104,6 +104,25 @@
 
   --radius: 0.875rem;
 
+  /*
+   * Movimiento.
+   *
+   * Una sola curva manda: una salida exponencial que arranca rápido y frena
+   * largo. Es lo que hace que algo se sienta resuelto y no elástico —el rebote
+   * es simpático la primera vez y cansa a la décima—. El resorte se reserva
+   * para lo que el usuario acaba de provocar con el dedo.
+   */
+  --ease-salida: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-suave: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-resorte: cubic-bezier(0.34, 1.4, 0.64, 1);
+
+  --mov-rapido: 160ms;
+  --mov-medio: 340ms;
+  --mov-lento: 620ms;
+
+  /* Retardo entre hermanos de una lista que aparece escalonada. */
+  --mov-paso: 55ms;
+
   --sidebar: oklch(0.945 0.014 106);
   --sidebar-foreground: oklch(0.34 0.016 140);
   --sidebar-primary: oklch(0.48 0.048 152);
@@ -193,5 +212,192 @@
   /* Superficie elevada: el crema del fondo hace el contraste, no la sombra. */
   .superficie {
     @apply rounded-2xl border border-border/70 bg-card;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Movimiento
+ *
+ * Reglas que se siguen en todo el sistema:
+ *
+ * 1. Solo se animan `opacity` y `transform`. Animar alto, ancho o posición
+ *    obliga al navegador a rehacer el diseño en cada fotograma y se nota.
+ * 2. Nada se anima en bucle si se puede pulsar. Una animación infinita sobre un
+ *    control impide que el navegador —y las pruebas— lo consideren quieto.
+ * 3. Nada empieza invisible y se queda invisible: todas las entradas terminan
+ *    en el estado final aunque la animación no llegue a correr.
+ * 4. Con `prefers-reduced-motion` no hay grados: se apaga todo (al final).
+ * ------------------------------------------------------------------------- */
+
+@keyframes entrar-abajo {
+  from { opacity: 0; transform: translate3d(0, 14px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes entrar-escala {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes entrar-lado {
+  from { opacity: 0; transform: translate3d(-10px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Barras del desglose: crecen desde su origen en lugar de aparecer hechas. */
+@keyframes crecer-barra {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* Barrido de luz. Es el gesto «futurista» del sistema y por eso aparece en un
+   solo sitio a la vez: nunca dos barridos simultáneos en pantalla. */
+@keyframes barrido {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(200%); }
+}
+
+@keyframes latido-anillo {
+  0%   { opacity: 0.55; transform: scale(1); }
+  70%  { opacity: 0;    transform: scale(1.9); }
+  100% { opacity: 0;    transform: scale(1.9); }
+}
+
+@layer components {
+  /* Entrada de una pantalla completa. La usa el contenedor de páginas. */
+  .entra-pagina {
+    animation: entrar-abajo var(--mov-medio) var(--ease-salida) both;
+  }
+
+  .entra { animation: entrar-abajo var(--mov-medio) var(--ease-salida) both; }
+  .entra-escala { animation: entrar-escala var(--mov-medio) var(--ease-salida) both; }
+  .entra-lado { animation: entrar-lado var(--mov-medio) var(--ease-salida) both; }
+
+  /*
+   * Escalonado.
+   *
+   * Los hijos directos entran uno detrás de otro. El retardo se corta en el
+   * décimo: más allá, la última fila de una lista larga tardaría segundos en
+   * aparecer y el escalonado dejaría de leerse como intención para leerse como
+   * lentitud.
+   */
+  .escalonado > * {
+    animation: entrar-abajo var(--mov-medio) var(--ease-salida) both;
+  }
+  .escalonado > *:nth-child(1)  { animation-delay: calc(var(--mov-paso) * 0); }
+  .escalonado > *:nth-child(2)  { animation-delay: calc(var(--mov-paso) * 1); }
+  .escalonado > *:nth-child(3)  { animation-delay: calc(var(--mov-paso) * 2); }
+  .escalonado > *:nth-child(4)  { animation-delay: calc(var(--mov-paso) * 3); }
+  .escalonado > *:nth-child(5)  { animation-delay: calc(var(--mov-paso) * 4); }
+  .escalonado > *:nth-child(6)  { animation-delay: calc(var(--mov-paso) * 5); }
+  .escalonado > *:nth-child(7)  { animation-delay: calc(var(--mov-paso) * 6); }
+  .escalonado > *:nth-child(8)  { animation-delay: calc(var(--mov-paso) * 7); }
+  .escalonado > *:nth-child(9)  { animation-delay: calc(var(--mov-paso) * 8); }
+  .escalonado > *:nth-child(n+10) { animation-delay: calc(var(--mov-paso) * 9); }
+
+  /* Barra de progreso o de desglose. */
+  .barra-crece {
+    transform-origin: left center;
+    animation: crecer-barra var(--mov-lento) var(--ease-salida) both;
+  }
+
+  /*
+   * Superficie que responde al puntero.
+   *
+   * Se eleva apenas: dos píxeles bastan para que se lea como tocable, y más
+   * convierte una lista en un campo de globos.
+   */
+  .superficie-viva {
+    transition:
+      transform var(--mov-rapido) var(--ease-suave),
+      box-shadow var(--mov-rapido) var(--ease-suave),
+      border-color var(--mov-rapido) var(--ease-suave);
+  }
+  .superficie-viva:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px oklch(0.26 0.014 140 / 8%);
+  }
+  .superficie-viva:active { transform: translateY(0); }
+
+  /*
+   * Barrido sobre una superficie. El elemento padre necesita `relative` y
+   * `overflow-hidden`; este pinta una banda de luz que lo cruza una vez.
+   */
+  .barrido::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+      100deg,
+      transparent 30%,
+      oklch(1 0 0 / 55%) 50%,
+      transparent 70%
+    );
+    animation: barrido var(--mov-lento) var(--ease-suave) both;
+  }
+
+  /* Anillo que se expande una vez desde un punto. Confirma sin interrumpir. */
+  .anillo::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    border: 1px solid var(--primary);
+    pointer-events: none;
+    animation: latido-anillo var(--mov-lento) var(--ease-salida) both;
+  }
+}
+
+/*
+ * Sin grados: quien pide menos movimiento no quiere «menos», quiere ninguno.
+ * Se conservan las transiciones de color, que no desplazan nada y son las que
+ * hacen legible el estado de un control.
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Esperas
+ * ------------------------------------------------------------------------- */
+
+@keyframes reflejo {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
+@layer components {
+  /*
+   * Hueco de carga.
+   *
+   * Tiene la forma de lo que va a llegar, no la de una barra genérica: así el
+   * contenido no empuja nada al aparecer y la espera se lee como la pantalla
+   * armándose, no como otra pantalla distinta.
+   */
+  .hueco {
+    position: relative;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--muted);
+  }
+  .hueco::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      oklch(1 0 0 / 45%),
+      transparent
+    );
+    animation: reflejo 1.4s var(--ease-suave) infinite;
   }
 }

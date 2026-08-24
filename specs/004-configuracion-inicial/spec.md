@@ -36,7 +36,7 @@ por su nombre cambia por completo cómo se siente usarla.
 
 ### E1 — Primer arranque
 
-**Dado** que abro Finzen por primera vez,
+**Dado** que abro Serva por primera vez,
 **cuando** se me pide la información inicial,
 **entonces** solo se me piden el nombre y el país, y al terminar entro directamente
 a la aplicación lista para usar.

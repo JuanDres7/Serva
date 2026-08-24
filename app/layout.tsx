@@ -7,7 +7,7 @@ import './globals.css'
  * Una sola familia de texto, con carácter propio.
  *
  * Plus Jakarta Sans es humanista y algo redondeada: cercana sin ser infantil,
- * que es exactamente el registro que busca Finzen. El carácter del diseño no
+ * que es exactamente el registro que busca Serva. El carácter del diseño no
  * viene de mezclar tipografías sino del tratamiento —mayúsculas espaciadas para
  * las etiquetas, contraste fuerte de tamaños—, que es más disciplinado y
  * envejece mejor.
@@ -26,7 +26,7 @@ const mono = JetBrains_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Finzen',
+  title: 'Serva',
   description:
     'Registra tus gastos en segundos y entiende a dónde se va tu dinero, sin saber de finanzas.',
 }

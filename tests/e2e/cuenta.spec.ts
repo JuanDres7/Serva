@@ -10,7 +10,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 
 async function crearCuenta(page: Page, nombre = 'Juan') {
-  const email = `cuenta-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@finzen.local`
+  const email = `cuenta-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@serva.local`
 
   await page.goto('/entrar')
   await page.getByLabel('¿Cómo te llamas?').fill(nombre)
@@ -69,7 +69,7 @@ test('FR-005 — la pantalla de restablecimiento no revela si el correo existe',
   page,
 }) => {
   await page.goto('/restablecer')
-  await page.getByLabel('Correo').fill('nadie-tiene-este-correo@finzen.local')
+  await page.getByLabel('Correo').fill('nadie-tiene-este-correo@serva.local')
   await page.getByRole('button', { name: 'Enviar enlace' }).click()
 
   // La misma respuesta para un correo inexistente que para uno real: cualquier
