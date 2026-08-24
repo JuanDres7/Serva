@@ -2,6 +2,7 @@
 
 import { findCategory } from '@/lib/domain/categories'
 import { GraficoRitmo } from '@/components/graficos'
+import { TarjetaDeAccion } from '@/components/chat-accion'
 import type { PuntoAcumulado } from '@/lib/domain/series'
 
 /**
@@ -34,7 +35,8 @@ export function VisualDeHerramienta({
   readonly locale: string
 }) {
   // Un conjunto vacío no se dibuja: una barra de longitud cero se lee como un
-  // fallo de la interfaz, y el texto ya explica que no hay datos.
+  // fallo de la interfaz, y el texto ya explica que no hay datos. Las de
+  // escritura no tienen ese campo, así que no les afecta.
   if (salida.sinDatos === true || salida.sinReferencia === true) return null
 
   switch (nombre) {
@@ -46,6 +48,13 @@ export function VisualDeHerramienta({
       return <Desglose categorias={comoMayores(salida.gastos)} />
     case 'ritmoDelPeriodo':
       return <Ritmo salida={salida} currency={currency} locale={locale} />
+
+    // Las tres de escritura comparten tarjeta: la pregunta que le hacen a la
+    // persona es la misma, «¿esto está bien?», y solo cambian los verbos.
+    case 'proponerMovimientos':
+    case 'proponerCorreccion':
+    case 'proponerAnulacion':
+      return <TarjetaDeAccion salida={salida} />
     default:
       return null
   }

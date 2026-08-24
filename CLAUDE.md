@@ -43,7 +43,7 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 | 007 — Movimientos recurrentes | ✅ | — | **construida** |
 | 008 — Gráficos y visualización | ✅ | — | **construida** |
 | 009 — Exportación de datos | ✅ | — | **construida** |
-| 010 — Registrar y programar hablando | ✅ | ✅ | tareas listas |
+| 010 — Registrar y programar hablando | ✅ | ✅ | **construida** |
 | 011 — Deudas y préstamos | — | — | prevista, depende de 010 |
 
 La numeración identifica la feature; no es el orden de construcción.
@@ -63,9 +63,16 @@ en esta máquina no es viable (D-056).
 terracota, con `.eyebrow` para etiquetas y `.cifra` para montos. Los tokens
 viven en `app/globals.css`; no metas colores sueltos de la paleta de Tailwind.
 
-**Siguiente paso:** la feature 010 (T-401 a T-443), empezando por la fase 1 —la
-puerta— que va sola y primero. La revisión de la 003 que la habilitaba ya está
-construida.
+**Serva AI escribe** desde la feature 010: registra, corrige, anula y programa
+cobros a partir de lo que se le cuenta. **El modelo no escribe: propone, y una
+función pura decide** (`lib/domain/puerta.ts`). Antes de tocar esa puerta o las
+herramientas `proponer*`, lee la spec 010 entera.
+
+La extracción se evalúa aparte con `npm run evaluar`, contra el proveedor real:
+10 de 10 en la última medida (D-069). Nunca dentro de `verify`.
+
+**Siguiente paso:** la feature 011, deudas y préstamos como entidad. Y desplegar
+en Vercel y Neon.
 
 **Ojo con la 010:** levanta la garantía de solo lectura del asistente (D-066).
 Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.
@@ -76,7 +83,7 @@ Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.
 |---|---|
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
 | `docs/vision.md` | Qué es Serva, para quién y qué no es. |
-| `docs/decisiones.md` | Las 68 decisiones tomadas, con su razón. |
+| `docs/decisiones.md` | Las 69 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |

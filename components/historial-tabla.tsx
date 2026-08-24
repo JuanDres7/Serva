@@ -41,6 +41,8 @@ export type MovimientoVista = {
   readonly description: string | null
   readonly descriptionShort: string | null
   readonly status: 'active' | 'voided'
+  /** Quién lo escribió (spec 010, FR-013). */
+  readonly createdBy?: 'user' | 'assistant'
 }
 
 type Props = {
@@ -321,9 +323,24 @@ function FilaLectura({
       <TableCell className={anulado ? 'line-through' : undefined}>
         {/* Se muestra la versión corta cuando existe: un historial lleno de
             frases largas se vuelve ilegible de un vistazo (D-012). */}
-        {movimiento.descriptionShort || movimiento.description || (
-          <span className="text-muted-foreground">Sin descripción</span>
-        )}
+        <span className="flex items-center gap-2">
+          <span className="truncate">
+            {movimiento.descriptionShort || movimiento.description || (
+              <span className="text-muted-foreground">Sin descripción</span>
+            )}
+          </span>
+          {/* FR-013: lo escribió Serva. Un punto y una etiqueta pequeña, no un
+              color de fila: teñir el historial lo convertiría en un semáforo, y
+              el origen es un dato de procedencia, no una alarma. */}
+          {movimiento.createdBy === 'assistant' && (
+            <span
+              className="eyebrow shrink-0 rounded-full bg-accent px-2 py-0.5 text-accent-foreground"
+              title="Lo registró Serva AI a partir de algo que dijiste"
+            >
+              Serva
+            </span>
+          )}
+        </span>
       </TableCell>
 
       <TableCell>
