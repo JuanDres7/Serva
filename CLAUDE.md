@@ -87,7 +87,7 @@ Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
 | `docs/vision.md` | Qué es Serva, para quién y qué no es. |
 | `docs/arquitectura.md` | Capas, rutas, stack y por qué cada pieza. El mapa. |
-| `docs/decisiones.md` | Las 71 decisiones tomadas, con su razón. |
+| `docs/decisiones.md` | Las 72 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |

@@ -1190,12 +1190,11 @@ que nadie alcanzara datos ajenos —lo que decide si el asistente es fiable—, 
 no podían detectar que la búsqueda no entendiera un plural. Eso solo lo encuentra
 alguien preguntando de verdad.
 
-## D-058 · ~~Licencia MIT~~ REVERTIDA (2026-08-23)
+## D-058 · Licencia MIT (2026-08-23)
 
-> Revertida por **D-071**: el proyecto pasa a ser de pago, y MIT permitía a
-> cualquiera desplegarlo y venderlo. Se conserva por trazabilidad, porque el
-> razonamiento de por qué se eligió una licencia permisiva sigue siendo válido
-> para lo que se eligió entonces: un proyecto de portafolio sin ánimo comercial.
+> Estuvo revertida por D-071 durante unas horas, y **D-072 la restableció**. El
+> ir y venir se conserva porque el razonamiento de ambos lados sigue siendo
+> útil el día que la pregunta vuelva.
 
 El repositorio se publica bajo licencia MIT. Cualquiera puede usar, modificar y
 distribuir el código, incluso con fines comerciales, conservando el aviso de
@@ -1611,7 +1610,11 @@ puede quedar fijo fuera del sistema de tokens** (RN-007 de la spec 004).
 
 ---
 
-## D-071 · Todos los derechos reservados, no MIT (2026-08-23)
+## D-071 · ~~Todos los derechos reservados, no MIT~~ REVERTIDA (2026-08-23)
+
+> Revertida el mismo día por **D-072**. Se conserva entera porque su análisis
+> —qué permite MIT exactamente, y por qué no se puede revocar hacia atrás— es lo
+> que hay que releer si la pregunta de la licencia vuelve a abrirse.
 
 **Decisión.** El código se publica con todos los derechos reservados. Se puede
 leer, estudiar, bifurcar dentro de GitHub y ejecutar en local para evaluarlo;
@@ -1648,6 +1651,33 @@ cambio de la visibilidad. No autoriza a desplegarlo ni a usarlo fuera.
 directas es copyleft —todas MIT, Apache-2.0, ISC, BSD o Unlicense—, así que nada
 obliga a liberar este código. Con una sola dependencia GPL o AGPL, esta decisión
 no habría sido posible.
+
+---
+
+## D-072 · Se vuelve a MIT (2026-08-24)
+
+**Decisión.** El proyecto vuelve a publicarse bajo licencia MIT. Revierte
+**D-071** y restablece **D-058**.
+
+**Lo que esto significa, dicho una vez y con claridad:** cualquiera puede tomar
+este código, desplegarlo, cobrar por él y competir, sin pedir permiso ni pagar
+nada. Lo único que debe conservar es el aviso de copyright. Esa consecuencia se
+analizó en D-071 antes de decidir, y se asume a sabiendas.
+
+**Lo que MIT no impide:** cobrar por Serva. Eso nunca dependió de la licencia.
+Se puede desplegar el servicio y venderlo con MIT igual que sin ella; lo que
+cambia es si otros pueden hacer lo mismo.
+
+**Por qué se vuelve.** Es la decisión del dueño del proyecto. Las razones de
+D-058 —que una licencia permisiva no estorba en un proyecto que quiere leerse y
+compartirse— siguen en pie, y son las que vuelven a aplicarse.
+
+**Nota de trazabilidad.** D-071 se escribió y se revirtió el mismo día, sin que
+llegara a publicarse nada bajo esa licencia: el repositorio se borró antes. Así
+que no queda ninguna versión de Serva circulando con la licencia cerrada, ni
+ninguna con MIT que después se hubiera cerrado. El historial de git sí conserva
+ambos textos, que es lo correcto: registra lo que se pensó, no solo lo que
+quedó.
 
 ---
 
