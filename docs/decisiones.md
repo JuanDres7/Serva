@@ -1432,6 +1432,101 @@ partes deja de transmitir confianza, que es lo primero que se le pidió.
 
 ---
 
+## D-066 · Serva AI podrá escribir, con activación en el chat (2026-08-23)
+
+**Decisión.** Serva AI deja de ser de solo lectura. Se le dan herramientas de
+escritura acotadas —registrar, corregir y anular movimientos, y programar
+cobros— bajo tres condiciones que fija la spec 010.
+
+**1. La activación vive en el chat, no en Ajustes.** El Artículo II.1 ya preveía
+este caso: permite que la IA modifique datos «salvo que el usuario haya activado
+esa automatización de forma consciente y revocable». No hace falta enmendar la
+constitución; hace falta diseñar bien ese consentimiento. La primera vez que
+Serva va a escribir algo, muestra lo que entendió y ofrece registrarlo esta vez o
+siempre. Se revoca hablándole. Mandar a la persona a una pantalla de
+configuración para activar algo que solo ocurre en el chat es hacerle recorrer la
+aplicación para no tener que recorrerla.
+
+**2. Crear se automatiza; modificar y anular, nunca.** Con el automático puesto,
+los movimientos nuevos entran solos. Corregir o anular algo que ya existe pide
+confirmación siempre. La asimetría no es timidez: crear de más se deshace en un
+toque y se ve en el historial, mientras que anular el movimiento equivocado se
+descubre semanas después, cuando ya no se recuerda qué había. El coste del error
+no es simétrico, así que la salvaguarda tampoco.
+
+**3. Todo lo que escriba queda marcado.** Origen, confianza y la frase de la que
+salió, por exigencia del Artículo II.2. Hoy `categorySource` solo dice cómo se
+eligió la categoría; hace falta además marcar el movimiento entero. Esa marca es
+lo que permite, el día que la extracción resulte peor de lo esperado, encontrar y
+revisar exactamente lo que escribió la IA en lugar de desconfiar de todo el
+historial.
+
+**Lo que esto revierte.** La spec 003 declaraba en FR-010 que el chat es de solo
+lectura, y el prompt lo repetía. Era una garantía por construcción —no existían
+herramientas de escritura— y deja de serlo. Pasa a ser una garantía por
+enumeración: Serva solo puede tocar lo que la spec 010 lista. Es una garantía más
+débil, y por eso la spec 010 exige que ninguna prueba de la suite necesite un
+modelo para comprobar las salvaguardas.
+
+**Por qué se acepta el riesgo.** Es el diferenciador del producto. Registrar
+gastos rápido lo hace cualquier aplicación; entender «salí de fiesta y me tomé
+tres cervezas de dieciocho mil» y dejar la contabilidad hecha, no.
+
+---
+
+## D-067 · La conversación se guarda siete días, en el servidor (2026-08-23)
+
+**Decisión.** La conversación con Serva AI se conserva en la base de datos,
+ligada a la cuenta, y se borra a los siete días de su último mensaje. Cambiar de
+pestaña, de pantalla o de dispositivo deja de perderla.
+
+**Por qué en el servidor y no en el navegador.** Guardarla en el navegador no
+añade ningún dato que custodiar, que es la opción más limpia desde el Artículo
+VI. Pierde porque el problema real no es solo cambiar de pestaña: es que la
+conversación se evapore al limpiar el navegador o al abrir la aplicación desde el
+teléfono. Un asistente cuya memoria depende del dispositivo no es un asistente,
+es una caja de texto.
+
+**Por qué siete días y no para siempre.** Lo que se dice en ese chat es lo más
+sensible de la aplicación: no «Mercado, 80.000», sino la frase entera con el
+motivo. Guardar menos es la forma más barata de proteger un dato —lo que no está
+no se filtra— y siete días cubren el caso real: vuelves el lunes y sigue ahí lo
+del viernes. Un historial perpetuo acumularía años de frases que nadie va a
+releer, sin cifrado en la capa de aplicación (D-059).
+
+**Consecuencia que no se puede olvidar:** guardar el hilo entero no significa
+mandarlo entero al modelo en cada turno. El Artículo VI.2 sigue exigiendo enviar
+lo mínimo, y ahora hay más que podría enviarse por descuido (FR-021 de la spec
+003).
+
+## D-068 · Sin MCP: el chat pinta con sus propios componentes (2026-08-23)
+
+**Decisión.** Las visualizaciones dentro del chat —el FR-006 de la spec 003, que
+está aprobado y sin construir— se resuelven renderizando el resultado de cada
+herramienta con los componentes de Recharts que ya existen en el resumen. No se
+adopta MCP ni MCP UI.
+
+**Por qué no MCP UI**, que se barajó al arrancar el proyecto. Resuelve el
+problema de que un servidor MCP *externo* mande interfaz a una aplicación
+anfitriona *distinta*. En Serva el modelo, las herramientas y la interfaz son la
+misma aplicación de Next.js: el SDK ya envía al cliente el resultado de cada
+herramienta como parte del mensaje, y lo único que falta es que la interfaz deje
+de descartar esas partes. Adoptar MCP sería introducir un protocolo y una
+frontera de servidor que no existen para hacer algo que ya se puede hacer
+(Art. VIII).
+
+**Cuándo sí tendría sentido:** el día que Serva exponga sus herramientas a un
+asistente externo, para poder preguntar por las propias finanzas desde fuera de
+la aplicación. Eso está fuera de alcance por D-019. Si algún día entra, MCP es la
+respuesta correcta y esta decisión se revisa.
+
+**El trabajo real que esconde:** las seis herramientas devuelven los montos ya
+formateados como texto, porque nacieron para que el modelo los leyera. Un gráfico
+necesita números. Hay que devolver ambas cosas —centavos para dibujar, texto
+formateado para que el modelo cite sin redondear mal— y eso toca las seis.
+
+---
+
 # Decisiones pendientes
 
 _Ninguna. Todas las preguntas abiertas quedaron resueltas._
