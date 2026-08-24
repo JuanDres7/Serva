@@ -303,21 +303,46 @@ describe('aislamiento del asistente', () => {
 })
 
 describe('límites del asistente', () => {
-  it('no existe ninguna herramienta que modifique datos', () => {
-    // El límite no se confía a las instrucciones: si no hay herramienta de
-    // escritura, el asistente no puede escribir aunque se lo pidan (Art. II).
-    const nombres = Object.keys(crearHerramientas(contextoDe(ANA)))
+  /*
+   * El conjunto permitido, enumerado.
+   *
+   * Antes esta comprobación buscaba verbos de escritura con una expresión
+   * regular. Daba garantía falsa: `proponerAnulacion` no casa con `anular`, así
+   * que las herramientas de escritura de la spec 010 habrían entrado sin que
+   * nada fallara. Una prueba que sigue en verde cuando la garantía que protege
+   * ya no existe es peor que no tenerla (T-318).
+   *
+   * Enumerar obliga a que añadir una herramienta sea un acto deliberado: la
+   * prueba falla, alguien lee esta lista, y decide si esa herramienta debe
+   * poder existir.
+   */
+  const PERMITIDAS = [
+    'totalesDelPeriodo',
+    'gastoPorCategoria',
+    'compararConPeriodoAnterior',
+    'mayoresGastos',
+    'buscarMovimientos',
+    'ritmoDelPeriodo',
+  ] as const
 
-    for (const nombre of nombres) {
-      expect(nombre).not.toMatch(
-        /registrar|crear|guardar|modificar|actualizar|borrar|eliminar|anular/i,
-      )
-    }
+  it('solo existen las herramientas aprobadas', () => {
+    const nombres = Object.keys(crearHerramientas(contextoDe(ANA))).sort()
+    expect(nombres).toEqual([...PERMITIDAS].sort())
   })
 
-  it('el conjunto de herramientas es corto y cerrado', () => {
+  it('el conjunto es corto y cerrado', () => {
     // Cada herramienta añadida es una decisión más que el modelo puede
     // equivocar (plan 003, §2).
-    expect(Object.keys(crearHerramientas(contextoDe(ANA)))).toHaveLength(6)
+    expect(Object.keys(crearHerramientas(contextoDe(ANA)))).toHaveLength(
+      PERMITIDAS.length,
+    )
+  })
+
+  it('ninguna de las aprobadas escribe: todas son de consulta', () => {
+    // Mientras la spec 010 no entre, sigue siendo cierto por construcción. La
+    // prueba lo deja escrito para que dejar de serlo requiera cambiarla.
+    for (const nombre of PERMITIDAS) {
+      expect(nombre).toMatch(/^(totales|gasto|comparar|mayores|buscar|ritmo)/)
+    }
   })
 })

@@ -182,10 +182,13 @@ viable, debe evaluarse contra un modelo de nube (D-008). La arquitectura de
 consultas cerradas y validación de parámetros existe precisamente para acotar el
 daño de esos fallos.
 
-## 9. Deuda: la visualización que se aprobó y no se construyó
+## 9. Deuda saldada: la visualización que se aprobó y tardó en construirse
 
-El FR-006 y el E3 forman parte de esta spec desde que se aprobó, y no están
-hechos. `components/chat.tsx` filtra las partes del mensaje y solo pinta las de
+**Construida el 2026-08-23** (T-311 a T-316). Se conserva el registro de por qué
+faltó, que es lo que importa para que no vuelva a pasar.
+
+El FR-006 y el E3 formaron parte de esta spec desde que se aprobó, y estuvieron
+sin hacer mientras la feature figuraba como construida. `components/chat.tsx` filtra las partes del mensaje y solo pinta las de
 tipo texto; el resto se descarta en silencio. El resultado es que «¿en qué se me
 fue la plata?» devuelve una lista escrita donde debería devolver el desglose con
 su gráfico.

@@ -402,3 +402,76 @@ export const budgets = pgTable(
 )
 
 export type BudgetRow = typeof budgets.$inferSelect
+
+/**
+ * Conversaciones con Serva AI (spec 003, FR-017 a FR-021 · D-067).
+ *
+ * Se guardan en el servidor y no en el navegador: el problema no era solo
+ * cambiar de pestaña, era que la conversación se evaporase al limpiar el
+ * navegador o al abrir la aplicación desde el teléfono.
+ *
+ * **Caducan a los siete días.** Lo que se dice aquí es lo más sensible de la
+ * aplicación: no «Mercado, 80.000», sino la frase entera con su motivo. Guardar
+ * menos es la forma más barata de proteger un dato, y sin cifrado en la capa de
+ * aplicación (D-059) esa es la única protección real que hay.
+ */
+export const conversations = pgTable(
+  'conversations',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+
+    /**
+     * Fecha del último mensaje, y por tanto desde la que cuentan los siete días.
+     * Se guarda aparte de `updatedAt` porque es un dato de negocio —decide qué
+     * se borra— y no una marca técnica.
+     */
+    lastMessageAt: timestamp('last_message_at', { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // Se busca siempre «la conversación viva de este usuario».
+    index('conversations_user_recent_idx').on(table.userId, table.lastMessageAt),
+  ],
+)
+
+export type ConversationRow = typeof conversations.$inferSelect
+
+/**
+ * Los turnos de una conversación.
+ *
+ * `parts` guarda la parte del mensaje tal como la produjo el SDK, íntegra: si
+ * se guardara solo el texto, al volver a la conversación se perderían los
+ * gráficos y quedaría un hilo distinto del que se tuvo (FR-019).
+ */
+export const chatMessages = pgTable(
+  'chat_messages',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    conversationId: uuid('conversation_id')
+      .notNull()
+      .references(() => conversations.id, { onDelete: 'cascade' }),
+
+    role: text('role').notNull(),
+    parts: jsonb('parts').notNull(),
+
+    /** Orden dentro de la conversación. Dos mensajes del mismo instante no
+     *  pueden quedar desordenados por la precisión del reloj. */
+    position: integer('position').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('chat_messages_conversation_idx').on(table.conversationId, table.position),
+    check('chat_messages_role', sql`${table.role} in ('user', 'assistant', 'system')`),
+  ],
+)
+
+export type ChatMessageRow = typeof chatMessages.$inferSelect

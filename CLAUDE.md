@@ -36,7 +36,7 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 | 000 — Cuentas y acceso | ✅ | — | **construida** |
 | 001 — Registro y consulta de movimientos | ✅ | ✅ | **construida** |
 | 002 — Categorización automática | ✅ | ✅ | **construida** |
-| 003 — Chat sobre tus finanzas | ✅ | ✅ | **construida, salvo FR-006** |
+| 003 — Chat sobre tus finanzas | ✅ | ✅ | **construida** |
 | 004 — Configuración inicial y personalización | ✅ | — | **construida** |
 | 005 — Presupuestos | ✅ | — | **construida** |
 | 006 — Metas de ahorro | ✅ | — | **construida** |
@@ -48,10 +48,12 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**Las diez features están construidas, con una salvedad:** el FR-006 de la spec
-003 —gráficos dentro del chat— se aprobó y nunca se construyó. `chat.tsx` pinta
-solo texto. Está anotado en la §9 de esa spec. `npm run verify` pasa con 432
+**Las diez features están construidas.** `npm run verify` pasa con 453
 comprobaciones, ninguna de las cuales requiere un modelo instalado.
+
+**El chat dibuja y recuerda** desde la revisión de la spec 003: las respuestas
+llevan gráfico cuando la pregunta es de distribución o comparación, y la
+conversación se guarda siete días (D-067, D-068).
 
 **El asistente está verificado en ejecución** con Gemini: elige bien la
 herramienta, las cifras coinciden y respeta sus límites (D-057). Con modelo local
@@ -61,10 +63,9 @@ en esta máquina no es viable (D-056).
 terracota, con `.eyebrow` para etiquetas y `.cifra` para montos. Los tokens
 viven en `app/globals.css`; no metas colores sueltos de la paleta de Tailwind.
 
-**Siguiente paso:** construir. Primero la revisión de la spec 003 (T-311 a
-T-326: persistencia del chat y los gráficos que faltaban), y solo después la
-feature 010 (T-401 a T-443). El orden no es opcional: está razonado en el §10 del
-plan de la 010.
+**Siguiente paso:** la feature 010 (T-401 a T-443), empezando por la fase 1 —la
+puerta— que va sola y primero. La revisión de la 003 que la habilitaba ya está
+construida.
 
 **Ojo con la 010:** levanta la garantía de solo lectura del asistente (D-066).
 Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.

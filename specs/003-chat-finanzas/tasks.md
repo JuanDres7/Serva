@@ -18,7 +18,7 @@
 | ✅ T-307 | ~~Panel flotante~~ → pantalla propia (D-064) | `components/chat.tsx`, `app/(app)/asistente/` |
 | ✅ T-308 | Sin proveedor de IA, el asistente no se ofrece | `tests/e2e/chat.spec.ts` |
 | ✅ T-309 | Sin sesión, el punto de entrada rechaza la petición | `tests/e2e/chat.spec.ts` |
-| ⚠️ T-310 | No existe ninguna herramienta que escriba datos | **Su prueba da garantía falsa.** Ver T-318 |
+| ✅ T-310 | No existe ninguna herramienta que escriba datos | Prueba reescrita en T-318: enumera el conjunto permitido |
 
 ---
 
@@ -48,21 +48,21 @@ mensaje.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-317 | Tabla de conversaciones y mensajes, con borrado en cascada al eliminar la cuenta | Borrar la cuenta no deja ni una fila huérfana (FR-020) |
-| ⬜ T-318 | **Reescribir la prueba de T-310**: enumerar el conjunto permitido en vez de buscar verbos | Debe fallar si aparece una herramienta que no esté en la lista aprobada. Hoy `proponerAnulacion` pasaría la comprobación de T-310 sin ser detectada |
-| ⬜ T-319 | Guardar cada turno —del usuario y del asistente— con sus partes íntegras | Recargar la página devuelve la conversación con sus gráficos, no solo con el texto |
-| ⬜ T-320 | Recuperar la conversación viva al entrar a `/asistente` | Cambiar de pestaña y volver conserva el hilo (E7) |
-| ⬜ T-321 | Empezar una conversación nueva sin borrar la anterior a mano | La anterior deja de mostrarse y el asistente arranca sin contexto (E8) |
-| ⬜ T-322 | Caducidad a los siete días del último mensaje | Una conversación con fecha anterior no se recupera ni se envía al modelo (E9, FR-018) |
-| ⬜ T-323 | Acotar lo que se envía al modelo aunque el hilo entero esté guardado | Una conversación de cincuenta turnos no manda cincuenta turnos (FR-021, Art. VI.2) |
-| ⬜ T-324 | Aislamiento: nadie recupera la conversación de otra cuenta | Con dos usuarios, pedir el hilo ajeno por identificador devuelve vacío, no contenido |
+| ✅ T-317 | Tabla de conversaciones y mensajes, con borrado en cascada al eliminar la cuenta | Borrar la cuenta no deja ni una fila huérfana (FR-020) |
+| ✅ T-318 | **Reescribir la prueba de T-310**: enumerar el conjunto permitido en vez de buscar verbos | Debe fallar si aparece una herramienta que no esté en la lista aprobada. Hoy `proponerAnulacion` pasaría la comprobación de T-310 sin ser detectada |
+| ✅ T-319 | Guardar cada turno —del usuario y del asistente— con sus partes íntegras | Recargar la página devuelve la conversación con sus gráficos, no solo con el texto |
+| ✅ T-320 | Recuperar la conversación viva al entrar a `/asistente` | Cambiar de pestaña y volver conserva el hilo (E7) |
+| ✅ T-321 | Empezar una conversación nueva sin borrar la anterior a mano | La anterior deja de mostrarse y el asistente arranca sin contexto (E8) |
+| ✅ T-322 | Caducidad a los siete días del último mensaje | Una conversación con fecha anterior no se recupera ni se envía al modelo (E9, FR-018) |
+| ✅ T-323 | Acotar lo que se envía al modelo aunque el hilo entero esté guardado | Una conversación de cincuenta turnos no manda cincuenta turnos (FR-021, Art. VI.2) |
+| ✅ T-324 | Aislamiento: nadie recupera la conversación de otra cuenta | Con dos usuarios, pedir el hilo ajeno por identificador devuelve vacío, no contenido |
 
 ### Fase 4 — Cierre
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-325 | `npm run verify` en verde, sin modelo instalado | Las 432 comprobaciones actuales más las nuevas |
-| ⬜ T-326 | Comprobación manual con Gemini de los gráficos en el chat | Las tres preguntas del banco producen su visualización; se registra como decisión, igual que D-057 |
+| ✅ T-325 | `npm run verify` en verde, sin modelo instalado | Las 432 comprobaciones actuales más las nuevas |
+| ✅ T-326 | Comprobación manual con Gemini de los gráficos en el chat | Las tres preguntas del banco producen su visualización; se registra como decisión, igual que D-057 |
 
 ---
 
