@@ -3,8 +3,11 @@
 - **Estado:** aprobada
 - **Creada:** 2026-08-22
 - **Depende de:** 001 y 002 (necesita historial categorizado)
-- **Decisiones aplicables:** D-002, D-008, D-011, D-019, D-025, D-034, D-064
+- **Decisiones aplicables:** D-002, D-008, D-011, D-019, D-025, D-034, D-064, D-067
 - **Revisada:** 2026-08-23 — D-064 sustituye el panel flotante por una pantalla propia
+- **Revisada:** 2026-08-23 — D-067 añade persistencia de la conversación (FR-017 a FR-021)
+- **Deuda conocida:** el FR-006 y el E3 se aprobaron y **no se construyeron**. El
+  chat pinta solo texto y descarta el resto de partes del mensaje. Ver §9.
 
 ---
 
@@ -82,7 +85,29 @@ cifra.
 **entonces** el sistema me indica que aún no hay historial suficiente, en vez de
 responder sobre una muestra que no significa nada.
 
-### E7 — El modelo no está disponible
+### E7 — Vuelvo a la conversación
+
+**Dado** que estaba hablando con Serva AI y me fui a otra pestaña, a otra pantalla
+de la aplicación o cerré el navegador,
+**cuando** vuelvo a Serva AI,
+**entonces** la conversación sigue donde la dejé, con todo lo que nos habíamos
+dicho.
+
+### E8 — Empezar de cero
+
+**Dado** que tengo una conversación en marcha,
+**cuando** pido empezar una nueva,
+**entonces** la anterior deja de mostrarse y el asistente arranca sin contexto
+previo.
+
+### E9 — La conversación caduca
+
+**Dado** que hablé con Serva AI hace más de siete días,
+**cuando** vuelvo,
+**entonces** esa conversación ya no está y arranco limpio. No se conserva
+indefinidamente lo que dije sobre mi dinero.
+
+### E10 — El modelo no está disponible
 
 **Dado** que el modelo no responde,
 **cuando** envío una pregunta,
@@ -109,6 +134,11 @@ resto de la aplicación sigue funcionando con normalidad.
 | FR-014 | El proveedor del modelo debe poder cambiarse por configuración (D-008). |
 | FR-015 | Cada consulta al modelo debe registrarse con su entrada, su salida, su latencia y su costo. |
 | FR-016 | Debe enviarse al modelo únicamente lo necesario para resolver la pregunta, nunca el historial completo por defecto (Art. VI.2). |
+| FR-017 | La conversación debe conservarse en el servidor, ligada a la cuenta del usuario, y recuperarse al volver a la pantalla desde cualquier dispositivo (D-067). |
+| FR-018 | Las conversaciones deben borrarse automáticamente a los siete días de su último mensaje. |
+| FR-019 | El usuario debe poder empezar una conversación nueva, y hacerlo no debe requerir borrar la anterior a mano. |
+| FR-020 | Al eliminar su cuenta, las conversaciones del usuario deben desaparecer con ella, igual que el resto de sus datos (spec 000). |
+| FR-021 | Lo que se envía al modelo en cada turno debe seguir acotado aunque la conversación se conserve: guardar el hilo entero no obliga a mandarlo entero (Art. VI.2). |
 
 ## 5. Reglas de negocio
 
@@ -151,3 +181,27 @@ datos incorrectos. Antes de concluir que alguna capacidad de esta feature no es
 viable, debe evaluarse contra un modelo de nube (D-008). La arquitectura de
 consultas cerradas y validación de parámetros existe precisamente para acotar el
 daño de esos fallos.
+
+## 9. Deuda: la visualización que se aprobó y no se construyó
+
+El FR-006 y el E3 forman parte de esta spec desde que se aprobó, y no están
+hechos. `components/chat.tsx` filtra las partes del mensaje y solo pinta las de
+tipo texto; el resto se descarta en silencio. El resultado es que «¿en qué se me
+fue la plata?» devuelve una lista escrita donde debería devolver el desglose con
+su gráfico.
+
+Se anota aquí, y no solo en `tasks.md`, porque la feature figuraba como
+construida. El método dice que el código nunca es la fuente de verdad del
+comportamiento; esto fue lo contrario, y la spec quedó desmentida por la
+implementación sin que nadie lo registrara.
+
+**Lo que cuesta repararlo.** Las seis herramientas devuelven hoy los montos ya
+formateados como texto —`"$ 487.599"`— porque nacieron para que el modelo los
+leyera y los repitiera. Un gráfico necesita números. Así que hay que devolver
+ambas cosas: la cifra en centavos para dibujar y la formateada para que el modelo
+la cite sin equivocarse al redondear.
+
+**Lo que no cuesta.** Nada de protocolos nuevos. El SDK ya envía al cliente el
+resultado de cada herramienta como parte del mensaje; falta que la interfaz deje
+de descartarlas y las pinte con los componentes de Recharts que ya existen en el
+resumen, con la paleta de D-062.
