@@ -1,4 +1,4 @@
-# Finzen
+# Serva
 
 Gestor de finanzas personales donde registrar un movimiento toma segundos y
 entender tus finanzas no exige saber de finanzas. En lugar de navegar reportes y
@@ -15,7 +15,7 @@ Necesitas **Node.js 20 o superior** y **Docker** (solo para la base de datos).
 
 ```bash
 git clone <url-del-repositorio>
-cd finzen
+cd serva
 npm install
 cp .env.example .env.local
 docker compose up -d
@@ -41,7 +41,7 @@ lenguaje natural sobre los propios datos. Exportación a hoja de cálculo.
 
 ## La IA es opcional
 
-Finzen funciona sin ningún modelo instalado. La categorización automática y el chat
+Serva funciona sin ningún modelo instalado. La categorización automática y el chat
 se desactivan; todo lo demás —registro, historial, totales, gráficos— funciona
 igual.
 
@@ -83,7 +83,7 @@ y pruebas de extremo a extremo en navegador. Si pasa, el proyecto está sano.
 
 ## Cómo está construido este proyecto
 
-Finzen se desarrolla con **Spec Driven Development** y **Loop Engineering**: lo que
+Serva se desarrolla con **Spec Driven Development** y **Loop Engineering**: lo que
 se construye se decide en documentos antes de escribirse, y cada cambio se verifica
 automáticamente en lugar de revisarse a mano.
 
@@ -91,7 +91,7 @@ Si vienes a ver el código, quizá te interese más esto:
 
 | Documento | Qué contiene |
 |---|---|
-| [Visión](docs/vision.md) | Qué es Finzen, para quién y qué **no** es |
+| [Visión](docs/vision.md) | Qué es Serva, para quién y qué **no** es |
 | [Constitución](.specify/memory/constitution.md) | Los principios innegociables del proyecto |
 | [Decisiones](docs/decisiones.md) | Cada decisión tomada, por qué, y las que se revirtieron |
 | [Método](docs/metodo.md) | Cómo se trabaja |

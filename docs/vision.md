@@ -1,12 +1,12 @@
-# Visión de Finzen
+# Visión de Serva
 
 ## La visión
 
-Finzen es un gestor de finanzas personales donde registrar un movimiento toma
+Serva es un gestor de finanzas personales donde registrar un movimiento toma
 segundos y entender tus finanzas no exige saber de finanzas.
 
 En lugar de obligar al usuario a navegar reportes, filtros y gráficos para
-encontrar lo que busca, Finzen invierte la relación: el usuario pregunta en su
+encontrar lo que busca, Serva invierte la relación: el usuario pregunta en su
 propio idioma —*"¿en qué se me fue la plata este mes?"*, *"¿estoy gastando más en
 domicilios que antes?"*— y la IA responde con datos reales de su propio historial.
 La aplicación además categoriza sola lo que se registra y señala lo que merece
@@ -43,21 +43,21 @@ Se suman dos fricciones que se refuerzan entre sí:
 2. **Consultar exige saber.** Aun con datos completos, extraer una conclusión
    requiere un esfuerzo que el usuario no está dispuesto a hacer cada semana.
 
-Finzen ataca las dos: la IA reduce el costo de registrar (categorizando sola) y
+Serva ataca las dos: la IA reduce el costo de registrar (categorizando sola) y
 elimina el costo de consultar (respondiendo preguntas en lenguaje natural).
 
-## Qué hace a Finzen distinto
+## Qué hace a Serva distinto
 
 - **Se pregunta, no se navega.** La conversación es la interfaz principal de
   consulta, no una función secundaria escondida en un menú.
-- **Las respuestas salen de los datos del usuario, no del modelo.** Finzen no
+- **Las respuestas salen de los datos del usuario, no del modelo.** Serva no
   opina ni inventa cifras: consulta el historial real y responde sobre él.
 - **La IA propone, el usuario manda.** Toda sugerencia es visible, atribuida y
   reversible. El usuario nunca pierde el control de sus propios registros.
 - **Diseñado para el que no sabe de finanzas.** Sin jerga, sin configuración
   previa, sin necesidad de entender categorías contables para empezar.
 
-## Qué NO es Finzen
+## Qué NO es Serva
 
 - No es un asesor financiero. No recomienda inversiones ni dice qué hacer con el
   dinero: describe lo que pasó y estima lo que viene.
@@ -78,4 +78,4 @@ negocio necesitaría.
 1. Un usuario registra un gasto en menos de 10 segundos, sin fricción.
 2. Un usuario obtiene una respuesta útil preguntando, sin tocar un filtro.
 3. Un usuario sigue registrando movimientos después de la tercera semana.
-4. Un usuario descubre algo sobre sus gastos que no sabía antes de usar Finzen.
+4. Un usuario descubre algo sobre sus gastos que no sabía antes de usar Serva.

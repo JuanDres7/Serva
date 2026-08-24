@@ -1,6 +1,12 @@
 import { test, expect, type Page } from '@playwright/test'
 
 /**
+ * La zona que la aplicación asigna a una cuenta nueva (Colombia, por defecto).
+ * Las fechas civiles se calculan ahí, no en UTC.
+ */
+const ZONA_DEL_USUARIO = 'America/Bogota'
+
+/**
  * T-038 — Escenarios E1 a E9 de la spec 001.
  *
  * Cada prueba crea su propia cuenta: así no dependen entre sí ni del orden, y de
@@ -8,7 +14,7 @@ import { test, expect, type Page } from '@playwright/test'
  */
 
 async function entrarComoNuevoUsuario(page: Page, nombre = 'Juan') {
-  const email = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@finzen.local`
+  const email = `e2e-${Date.now()}-${Math.random().toString(36).slice(2, 8)}@serva.local`
 
   await page.goto('/entrar')
   await page.getByLabel('¿Cómo te llamas?').fill(nombre)
@@ -218,7 +224,14 @@ test('FR-008 — no se aceptan fechas futuras', async ({ page }) => {
   await entrarComoNuevoUsuario(page)
   await page.goto('/registro')
 
-  const hoy = new Date().toISOString().slice(0, 10)
+  // El «hoy» del oráculo tiene que calcularse en la misma zona que usa la
+  // aplicación, que es la del usuario y no la del reloj UTC. Con
+  // `toISOString()` esta comprobación pasaba diecinueve horas al día y fallaba
+  // las cinco restantes: entre las 19:00 de Bogotá y la medianoche, UTC ya está
+  // en el día siguiente y la aplicación —correctamente— no.
+  const hoy = new Intl.DateTimeFormat('en-CA', { timeZone: ZONA_DEL_USUARIO }).format(
+    new Date(),
+  )
   await expect(page.getByLabel('¿Cuándo?')).toHaveAttribute('max', hoy)
 })
 

@@ -11,7 +11,7 @@ import { test, expect } from '@playwright/test'
 const unique = () => `prueba-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
 
 test('crea una cuenta e inicia sesión', async ({ request }) => {
-  const email = `${unique()}@finzen.local`
+  const email = `${unique()}@serva.local`
 
   const registro = await request.post('/api/auth/sign-up/email', {
     data: { email, password: 'contrasena-larga-123', name: 'Juan Andrés' },
@@ -25,7 +25,7 @@ test('crea una cuenta e inicia sesión', async ({ request }) => {
 })
 
 test('la sesión persiste entre peticiones', async ({ request }) => {
-  const email = `${unique()}@finzen.local`
+  const email = `${unique()}@serva.local`
   await request.post('/api/auth/sign-up/email', {
     data: { email, password: 'contrasena-larga-123', name: 'Persistente' },
   })
@@ -39,7 +39,7 @@ test('la sesión persiste entre peticiones', async ({ request }) => {
 
 test('rechaza contraseñas demasiado cortas', async ({ request }) => {
   const respuesta = await request.post('/api/auth/sign-up/email', {
-    data: { email: `${unique()}@finzen.local`, password: 'corta', name: 'Corta' },
+    data: { email: `${unique()}@serva.local`, password: 'corta', name: 'Corta' },
   })
   expect(respuesta.ok()).toBe(false)
 })
@@ -47,7 +47,7 @@ test('rechaza contraseñas demasiado cortas', async ({ request }) => {
 test('no revela si un correo ya está registrado', async ({ request }) => {
   // FR-009 de la spec 000: el mensaje de error no debe permitir averiguar qué
   // correos tienen cuenta.
-  const email = `${unique()}@finzen.local`
+  const email = `${unique()}@serva.local`
   await request.post('/api/auth/sign-up/email', {
     data: { email, password: 'contrasena-larga-123', name: 'Existente' },
   })
@@ -56,7 +56,7 @@ test('no revela si un correo ya está registrado', async ({ request }) => {
     data: { email, password: 'contrasena-equivocada' },
   })
   const desconocido = await request.post('/api/auth/sign-in/email', {
-    data: { email: `${unique()}@finzen.local`, password: 'contrasena-equivocada' },
+    data: { email: `${unique()}@serva.local`, password: 'contrasena-equivocada' },
   })
 
   expect(conocido.status()).toBe(desconocido.status())

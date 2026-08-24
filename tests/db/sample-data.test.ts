@@ -120,7 +120,7 @@ describe('borrado de los datos de ejemplo', () => {
 
   it('no toca los movimientos que registró la persona', async () => {
     // El requisito que hace usable la función: quien prueba, le gusta y decide
-    // usar Finzen en serio no puede quedarse con gastos inventados mezclados.
+    // usar Serva en serio no puede quedarse con gastos inventados mezclados.
     await generarDatosDeEjemplo(USUARIO, { currency: 'COP', hoy: HOY })
 
     const propio = await createTransaction(USUARIO, {

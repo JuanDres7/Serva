@@ -17,7 +17,7 @@ Hay un segundo efecto, menos obvio y más valioso: con los recurrentes definidos
 el historial se llena casi solo. Eso da antes materia prima a la categorización y
 hace que los totales signifiquen algo desde el primer período.
 
-**Finzen no está conectada a ningún banco**, así que no puede saber si un cobro
+**Serva no está conectada a ningún banco**, así que no puede saber si un cobro
 ocurrió. Por eso pregunta en lugar de asumir.
 
 ## 2. Alcance
@@ -105,7 +105,7 @@ pudiendo ignorarlos y seguir usando la aplicación.
   fecha casi una semana al cabo de un año (D-032).
 - **RN-004** — Un recurrente eliminado desaparece de la lista, pero los
   movimientos que generó permanecen: son gastos que de verdad ocurrieron.
-- **RN-005** — Confirmar es siempre una acción del usuario. Finzen no registra
+- **RN-005** — Confirmar es siempre una acción del usuario. Serva no registra
   movimientos por su cuenta.
 
 ## 6. Criterios de aceptación

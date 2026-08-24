@@ -1,4 +1,4 @@
-# Finzen — contexto para agentes
+# Serva — contexto para agentes
 
 Gestor de finanzas personales con IA. Registro manual de movimientos, con
 categorización automática y consulta en lenguaje natural sobre los propios datos.
@@ -64,8 +64,8 @@ viven en `app/globals.css`; no metas colores sueltos de la paleta de Tailwind.
 | Archivo | Qué contiene |
 |---|---|
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
-| `docs/vision.md` | Qué es Finzen, para quién y qué no es. |
-| `docs/decisiones.md` | Las 62 decisiones tomadas, con su razón. |
+| `docs/vision.md` | Qué es Serva, para quién y qué no es. |
+| `docs/decisiones.md` | Las 65 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |

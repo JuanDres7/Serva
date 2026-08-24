@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -52,6 +52,10 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [guardando, setGuardando] = useState(false)
 
+  // Cada guardado incrementa este contador. Sirve de clave para que el barrido
+  // de confirmación vuelva a montarse y, con ello, a correr.
+  const [pulso, setPulso] = useState(0)
+
   // Contador de la sesión: da sensación de avance y evita registrar dos veces lo
   // mismo cuando se encadenan varios (FR-013).
   const [registrados, setRegistrados] = useState(0)
@@ -92,30 +96,62 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
   }
 
   /**
-   * Pide la sugerencia al salir del campo de descripción, no al enviar.
+   * Pide la sugerencia mientras la persona escribe, no solo al salir del campo.
    *
-   * Así la categoría ya está puesta cuando la persona llega al botón de
-   * guardar. Pedirla al confirmar añadiría una espera justo en el momento en
-   * que quiere terminar.
+   * Esperar únicamente al blur obligaba a clickear fuera —o a dar Enter, que
+   * registra— para que el sistema pensara. Con un retardo de 700 ms tras la
+   * última tecla la categoría llega sola y Enter vuelve a significar solo una
+   * cosa. El blur se conserva como atajo: si el foco ya se va, no hay motivo
+   * para esperar al retardo.
+   *
+   * Cuatro protecciones para que pensar en vivo no cueste de más ni pise nada:
+   * la clave deduplica texto+tipo ya pedidos, el contador descarta respuestas
+   * que llegan tarde (manda lo que hay en pantalla ahora), `elegidaPorUsuario`
+   * impide que cualquier sugerencia posterior pise la elección humana (Art.
+   * II.3), y limpiar reinicia la clave para que el siguiente movimiento vuelva
+   * a consultar aunque repita descripción —entre medias el sistema aprendió—.
+   * Con menos de tres letras no se llama: casi nada clasifica ahí. Que todo
+   * registro con descripción consulte al menos una vez importa: cada consulta
+   * abre el registro de aprendizaje que guardar cierra con la categoría final,
+   * y sin consulta no hay de qué aprender.
    */
-  async function pedirSugerencia() {
-    const texto = descripcion.trim()
-    if (texto === '') return
+  const peticionRef = useRef(0)
+  const pedidaRef = useRef('')
 
-    setPensando(true)
-    try {
-      const sugerencia = await sugerirCategoria(texto, tipo)
-      setLogId(sugerencia.logId)
-      setDescripcionCorta(sugerencia.descripcionCorta || null)
+  const pedirSugerencia = useCallback(
+    async (texto: string) => {
+      const limpia = texto.trim()
+      if (limpia.length < 3) return
 
-      if (sugerencia.categoria && !elegidaPorUsuario) {
-        setCategoria(sugerencia.categoria)
-        setCategoriaSugerida(sugerencia.categoria)
+      const clave = `${tipo}:${limpia}`
+      if (clave === pedidaRef.current) return
+      pedidaRef.current = clave
+
+      const id = ++peticionRef.current
+      setPensando(true)
+      try {
+        const sugerencia = await sugerirCategoria(limpia, tipo)
+        // Llegó tarde: ya se escribió algo distinto después de pedirlo.
+        if (id !== peticionRef.current) return
+
+        setLogId(sugerencia.logId)
+        setDescripcionCorta(sugerencia.descripcionCorta || null)
+
+        if (sugerencia.categoria && !elegidaPorUsuario) {
+          setCategoria(sugerencia.categoria)
+          setCategoriaSugerida(sugerencia.categoria)
+        }
+      } finally {
+        if (id === peticionRef.current) setPensando(false)
       }
-    } finally {
-      setPensando(false)
-    }
-  }
+    },
+    [tipo, elegidaPorUsuario],
+  )
+
+  useEffect(() => {
+    const t = setTimeout(() => void pedirSugerencia(descripcion), 700)
+    return () => clearTimeout(t)
+  }, [descripcion, tipo, pedirSugerencia])
 
   function limpiar() {
     setMontoTexto('')
@@ -126,6 +162,9 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
     setLogId(null)
     setDescripcionCorta(null)
     setError(null)
+    // La misma descripción en el siguiente movimiento sí merece consulta
+    // nueva: entre medias el sistema aprendió de la corrección del usuario.
+    pedidaRef.current = ''
     montoRef.current?.focus()
   }
 
@@ -180,6 +219,7 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
 
     setRegistrados((n) => n + 1)
     setTotalSesion((total) => add(total, money(monto.cents, currency)))
+    setPulso((n) => n + 1)
 
     // FR-012: confirmación visible y posibilidad de deshacer sin salir del flujo.
     toast.success(`${tipo === 'expense' ? 'Gasto' : 'Ingreso'} registrado`, {
@@ -204,20 +244,32 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
 
   return (
     <form onSubmit={guardar} className="space-y-6">
+      {/* El pulgar se desliza hasta el tipo activo en vez de apagar uno y
+          encender el otro: el recorrido dice hacia qué lado cambió el signo del
+          monto, que aquí es la información que importa. */}
       <div
-        className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1"
+        className="relative grid grid-cols-2 gap-1 rounded-full bg-muted p-1"
         role="group"
         aria-label="Tipo de movimiento"
       >
+        <span
+          aria-hidden
+          className="absolute inset-y-1 left-1 w-[calc(50%-0.375rem)] rounded-full bg-card shadow-sm"
+          style={{
+            transform:
+              tipo === 'expense' ? 'translateX(0)' : 'translateX(calc(100% + 0.25rem))',
+            transition: 'transform var(--mov-medio) var(--ease-salida)',
+          }}
+        />
         {TIPOS.map(([valor, etiqueta]) => (
           <button
             key={valor}
             type="button"
             aria-pressed={tipo === valor}
             onClick={() => cambiarTipo(valor)}
-            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+            className={`relative rounded-full px-4 py-2 text-sm font-medium transition-colors ${
               tipo === valor
-                ? 'bg-card text-foreground shadow-sm'
+                ? 'text-foreground'
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
@@ -232,7 +284,17 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
         propia con la cifra grande, sin la caja de un campo cualquiera. El
         símbolo va aparte porque no se escribe, se lee.
       */}
-      <div className="superficie px-5 py-6 transition-colors focus-within:border-ring/60 sm:px-7 sm:py-7">
+      <div className="superficie relative px-5 py-6 transition-colors focus-within:border-ring/60 sm:px-7 sm:py-7">
+        {/* Confirmación de que quedó registrado: una banda de luz cruza el
+            campo una vez. Dura lo que dura y no deja nada encendido, porque lo
+            siguiente que hace la persona es teclear el monto siguiente. */}
+        {pulso > 0 && (
+          <span
+            key={pulso}
+            aria-hidden
+            className="barrido pointer-events-none absolute inset-0 overflow-hidden rounded-2xl"
+          />
+        )}
         <Label htmlFor="monto" className="eyebrow text-muted-foreground">
           ¿De cuánto fue {tipo === 'expense' ? 'el gasto' : 'el ingreso'}?
         </Label>
@@ -263,7 +325,10 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
           placeholder="almuerzo, mercado de la semana…"
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
-          onBlur={pedirSugerencia}
+          // Salir del campo adelanta la consulta que el retardo haría igual:
+          // quien pasa de la descripción al monto con Tab o clic no espera
+          // 700 ms. El dedupe evita pedir dos veces lo mismo.
+          onBlur={() => void pedirSugerencia(descripcion)}
         />
       </div>
 
@@ -338,7 +403,7 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
       </div>
 
       {error && (
-        <p role="alert" className="text-sm text-destructive">
+        <p role="alert" className="entra text-sm text-destructive">
           {error}
         </p>
       )}
@@ -358,7 +423,10 @@ export function RegistroFacil({ currency, locale, hoy }: Props) {
       </div>
 
       {registrados > 0 && (
-        <p className="text-center text-sm text-muted-foreground" aria-live="polite">
+        <p
+          className="entra text-center text-sm text-muted-foreground"
+          aria-live="polite"
+        >
           Llevas {registrados} {registrados === 1 ? 'registro' : 'registros'} ·{' '}
           {formatMoney(totalSesion, locale)}
         </p>

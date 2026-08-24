@@ -23,7 +23,7 @@ import { formatMoney } from '@/lib/domain/money-format'
  *
  * Los colores vienen del sistema visual, no de la paleta por defecto de
  * Recharts: un rojo de semáforo junto a un verde de semáforo convierte el
- * resumen del mes en un veredicto, que es justo el tono que Finzen evita.
+ * resumen del mes en un veredicto, que es justo el tono que Serva evita.
  * Aquí el gasto es terracota apagada y el ingreso salvia, los mismos tonos que
  * llevan las categorías en el resto de la aplicación.
  */

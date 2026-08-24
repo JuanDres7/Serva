@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 export const metadata = {
-  title: 'Privacidad · Finzen',
+  title: 'Privacidad · Serva',
 }
 
 /**
@@ -12,7 +12,7 @@ export const metadata = {
 export default function PrivacidadPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <article className="space-y-8">
+      <article className="entra space-y-8">
         <header className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight">
             Qué hacemos con tus datos
@@ -23,7 +23,7 @@ export default function PrivacidadPage() {
         </header>
 
         <section className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-200">
-          <p className="font-medium">Finzen es una aplicación de demostración.</p>
+          <p className="font-medium">Serva es una aplicación de demostración.</p>
           <p className="mt-1">
             No la uses para llevar tus finanzas reales ni introduzcas información
             financiera verdadera. Es un proyecto para mostrar cómo está construido,
@@ -47,7 +47,7 @@ export default function PrivacidadPage() {
           </ul>
           <p className="text-sm text-muted-foreground">
             No se pide ni se guarda nada más: ni documento de identidad, ni
-            teléfono, ni datos bancarios. Finzen no se conecta a ningún banco.
+            teléfono, ni datos bancarios. Serva no se conecta a ningún banco.
           </p>
         </section>
 

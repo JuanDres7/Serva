@@ -11,7 +11,7 @@ export default async function BienvenidaPage() {
   if (settings.onboardedAt) redirect('/')
 
   return (
-    <div className="mx-auto min-h-screen max-w-md space-y-8 px-4 py-16">
+    <div className="escalonado mx-auto min-h-screen max-w-md space-y-8 px-4 py-16">
       <div className="space-y-2">
         <h1 className="text-2xl font-semibold tracking-tight">
           Antes de empezar

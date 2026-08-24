@@ -66,7 +66,7 @@ export default async function MetasPage() {
           un viaje— cada aporte significa algo.
         </Vacio>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
+        <div className="escalonado grid gap-4 sm:grid-cols-2">
           {activas.map((meta) => (
             <MetaTarjeta
               key={meta.id}
@@ -83,7 +83,7 @@ export default async function MetasPage() {
           <h2 className="text-sm font-medium text-muted-foreground">
             Metas logradas
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="escalonado grid gap-4 sm:grid-cols-2">
             {logradas.map((meta) => (
               <MetaTarjeta
                 key={meta.id}

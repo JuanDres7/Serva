@@ -39,7 +39,7 @@ export function PendientesRecurrentes({ pendientes, currency, locale, hoy }: Pro
   if (pendientes.length === 0) return null
 
   return (
-    <section className="space-y-3 rounded-lg border border-amber-300 bg-amber-50/60 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
+    <section className="entra space-y-3 rounded-lg border border-amber-300 bg-amber-50/60 p-4 dark:border-amber-900/50 dark:bg-amber-950/20">
       <header>
         <h2 className="text-sm font-medium">
           {pendientes.length === 1
@@ -47,11 +47,11 @@ export function PendientesRecurrentes({ pendientes, currency, locale, hoy }: Pro
             : `Tienes ${pendientes.length} cobros por confirmar`}
         </h2>
         <p className="text-xs text-muted-foreground">
-          Finzen no está conectada a tu banco, así que necesita que se lo digas.
+          Serva no está conectada a tu banco, así que necesita que se lo digas.
         </p>
       </header>
 
-      <ul className="space-y-2">
+      <ul className="escalonado space-y-2">
         {pendientes.map((pendiente) => (
           <FilaPendiente
             key={pendiente.id}
@@ -196,7 +196,7 @@ function FilaPendiente({
       {/* FR-010: al cambiar el monto se pregunta si vale solo esta vez o de ahí
           en adelante. Es lo único que el sistema no puede inferir. */}
       {montoCambio && (
-        <div className="mt-3 space-y-2 rounded-md bg-muted/60 p-3">
+        <div className="entra mt-3 space-y-2 rounded-md bg-muted/60 p-3">
           <p className="text-xs">Cambiaste el monto. ¿Este cambio es…?</p>
           <div className="flex flex-wrap gap-2">
             <Button size="xs" disabled={ocupado} onClick={() => confirmar(true)}>
@@ -220,7 +220,7 @@ function FilaPendiente({
       )}
 
       {reprogramando && !montoCambio && (
-        <div className="mt-3 flex flex-wrap items-end gap-2 rounded-md bg-muted/60 p-3">
+        <div className="entra mt-3 flex flex-wrap items-end gap-2 rounded-md bg-muted/60 p-3">
           <div className="space-y-1">
             <Label htmlFor={`fecha-${pendiente.id}`} className="text-xs">
               ¿Cuándo se hará efectivo?

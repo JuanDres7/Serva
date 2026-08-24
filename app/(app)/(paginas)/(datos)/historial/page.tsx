@@ -10,10 +10,10 @@ import {
 import { periodFor, nextPeriod, previousPeriod, type Period } from '@/lib/domain/cycle'
 import { todayIn } from '@/lib/domain/civil-date'
 import { computeTotals } from '@/lib/domain/balance'
-import { formatMoney } from '@/lib/domain/money-format'
 import { nombrarPeriodo } from '@/components/etiqueta-periodo'
 import { HistorialTabla } from '@/components/historial-tabla'
 import { FiltrosHistorial } from '@/components/filtros-historial'
+import { CifraAnimada } from '@/components/cifra-animada'
 import { buttonVariants } from '@/components/ui/button'
 
 const POR_PAGINA = 25
@@ -75,8 +75,6 @@ export default async function HistorialPage({ searchParams }: Params) {
   ])
 
   const totales = computeTotals(agregados)
-  const formatear = (cents: number) =>
-    formatMoney({ cents, currency: settings.currency }, settings.locale)
 
   const enlaceCon = (cambios: Record<string, string | undefined>) => {
     const url = new URLSearchParams()
@@ -152,7 +150,12 @@ export default async function HistorialPage({ searchParams }: Params) {
         ].map(([etiqueta, valor]) => (
           <div key={etiqueta as string} className="space-y-1.5 px-5 py-4">
             <p className="eyebrow text-muted-foreground">{etiqueta}</p>
-            <p className="cifra text-xl">{formatear(valor as number)}</p>
+            <CifraAnimada
+              cents={valor as number}
+              currency={settings.currency}
+              locale={settings.locale}
+              className="cifra text-xl"
+            />
           </div>
         ))}
       </div>

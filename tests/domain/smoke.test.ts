@@ -3,7 +3,7 @@ import { describe, it, expect } from 'vitest'
 /**
  * Prueba de humo del andamiaje (T-005).
  *
- * No verifica lógica de Finzen: verifica que el oráculo funciona. Si esta prueba
+ * No verifica lógica de Serva: verifica que el oráculo funciona. Si esta prueba
  * pasa, `npm run verify` es capaz de detectar fallos, que es la condición sin la
  * cual no hay ciclo de trabajo (Art. IV.1).
  *

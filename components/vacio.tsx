@@ -15,7 +15,7 @@ export function Vacio({
   readonly accion?: React.ReactNode
 }) {
   return (
-    <div className="superficie border-dashed bg-transparent px-6 py-14 text-center">
+    <div className="entra-escala superficie border-dashed bg-transparent px-6 py-14 text-center">
       <p className="text-base font-medium">{titulo}</p>
       <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground text-balance">
         {children}

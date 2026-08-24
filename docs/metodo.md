@@ -1,4 +1,4 @@
-# Cómo trabajamos en Finzen
+# Cómo trabajamos en Serva
 
 Dos métodos que se complementan: **Spec Driven Development** define *qué* se
 construye; **Loop Engineering** define *cómo* se ejecuta cada iteración.

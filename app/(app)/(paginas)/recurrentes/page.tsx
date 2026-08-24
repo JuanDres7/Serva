@@ -68,7 +68,7 @@ export default async function RecurrentesPage() {
           <CardHeader>
             <CardTitle className="text-base">Programados</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="escalonado space-y-3">
             {programados.length === 0 && (
               <p className="text-sm text-muted-foreground">
                 Todos están arriba, esperando confirmación.

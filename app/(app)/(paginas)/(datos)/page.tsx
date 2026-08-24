@@ -13,6 +13,7 @@ import { formatMoney } from '@/lib/domain/money-format'
 import { buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { EtiquetaPeriodo } from '@/components/etiqueta-periodo'
+import { CifraAnimada } from '@/components/cifra-animada'
 import { CargarEjemplo, BorrarEjemplo } from '@/components/datos-de-ejemplo'
 import { tieneDatosDeEjemplo } from '@/lib/db/queries/sample-data'
 import { gastoPorDia, evolucion } from '@/lib/db/queries/charts'
@@ -139,7 +140,7 @@ export default async function InicioPage() {
         </div>
 
         <Link href="/registro" className={buttonVariants({ size: 'lg' })}>
-          Registro fácil
+          Registrar movimiento
         </Link>
       </div>
 
@@ -151,12 +152,22 @@ export default async function InicioPage() {
       <div className="superficie grid divide-y divide-border/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
         <div className="space-y-2 px-5 py-5">
           <p className="eyebrow text-muted-foreground">Ingresos</p>
-          <p className="cifra text-2xl">{formatear(totales.income.cents)}</p>
+          <CifraAnimada
+            cents={totales.income.cents}
+            currency={settings.currency}
+            locale={settings.locale}
+            className="cifra block text-2xl"
+          />
         </div>
 
         <div className="space-y-2 px-5 py-5">
           <p className="eyebrow text-muted-foreground">Gastos</p>
-          <p className="cifra text-2xl">{formatear(totales.expense.cents)}</p>
+          <CifraAnimada
+            cents={totales.expense.cents}
+            currency={settings.currency}
+            locale={settings.locale}
+            className="cifra block text-2xl"
+          />
           {/* Ninguna cifra destacada se muestra sin comparación: un número
               suelto no dice si es mucho o poco. */}
           {comparacionGasto.percentageChange !== null && (
@@ -170,13 +181,14 @@ export default async function InicioPage() {
 
         <div className="space-y-2 px-5 py-5">
           <p className="eyebrow text-muted-foreground">Saldo</p>
-          <p
-            className={`cifra text-2xl ${
+          <CifraAnimada
+            cents={totales.balance.cents}
+            currency={settings.currency}
+            locale={settings.locale}
+            className={`cifra block text-2xl ${
               totales.balance.cents < 0 ? 'text-destructive' : 'text-primary'
             }`}
-          >
-            {formatear(totales.balance.cents)}
-          </p>
+          />
         </div>
       </div>
 
@@ -185,7 +197,7 @@ export default async function InicioPage() {
           <CardHeader>
             <CardTitle className="text-base">¿En qué se te fue?</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-3">
+          <CardContent className="escalonado space-y-3">
             {desglose.map((entrada) => (
               <div key={entrada.category.key} className="space-y-1">
                 <div className="flex items-baseline justify-between gap-4 text-sm">
@@ -209,7 +221,7 @@ export default async function InicioPage() {
                     categorías un gráfico circular sería ilegible (D-034). */}
                 <div className="h-2 overflow-hidden rounded-full bg-muted">
                   <div
-                    className="h-full rounded-full"
+                    className="barra-crece h-full rounded-full"
                     style={{
                       width: `${entrada.percentage}%`,
                       backgroundColor: entrada.category.color,
