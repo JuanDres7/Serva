@@ -29,7 +29,18 @@ export type ResultadoAccion =
   | { readonly ok: true; readonly id: string }
   | { readonly ok: false; readonly error: string }
 
-type EntradaRegistro = Omit<TransactionInput, 'currency' | 'categorySource'> & {
+/**
+ * Lo que puede pedir la interfaz.
+ *
+ * `createdBy` y `assistantWriteId` quedan fuera a propósito: esta acción la
+ * invoca una persona desde un formulario, así que el origen no se negocia. Lo
+ * que escribe Serva pasa por otro camino, que es el único que puede marcarlo
+ * como suyo (spec 010).
+ */
+type EntradaRegistro = Omit<
+  TransactionInput,
+  'currency' | 'categorySource' | 'createdBy' | 'assistantWriteId'
+> & {
   readonly categorySource?: TransactionInput['categorySource']
   /**
    * Registro de aprendizaje asociado, si hubo sugerencia. Al guardar se cierra
