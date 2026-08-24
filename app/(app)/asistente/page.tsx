@@ -17,5 +17,11 @@ export default async function AsistentePage() {
 
   const settings = await ensureUserSettings(userId)
 
-  return <Chat nombre={settings.displayName} />
+  return (
+    <Chat
+      nombre={settings.displayName}
+      currency={settings.currency}
+      locale={settings.locale}
+    />
+  )
 }

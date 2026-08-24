@@ -32,17 +32,17 @@ mensaje.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-311 | Cada herramienta devuelve el monto en centavos **además** del texto formateado | `gastoPorCategoria` devuelve `montoCents: 48759900` junto a `monto: "$ 487.599"`; ninguna pierde el texto que el modelo ya sabe citar |
-| ⬜ T-312 | Las pruebas de `tools.test.ts` comprueban ambas formas | Falla si el entero y el texto formateado dejan de representar la misma cifra |
+| ✅ T-311 | Cada herramienta devuelve el monto en centavos **además** del texto formateado | `gastoPorCategoria` devuelve `montoCents: 48759900` junto a `monto: "$ 487.599"`; ninguna pierde el texto que el modelo ya sabe citar |
+| ✅ T-312 | Las pruebas de `tools.test.ts` comprueban ambas formas | Falla si el entero y el texto formateado dejan de representar la misma cifra |
 
 ### Fase 2 — El chat pinta lo que no es texto
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-313 | `chat.tsx` deja de descartar las partes que no son texto y las encamina por tipo | Un resultado de herramienta desconocido no rompe el mensaje: se ignora en silencio, no lanza |
-| ⬜ T-314 | Componente de desglose por categoría dentro del mensaje, con la paleta de D-062 | Preguntar «¿en qué se me fue la plata?» muestra el desglose con su gráfico y sin salir del chat (E3) |
-| ⬜ T-315 | Componente de comparación entre períodos y de evolución | Preguntar «¿gasté más que el mes pasado?» muestra ambas cifras y su gráfico (E2, FR-006) |
-| ⬜ T-316 | Los gráficos del chat respetan `prefers-reduced-motion` y el ancho del móvil | A 390 px no desbordan y no reintroducen scroll horizontal |
+| ✅ T-313 | `chat.tsx` deja de descartar las partes que no son texto y las encamina por tipo | Un resultado de herramienta desconocido no rompe el mensaje: se ignora en silencio, no lanza |
+| ✅ T-314 | Componente de desglose por categoría dentro del mensaje, con la paleta de D-062 | Preguntar «¿en qué se me fue la plata?» muestra el desglose con su gráfico y sin salir del chat (E3) |
+| ✅ T-315 | Componente de comparación entre períodos y de evolución | Preguntar «¿gasté más que el mes pasado?» muestra ambas cifras y su gráfico (E2, FR-006) |
+| ✅ T-316 | Los gráficos del chat respetan `prefers-reduced-motion` y el ancho del móvil | A 390 px no desbordan y no reintroducen scroll horizontal |
 
 ### Fase 3 — Persistencia
 

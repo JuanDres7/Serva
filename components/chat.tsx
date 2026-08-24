@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { Button } from '@/components/ui/button'
+import { VisualDeHerramienta } from '@/components/chat-visuales'
 
 /**
  * Serva AI, el asistente (spec 003).
@@ -20,7 +21,15 @@ const SUGERENCIAS = [
   '¿Cuáles fueron mis gastos más grandes?',
 ]
 
-export function Chat({ nombre }: { nombre: string }) {
+export function Chat({
+  nombre,
+  currency,
+  locale,
+}: {
+  readonly nombre: string
+  readonly currency: string
+  readonly locale: string
+}) {
   const [texto, setTexto] = useState('')
   const finalRef = useRef<HTMLDivElement>(null)
   const campoRef = useRef<HTMLTextAreaElement>(null)
@@ -78,7 +87,12 @@ export function Chat({ nombre }: { nombre: string }) {
           ) : (
             <div className="space-y-6">
               {messages.map((mensaje) => (
-                <Mensaje key={mensaje.id} mensaje={mensaje} />
+                <Mensaje
+                  key={mensaje.id}
+                  mensaje={mensaje}
+                  currency={currency}
+                  locale={locale}
+                />
               ))}
 
               {pensando && <Esperando />}
@@ -139,11 +153,23 @@ export function Chat({ nombre }: { nombre: string }) {
   )
 }
 
-function Mensaje({ mensaje }: { mensaje: { role: string; parts: readonly unknown[] } }) {
-  const texto = mensaje.parts
-    .filter((parte): parte is { type: 'text'; text: string } =>
-      typeof parte === 'object' && parte !== null && (parte as { type?: string }).type === 'text',
-    )
+type Parte = { type?: string; text?: string; state?: string; output?: unknown }
+
+function Mensaje({
+  mensaje,
+  currency,
+  locale,
+}: {
+  mensaje: { role: string; parts: readonly unknown[] }
+  currency: string
+  locale: string
+}) {
+  const partes = mensaje.parts.filter(
+    (parte): parte is Parte => typeof parte === 'object' && parte !== null,
+  )
+
+  const texto = partes
+    .filter((parte) => parte.type === 'text' && typeof parte.text === 'string')
     .map((parte) => parte.text)
     .join('')
 
@@ -157,10 +183,30 @@ function Mensaje({ mensaje }: { mensaje: { role: string; parts: readonly unknown
     )
   }
 
+  // Los resultados de herramienta llegan como partes `tool-<nombre>` y hasta
+  // ahora se descartaban en silencio, que es por lo que el FR-006 quedó sin
+  // construir pese a estar aprobado.
+  const visuales = partes.flatMap((parte, i) => {
+    if (typeof parte.type !== 'string' || !parte.type.startsWith('tool-')) return []
+    if (parte.state !== 'output-available') return []
+    if (typeof parte.output !== 'object' || parte.output === null) return []
+
+    return [
+      <VisualDeHerramienta
+        key={i}
+        nombre={parte.type.slice('tool-'.length)}
+        salida={parte.output as Record<string, unknown>}
+        currency={currency}
+        locale={locale}
+      />,
+    ]
+  })
+
   return (
-    <div className="entra text-sm whitespace-pre-wrap">
+    <div className="entra text-sm">
       <p className="eyebrow mb-1.5 text-muted-foreground">Serva AI</p>
-      {texto}
+      <div className="whitespace-pre-wrap">{texto}</div>
+      {visuales}
     </div>
   )
 }

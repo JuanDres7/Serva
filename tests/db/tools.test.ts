@@ -5,6 +5,7 @@ import { user, transactions } from '@/lib/db/schema'
 import { crearHerramientas, type ContextoHerramientas } from '@/lib/ai/tools'
 import { createTransaction } from '@/lib/db/queries/transactions'
 import { todayIn, toISO, addDays } from '@/lib/domain/civil-date'
+import { findCategory } from '@/lib/domain/categories'
 
 /**
  * Las herramientas del asistente, probadas **sin modelo**.
@@ -203,6 +204,66 @@ describe('herramientas del asistente', () => {
 
     const resultado = await ejecutar(ANA, 'totalesDelPeriodo', { periodo: 'actual' })
     expect(resultado.sinDatos).toBe(true)
+  })
+})
+
+describe('cada monto viaja en sus dos formas (D-068)', () => {
+  /*
+   * El texto es lo que el modelo cita; el entero es lo que dibuja la interfaz.
+   * Si dejaran de representar la misma cifra, el chat mostraría un gráfico que
+   * contradice la frase que hay encima, y esa es la clase de error que nadie
+   * detecta mirando la pantalla.
+   */
+  const mismaCifra = (texto: string, cents: number) => {
+    const digitos = texto.replace(/\D/g, '')
+    expect(digitos).toBe(String(Math.round(cents / 100)))
+  }
+
+  beforeEach(async () => {
+    await gastar(ANA, 4800000, 'groceries', 'mercado')
+    await gastar(ANA, 1250000, 'transport', 'taxi')
+  })
+
+  it('totalesDelPeriodo', async () => {
+    const r = await ejecutar(ANA, 'totalesDelPeriodo', { periodo: 'actual' })
+    mismaCifra(r.gastos, r.gastosCents)
+    mismaCifra(r.ingresos, r.ingresosCents)
+    expect(Number.isInteger(r.gastosCents)).toBe(true)
+  })
+
+  it('gastoPorCategoria, y cada categoría trae su clave para el color', async () => {
+    const r = await ejecutar(ANA, 'gastoPorCategoria', { periodo: 'actual' })
+    for (const entrada of r.categorias as Record<string, never>[]) {
+      mismaCifra(entrada.monto, entrada.montoCents)
+      expect(findCategory(entrada.clave)).toBeDefined()
+    }
+  })
+
+  it('compararConPeriodoAnterior', async () => {
+    const r = await ejecutar(ANA, 'compararConPeriodoAnterior')
+    mismaCifra(r.gastoActual, r.gastoActualCents)
+    mismaCifra(r.gastoAnterior, r.gastoAnteriorCents)
+  })
+
+  it('mayoresGastos', async () => {
+    const r = await ejecutar(ANA, 'mayoresGastos', { periodo: 'actual', cuantos: 5 })
+    for (const gasto of r.gastos as Record<string, never>[]) {
+      mismaCifra(gasto.monto, gasto.montoCents)
+    }
+  })
+
+  it('buscarMovimientos', async () => {
+    const r = await ejecutar(ANA, 'buscarMovimientos', { texto: 'mercado' })
+    mismaCifra(r.total, r.totalCents)
+  })
+
+  it('ritmoDelPeriodo devuelve la serie con la que se dibuja la línea', async () => {
+    const r = await ejecutar(ANA, 'ritmoDelPeriodo')
+    expect(Array.isArray(r.puntos)).toBe(true)
+    for (const punto of r.puntos as Record<string, never>[]) {
+      expect(Number.isInteger(punto.dia)).toBe(true)
+      if (punto.actual !== null) expect(Number.isInteger(punto.actual)).toBe(true)
+    }
   })
 })
 
