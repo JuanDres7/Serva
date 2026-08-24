@@ -9,6 +9,7 @@ import { buttonVariants } from '@/components/ui/button'
 import { CambiarNombre } from '@/components/cambiar-nombre'
 import { EliminarCuenta } from '@/components/eliminar-cuenta'
 import { BorrarEjemplo } from '@/components/datos-de-ejemplo'
+import { ElegirTema } from '@/components/elegir-tema'
 
 export default async function AjustesPage() {
   const userId = await requireUserIdOrRedirect()
@@ -29,6 +30,19 @@ export default async function AjustesPage() {
         </CardHeader>
         <CardContent>
           <CambiarNombre actual={settings.displayName} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Cómo se ve</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <ElegirTema />
+          <p className="text-sm text-muted-foreground">
+            Se guarda en este dispositivo. El tema es del momento y del sitio
+            donde estés, no de tu cuenta.
+          </p>
         </CardContent>
       </Card>
 

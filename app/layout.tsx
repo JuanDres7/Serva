@@ -1,6 +1,8 @@
 import type { Metadata } from 'next'
 import { Plus_Jakarta_Sans, JetBrains_Mono } from 'next/font/google'
 import { Toaster } from '@/components/ui/sonner'
+import { SCRIPT_DE_TEMA } from '@/lib/domain/tema'
+import { SeguirAlSistema } from '@/components/elegir-tema'
 import './globals.css'
 
 /*
@@ -36,8 +38,17 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
     <html
       lang="es"
       className={`${sans.variable} ${mono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
+      <head>
+        {/* Antes del primer fotograma. Aplicar el tema al hidratar haría que
+            quien tiene el modo oscuro puesto viera un destello blanco en cada
+            carga, y ese destello de madrugada es justo lo que el modo oscuro
+            viene a evitar. El contenido es una constante, sin dato alguno. */}
+        <script dangerouslySetInnerHTML={{ __html: SCRIPT_DE_TEMA }} />
+      </head>
       <body className="flex min-h-full flex-col">
+        <SeguirAlSistema />
         {children}
         <Toaster position="top-right" />
       </body>

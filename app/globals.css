@@ -123,6 +123,21 @@
   /* Retardo entre hermanos de una lista que aparece escalonada. */
   --mov-paso: 55ms;
 
+  /*
+   * Tintas de los gráficos.
+   *
+   * Viven aquí y no en el componente porque tienen que cambiar con el tema, y
+   * un hex escrito dentro de un `.tsx` no sabe si el fondo es crema o verde
+   * oscuro. Recharts pinta SVG, y el SVG acepta `var()` igual que el CSS.
+   */
+  --grafico-ingresos: oklch(0.66 0.062 152);
+  --grafico-gastos: oklch(0.7 0.082 46);
+  --grafico-actual: oklch(0.52 0.05 152);
+  --grafico-anterior: oklch(0.75 0.008 96);
+  --grafico-rejilla: oklch(0.88 0.012 96);
+  --grafico-eje: oklch(0.54 0.008 120);
+  --grafico-emergente: oklch(0.995 0.004 106);
+
   --sidebar: oklch(0.945 0.014 106);
   --sidebar-foreground: oklch(0.34 0.016 140);
   --sidebar-primary: oklch(0.48 0.048 152);
@@ -164,6 +179,16 @@
   --chart-3: oklch(0.7 0.08 265);
   --chart-4: oklch(0.72 0.08 20);
   --chart-5: oklch(0.72 0.09 200);
+
+  /* En oscuro suben de luminosidad para seguir separándose del fondo, y la
+     rejilla baja: sobre verde oscuro una rejilla clara chilla. */
+  --grafico-ingresos: oklch(0.72 0.075 152);
+  --grafico-gastos: oklch(0.74 0.09 46);
+  --grafico-actual: oklch(0.78 0.07 152);
+  --grafico-anterior: oklch(0.45 0.012 120);
+  --grafico-rejilla: oklch(0.32 0.012 145);
+  --grafico-eje: oklch(0.62 0.012 120);
+  --grafico-emergente: oklch(0.26 0.014 145);
 
   --sidebar: oklch(0.225 0.014 145);
   --sidebar-foreground: oklch(0.86 0.01 106);
