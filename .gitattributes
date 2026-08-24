@@ -1,0 +1,23 @@
+# Cómo cuenta GitHub los lenguajes de este repositorio.
+#
+# La barra de lenguajes debería decir qué se escribió aquí, no qué archivos hay.
+# Sin estas marcas, los seis scripts que instala Spec Kit hacían que el
+# repositorio se presentara como un 7,5% PowerShell, que es exactamente lo
+# contrario de informativo: nadie escribió PowerShell en este proyecto.
+#
+# Ninguna de estas líneas oculta nada. Los archivos siguen en el repositorio y
+# se pueden leer; solo quedan etiquetados por lo que son.
+
+# Andamiaje de Spec Kit, instalado por su CLI. Código de terceros.
+.specify/scripts/** linguist-vendored
+.specify/templates/** linguist-vendored
+
+# Migraciones producidas por drizzle-kit. Se revisan a mano antes de aplicarlas,
+# pero no se escriben a mano.
+drizzle/*.sql linguist-generated
+drizzle/meta/** linguist-generated
+
+# Componentes traídos por el CLI de shadcn y adaptados después. Se marcan como
+# detectables para que sigan contando: se han modificado lo suficiente —radios,
+# alturas, estados de pulsación— como para que sean parte de este proyecto.
+components/ui/** linguist-detectable=true
