@@ -202,6 +202,7 @@ Si vienes a ver el código, quizá te interese más esto:
 | Documento | Qué contiene |
 |---|---|
 | [Visión](docs/vision.md) | Qué es Serva, para quién y qué **no** es |
+| [Arquitectura](docs/arquitectura.md) | Capas, estructura de archivos, stack y para qué sirve cada pieza |
 | [Constitución](.specify/memory/constitution.md) | Los principios innegociables del proyecto |
 | [Decisiones](docs/decisiones.md) | Cada decisión tomada, por qué, y las que se revirtieron |
 | [Método](docs/metodo.md) | Cómo se trabaja |
