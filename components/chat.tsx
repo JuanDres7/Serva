@@ -1,9 +1,12 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import { useChat } from '@ai-sdk/react'
+import { DefaultChatTransport, type UIMessage } from 'ai'
 import { Button } from '@/components/ui/button'
 import { VisualDeHerramienta } from '@/components/chat-visuales'
+import { empezarConversacion } from '@/lib/actions/conversations'
 
 /**
  * Serva AI, el asistente (spec 003).
@@ -25,16 +28,30 @@ export function Chat({
   nombre,
   currency,
   locale,
+  conversationId,
+  inicial,
 }: {
   readonly nombre: string
   readonly currency: string
   readonly locale: string
+  readonly conversationId: string | null
+  readonly inicial: readonly { id: string; role: string; parts: unknown }[]
 }) {
+  const router = useRouter()
   const [texto, setTexto] = useState('')
   const finalRef = useRef<HTMLDivElement>(null)
   const campoRef = useRef<HTMLTextAreaElement>(null)
 
-  const { messages, sendMessage, status, error } = useChat()
+  const { messages, sendMessage, setMessages, status, error } = useChat({
+    messages: inicial as UIMessage[],
+    // El identificador viaja en cada petición para que el servidor sepa a qué
+    // hilo pertenece el turno. No lo decide el cliente: si manda uno ajeno, la
+    // consulta no lo encuentra y se abre una conversación nueva.
+    transport: new DefaultChatTransport({
+      api: '/api/chat',
+      body: { conversationId },
+    }),
+  })
 
   useEffect(() => {
     finalRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -42,6 +59,20 @@ export function Chat({
 
   const pensando = status === 'submitted' || status === 'streaming'
   const vacio = messages.length === 0
+
+  /**
+   * Empezar de cero (FR-019).
+   *
+   * Hay que hacer las dos cosas. La acción borra el hilo en el servidor, pero
+   * `useChat` guarda los mensajes en su propio estado: sin vaciarlo, la
+   * conversación seguiría en pantalla aunque ya no exista, y el siguiente turno
+   * la resucitaría al enviarla entera.
+   */
+  async function nuevaConversacion() {
+    await empezarConversacion()
+    setMessages([])
+    router.refresh()
+  }
 
   function enviar(pregunta: string) {
     const limpia = pregunta.trim()
@@ -55,6 +86,15 @@ export function Chat({
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="min-h-0 flex-1 overflow-y-auto">
         <div className="mx-auto w-full max-w-2xl px-4 py-6">
+          {/* Empezar de nuevo no borra a mano nada: la anterior se cierra sola
+              (FR-019). Solo aparece cuando hay algo que dejar atrás. */}
+          {!vacio && (
+            <div className="mb-4 flex justify-end">
+              <Button variant="ghost" size="sm" onClick={nuevaConversacion}>
+                Nueva conversación
+              </Button>
+            </div>
+          )}
           {/*
             Sin conversación, la pantalla no arranca en blanco: saluda por su
             nombre y ofrece tres preguntas reales. Quien no sabe qué se le puede
