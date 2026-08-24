@@ -1,21 +1,77 @@
-MIT License
+Copyright (c) 2026 Juan Andrés. All rights reserved.
+Todos los derechos reservados.
 
-Copyright (c) 2026 Juan Andrés
+================================================================================
+ENGLISH
+================================================================================
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+This source code is published so that it can be read, studied and evaluated.
+It is not open source, and no license to use it is granted.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+YOU MAY, without asking:
+
+  - Read the source code.
+  - View and fork this repository within GitHub, as GitHub's Terms of Service
+    allow for any public repository.
+  - Quote excerpts for review, teaching or commentary, with attribution.
+  - Run it locally for the sole purpose of evaluating the work.
+
+YOU MAY NOT, without prior written permission from the copyright holder:
+
+  - Use this software, in whole or in part, in any product or service.
+  - Deploy or host it, whether or not you charge for it.
+  - Copy, modify or distribute it outside GitHub.
+  - Create derivative works from it.
+  - Remove or alter this notice.
+
+No trademark rights are granted. "Serva" and its visual identity are not
+covered by any permission above.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+AUTHOR BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY ARISING FROM, OUT
+OF OR IN CONNECTION WITH THE SOFTWARE OR ITS USE.
+
+For any use beyond the above, ask. Permission is granted in writing or not
+at all.
+
+================================================================================
+ESPAÑOL
+================================================================================
+
+Este código se publica para que pueda leerse, estudiarse y evaluarse. No es
+código abierto, y no se concede ninguna licencia de uso.
+
+PUEDES, sin pedir permiso:
+
+  - Leer el código.
+  - Ver y bifurcar este repositorio dentro de GitHub, según permiten sus
+    términos de servicio para cualquier repositorio público.
+  - Citar fragmentos para reseñarlo, enseñarlo o comentarlo, con atribución.
+  - Ejecutarlo en local con el único fin de evaluar el trabajo.
+
+NO PUEDES, sin permiso previo y por escrito del titular:
+
+  - Usar este software, entero o en parte, en ningún producto ni servicio.
+  - Desplegarlo ni alojarlo, cobres o no por ello.
+  - Copiarlo, modificarlo ni distribuirlo fuera de GitHub.
+  - Crear obras derivadas a partir de él.
+  - Retirar ni alterar este aviso.
+
+No se conceden derechos de marca. «Serva» y su identidad visual quedan fuera de
+cualquier permiso anterior.
+
+EL SOFTWARE SE ENTREGA «TAL CUAL», SIN GARANTÍA DE NINGÚN TIPO, EXPRESA O
+IMPLÍCITA, INCLUIDAS ENTRE OTRAS LAS DE COMERCIABILIDAD, IDONEIDAD PARA UN FIN
+DETERMINADO Y NO INFRACCIÓN. EL AUTOR NO RESPONDERÁ POR NINGUNA RECLAMACIÓN,
+DAÑO NI RESPONSABILIDAD DERIVADOS DEL SOFTWARE O DE SU USO.
+
+Para cualquier uso más allá de lo anterior, pregunta. El permiso se concede por
+escrito o no se concede.
+
+================================================================================
+
+Las dependencias de terceros conservan sus propias licencias, que son las que
+figuran en sus respectivos paquetes. Este aviso cubre únicamente el código
+escrito para este proyecto.

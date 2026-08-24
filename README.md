@@ -11,25 +11,96 @@ la IA responde con datos reales de tu historial.
 
 ## Cómo levantarlo
 
-Necesitas **Node.js 20 o superior** y **Docker** (solo para la base de datos).
+Cinco pasos. Tardan unos diez minutos, casi todos esperando a `npm install`.
+
+### Lo que necesitas antes
+
+| | Para qué | Cómo comprobarlo |
+|---|---|---|
+| **Node.js 20 o superior** | Ejecutar la aplicación | `node --version` |
+| **Docker** | Solo la base de datos, no la aplicación | `docker --version` |
+| **Git** | Traer el código | `git --version` |
+
+No hace falta instalar PostgreSQL: viene dentro del contenedor. Tampoco hace
+falta ninguna IA para arrancar.
+
+### 1. Traer el código e instalar
 
 ```bash
-git clone <url-del-repositorio>
+git clone https://github.com/TU-USUARIO/serva.git
 cd serva
 npm install
-cp .env.example .env.local
-docker compose up -d
-npm run dev
 ```
 
-La aplicación queda en `http://localhost:3000`.
+### 2. Levantar la base de datos
 
-El único valor que debes rellenar en `.env.local` para arrancar es
-`BETTER_AUTH_SECRET`. Genera uno con:
+```bash
+docker compose up -d
+```
+
+Arranca PostgreSQL con pgvector en el **puerto 5433** del anfitrión, no en el
+5432. Es a propósito: así no choca con un PostgreSQL que ya tengas instalado,
+que es lo habitual en una máquina de desarrollo.
+
+Comprueba que quedó arriba:
+
+```bash
+docker compose ps
+```
+
+### 3. Configurar el entorno
+
+```bash
+cp .env.example .env.local
+```
+
+De todo lo que hay en ese archivo, **solo una variable es obligatoria** para
+arrancar: `BETTER_AUTH_SECRET`. Sin ella no se pueden abrir sesiones. Genera
+una:
 
 ```bash
 openssl rand -base64 32
 ```
+
+Y pega el resultado entre las comillas:
+
+```
+BETTER_AUTH_SECRET="el-valor-que-acabas-de-generar"
+```
+
+En Windows sin `openssl`, vale cualquier cadena larga y aleatoria; en PowerShell:
+
+```bash
+[Convert]::ToBase64String((1..32 | ForEach-Object { Get-Random -Max 256 }))
+```
+
+Lo demás —IA, correo— es opcional y se explica más abajo.
+
+### 4. Crear las tablas
+
+```bash
+npm run db:migrate
+```
+
+**Este paso no se puede saltar.** El contenedor del paso 2 levanta una base de
+datos vacía; las tablas las crean las migraciones. Si lo omites, la aplicación
+arranca y falla al primer intento de registrarte.
+
+### 5. Arrancar
+
+```bash
+npm run dev
+```
+
+Listo: `http://localhost:3000`.
+
+### El primer uso
+
+Al entrar te pedirá crear una cuenta y luego tu nombre y tu país, que es lo que
+fija tu moneda y tu zona horaria. En el resumen encontrarás **«Ver con datos de
+ejemplo»**: carga unos meses de movimientos ficticios para que puedas ver los
+gráficos y el historial con algo dentro. Se borran cuando quieras, desde el
+mismo sitio.
 
 ## Qué hace
 
@@ -53,6 +124,22 @@ Se elige con una sola variable en `.env.local`:
 | `AI_PROVIDER=ollama` | Modelo local. Gratuito y tus datos no salen del equipo |
 | `AI_PROVIDER=gemini` | API de nube. Requiere una clave propia |
 
+### Si eliges Gemini
+
+Es la opción recomendada para verlo funcionando. Consigue una clave gratuita en
+[Google AI Studio](https://aistudio.google.com/apikey) y ponla en `.env.local`:
+
+```
+AI_PROVIDER="gemini"
+GOOGLE_GENERATIVE_AI_API_KEY="tu-clave"
+```
+
+Reinicia `npm run dev` y aparecerá **Serva AI** en la barra lateral.
+
+> El plan gratuito de Gemini puede usar lo que se le envía para mejorar sus
+> modelos. Está documentado en D-043, y es una de las razones por las que Serva
+> pide no introducir información financiera real.
+
 ### Si eliges el modelo local
 
 Instala [Ollama](https://ollama.com) y descarga el modelo indicado en
@@ -71,8 +158,18 @@ Un solo comando decide si el proyecto está bien:
 npm run verify
 ```
 
+La primera vez hay que descargar el navegador que usan las pruebas:
+
+```bash
+npx playwright install chromium
+```
+
 Encadena comprobación de tipos, lint, pruebas de dominio, pruebas de base de datos
 y pruebas de extremo a extremo en navegador. Si pasa, el proyecto está sano.
+
+**Ninguna de sus comprobaciones necesita una IA instalada**, y es deliberado: el
+oráculo tiene que dar el mismo resultado en cualquier máquina. Lo que solo se
+puede comprobar con un modelo real vive aparte, en `npm run evaluar`.
 
 | Comando | Para qué |
 |---|---|
@@ -80,6 +177,19 @@ y pruebas de extremo a extremo en navegador. Si pasa, el proyecto está sano.
 | `npm run verify` | Verificación completa |
 | `npm run test:unit` | Solo pruebas rápidas, sin navegador |
 | `npm run db:up` / `db:down` | Base de datos local |
+| `npm run db:migrate` | Aplicar migraciones pendientes |
+| `npm run evaluar` | Medir la extracción contra el modelo real. Necesita proveedor |
+
+## Si algo no arranca
+
+| Lo que ves | Qué pasa |
+|---|---|
+| `EADDRINUSE ... :3000` | Ya hay algo en ese puerto. Ciérralo, o arranca con `PORT=3001 npm run dev` |
+| `relation "user" does not exist` | Falta el paso 4: `npm run db:migrate` |
+| `ECONNREFUSED ... 5433` | La base no está arriba. `docker compose up -d` |
+| No aparece **Serva AI** en la barra lateral | No hay proveedor configurado. Es el comportamiento correcto: mejor que no exista a que exista y no funcione |
+| Las pruebas de navegador fallan al instante | Falta `npx playwright install chromium` |
+| Arrancó pero no puedes entrar | `BETTER_AUTH_SECRET` está vacío en `.env.local` |
 
 ## Cómo está construido este proyecto
 
@@ -110,5 +220,12 @@ La justificación de cada elección está en
 
 ## Licencia
 
-[MIT](LICENSE). Puedes usar, modificar y distribuir este código, incluso con
-fines comerciales, conservando el aviso de copyright.
+**Todos los derechos reservados** ([LICENSE](LICENSE)). Este código se publica
+para que pueda leerse, estudiarse y evaluarse; no es código abierto.
+
+Puedes leerlo, bifurcarlo dentro de GitHub, citarlo con atribución y ejecutarlo
+en local para evaluarlo. Cualquier otro uso —desplegarlo, incorporarlo a un
+producto, distribuirlo— requiere permiso previo por escrito.
+
+Si quieres usarlo para algo, escríbeme. El razonamiento del cambio desde MIT
+está en [decisiones.md](docs/decisiones.md) (D-071).

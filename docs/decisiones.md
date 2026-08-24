@@ -1190,7 +1190,12 @@ que nadie alcanzara datos ajenos —lo que decide si el asistente es fiable—, 
 no podían detectar que la búsqueda no entendiera un plural. Eso solo lo encuentra
 alguien preguntando de verdad.
 
-## D-058 · Licencia MIT (2026-08-23)
+## D-058 · ~~Licencia MIT~~ REVERTIDA (2026-08-23)
+
+> Revertida por **D-071**: el proyecto pasa a ser de pago, y MIT permitía a
+> cualquiera desplegarlo y venderlo. Se conserva por trazabilidad, porque el
+> razonamiento de por qué se eligió una licencia permisiva sigue siendo válido
+> para lo que se eligió entonces: un proyecto de portafolio sin ánimo comercial.
 
 El repositorio se publica bajo licencia MIT. Cualquiera puede usar, modificar y
 distribuir el código, incluso con fines comerciales, conservando el aviso de
@@ -1603,6 +1608,46 @@ baja: sobre verde oscuro una rejilla clara chilla.
 
 De ahí sale una regla que vale para lo que venga: **ningún color de la interfaz
 puede quedar fijo fuera del sistema de tokens** (RN-007 de la spec 004).
+
+---
+
+## D-071 · Todos los derechos reservados, no MIT (2026-08-23)
+
+**Decisión.** El código se publica con todos los derechos reservados. Se puede
+leer, estudiar, bifurcar dentro de GitHub y ejecutar en local para evaluarlo;
+cualquier otro uso requiere permiso por escrito. Revierte **D-058**.
+
+**Por qué cambia.** Cuando se eligió MIT, Serva era un proyecto de portafolio y
+la licencia más permisiva era la que menos estorbaba. Ahora la intención es
+cobrar por el producto, y eso cambia la pregunta.
+
+Conviene decirlo con precisión, porque es fácil confundirlo: **MIT nunca impidió
+cobrar**. Con MIT ya se podía desplegar Serva y venderlo. Lo que MIT permite
+además es que cualquier otro haga exactamente lo mismo con este código —
+clonarlo, desplegarlo, cobrar por él y competir— sin pedir permiso ni pagar
+nada. La pregunta real no era «¿puedo cobrar?» sino «¿quiero que otros puedan?»,
+y la respuesta es no.
+
+**Por qué público y no privado.** El repositorio sigue siendo la mejor carta de
+presentación del proyecto: setenta decisiones razonadas, once specs escritas
+antes del código y quinientas comprobaciones automáticas. Nada de eso vale si no
+se puede leer. Cerrar el repositorio protegería lo mismo y perdería todo eso.
+
+**Se hizo antes de publicar, y eso importa.** Una licencia no se revoca hacia
+atrás: quien obtiene una copia bajo MIT conserva esos derechos sobre esa versión
+para siempre. Como todavía no se había subido nada a ningún remoto, el cambio es
+limpio y no queda una versión MIT circulando. Publicar primero y cambiar después
+habría dejado esa puerta abierta de forma permanente.
+
+**Lo que no se puede evitar.** Hacer público un repositorio en GitHub concede,
+por sus propios términos de servicio, el derecho a verlo y a bifurcarlo dentro
+de la plataforma. Eso solo se evita con repositorio privado, y se asume a
+cambio de la visibilidad. No autoriza a desplegarlo ni a usarlo fuera.
+
+**Comprobado antes de decidir:** ninguna de las treinta y siete dependencias
+directas es copyleft —todas MIT, Apache-2.0, ISC, BSD o Unlicense—, así que nada
+obliga a liberar este código. Con una sola dependencia GPL o AGPL, esta decisión
+no habría sido posible.
 
 ---
 
