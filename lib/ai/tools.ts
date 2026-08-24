@@ -25,6 +25,13 @@ import { nombrarPeriodo } from '@/components/etiqueta-periodo'
  * Por eso este conjunto es cerrado y sus parámetros están validados: el modelo
  * elige cuál llamar y con qué argumentos, pero jamás toca la base directamente
  * (Art. III.3). Y el usuario viene de la sesión del servidor, nunca del modelo.
+ *
+ * **Cada monto se devuelve dos veces, y es a propósito.** El texto formateado
+ * —`"$ 487.599"`— es el que el modelo cita en su respuesta, porque redactar a
+ * partir de un entero le haría redondear mal o inventar separadores. El entero
+ * en centavos es el que dibuja la interfaz: un gráfico no se traza con cadenas
+ * de texto (D-068). Ninguna de las dos formas se calcula a partir de la otra;
+ * ambas salen del mismo entero de origen (Art. I).
  */
 
 export type ContextoHerramientas = {
@@ -74,6 +81,9 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
           gastos: dinero(totales.expense.cents),
           saldo: dinero(totales.balance.cents),
           ahorrado: dinero(totales.savedNet.cents),
+          ingresosCents: totales.income.cents,
+          gastosCents: totales.expense.cents,
+          saldoCents: totales.balance.cents,
           sinDatos: totales.income.cents === 0 && totales.expense.cents === 0,
         }
       },
@@ -97,6 +107,8 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
             categoria: entrada.category.name,
             monto: dinero(entrada.amount.cents),
             porcentaje: entrada.percentage,
+            clave: entrada.category.key,
+            montoCents: entrada.amount.cents,
           })),
         }
       },
@@ -126,6 +138,10 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
           gastoActual: dinero(totalesActual.expense.cents),
           gastoAnterior: dinero(totalesAnterior.expense.cents),
           diferencia: dinero(Math.abs(comparacion.difference.cents)),
+          gastoActualCents: totalesActual.expense.cents,
+          gastoAnteriorCents: totalesAnterior.expense.cents,
+          periodoActual: nombrarPeriodo(actual, contexto.locale),
+          periodoAnterior: nombrarPeriodo(anterior, contexto.locale),
           direccion: comparacion.difference.cents > 0 ? 'más' : 'menos',
           porcentaje: comparacion.percentageChange,
           // Sin período anterior no hay comparación posible: decirlo es mejor
@@ -162,6 +178,8 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
             categoria: m.category ? (findCategory(m.category)?.name ?? '') : '',
             monto: dinero(m.amountCents),
             fecha: m.occurredOn,
+            clave: m.category ?? null,
+            montoCents: m.amountCents,
           })),
         }
       },
@@ -206,11 +224,13 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
           periodo: rango ? nombrarPeriodo(rango, contexto.locale) : 'todo el historial',
           cuantos: coinciden.length,
           total: dinero(total),
+          totalCents: total,
           sinDatos: coinciden.length === 0,
           ejemplos: coinciden.slice(0, 5).map((m) => ({
             descripcion: m.descriptionShort ?? m.description ?? 'Sin descripción',
             monto: dinero(m.amountCents),
             fecha: m.occurredOn,
+            montoCents: m.amountCents,
           })),
         }
       },
@@ -241,6 +261,15 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
           direccion: ritmo ? (ritmo.diferencia > 0 ? 'más' : 'menos') : null,
           porcentaje: ritmo?.porcentaje ?? null,
           hasta: toISO(hoy),
+          diferenciaCents: ritmo ? ritmo.diferencia : null,
+          // La serie completa va aparte de la frase: el modelo no la lee, la
+          // dibuja la interfaz (D-068).
+          puntos: puntos.map((punto) => ({
+            dia: punto.dia,
+            fecha: punto.fecha,
+            actual: punto.actual,
+            anterior: punto.anterior,
+          })),
         }
       },
     }),
