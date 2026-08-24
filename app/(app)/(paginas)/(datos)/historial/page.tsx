@@ -177,6 +177,7 @@ export default async function HistorialPage({ searchParams }: Params) {
           description: m.description,
           descriptionShort: m.descriptionShort,
           status: m.status,
+          createdBy: m.createdBy,
         }))}
         currency={settings.currency}
         locale={settings.locale}

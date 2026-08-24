@@ -33,6 +33,16 @@ test('sin proveedor de IA, el asistente no se ofrece', async ({ page }) => {
 
   // El resto de la aplicación sigue intacta.
   await expect(page.getByRole('link', { name: 'Historial' })).toBeVisible()
+
+  // Y Registro Fácil, que es el camino manual, no se ha tocado (spec 010,
+  // T-437): sin modelo se registra igual que siempre.
+  await page.goto('/registro')
+  await page.getByLabel(/¿De cuánto fue/).fill('12000')
+  await page.getByLabel('¿En qué?').fill('café')
+  await page.getByLabel('Categoría').click()
+  await page.getByRole('option', { name: 'Comidas fuera' }).click()
+  await page.getByRole('button', { name: 'Registrar y seguir' }).click()
+  await expect(page.getByText('Gasto registrado')).toBeVisible()
 })
 
 test('el punto de entrada del chat responde que no está disponible', async ({

@@ -184,8 +184,11 @@ export function Chat({
             </Button>
           </div>
 
+          {/* Dejó de ser cierto que solo consulta (D-066). Lo que sigue
+              siendo cierto, y es lo que importa saber, es que nada de lo que
+              haga es definitivo. */}
           <p className="mt-2 text-center text-xs text-muted-foreground">
-            Serva AI solo consulta. No registra ni modifica movimientos.
+            Todo lo que registre Serva AI se puede revertir.
           </p>
         </form>
       </div>

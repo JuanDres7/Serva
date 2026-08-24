@@ -118,3 +118,19 @@ pudiendo ignorarlos y seguir usando la aplicación.
 5. Eliminar un recurrente no altera ningún total histórico.
 6. Ninguna consulta de recurrentes devuelve los de otro usuario.
 7. Con pendientes sin resolver, el resto de la aplicación sigue siendo usable.
+
+## Revisión de 2026-08-23 — cobros de una sola vez
+
+La feature 010 añade una periodicidad más: `once`, un cobro en una fecha
+concreta que no se repite. Sí, «un movimiento recurrente que ocurre una sola
+vez» es un oxímoron, y se asume el nombre a cambio de reutilizar toda la
+maquinaria que esta spec ya define —pendientes, confirmar, reprogramar,
+«¿te cobraron el monto de siempre?»—, que es exactamente lo que hace falta para
+«tengo que pagar 200 mil el martes»: que aparezca para confirmar cuando llegue
+el día. Una entidad paralela la habría duplicado entera para ganar solo un
+nombre más exacto (Art. VIII).
+
+**Lo único que se comporta distinto:** al confirmarse no se reprograma, se
+archiva. Deja de aparecer entre los pendientes y en la lista, pero su fila sigue
+existiendo, porque borrarla eliminaría el rastro de un cobro que sí ocurrió
+(Art. VII).

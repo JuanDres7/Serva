@@ -1527,6 +1527,46 @@ formateado para que el modelo cite sin redondear mal— y eso toca las seis.
 
 ---
 
+## D-069 · La extracción acierta 10 de 10, y por eso puede escribir sola (2026-08-23)
+
+**Qué se probó.** El banco de diez frases de `tests/evaluacion/`, contra Gemini,
+con `npm run evaluar`. Frases corrientes de gasto e ingreso, una con dos
+movimientos en la misma oración, una sin monto, una que solo pregunta y una que
+cae en el futuro.
+
+**Resultado: 10 de 10.** El umbral que fijaba la spec era 9. Los dos casos que
+de verdad decidían son los que no son de extracción sino de contención:
+
+- «Me tomé unas cervezas anoche» → **preguntó cuánto** en lugar de inventar un
+  monto. Es el FR-003, y es lo que separa esto de una aplicación que se llena de
+  datos falsos.
+- «¿Cuánto llevo gastado este mes?» → **no escribió nada**. Es el FR-015:
+  preguntar y registrar son intenciones distintas.
+
+También acertó «pagué el arriendo, 1 millón 200 mil» —que exige entender un
+número dicho en dos escalas— y encaminó «tengo que pagar 200 mil el 7 de
+septiembre» a un cobro programado en lugar de a un movimiento con fecha futura.
+
+**Lo que esto autoriza y lo que no.** Autoriza que el registro automático sea
+una opción real: con esta tasa, escribir sola y ofrecer deshacer es mejor
+experiencia que preguntar siempre. No autoriza a relajar las salvaguardas.
+Diez frases elegidas por quien construyó la feature no son una muestra: son una
+comprobación de que no está rota. La medida que manda a partir de ahora es la de
+la spec §7 —cuántos movimientos escritos por la IA corrige o anula el usuario
+después—, que se mide con uso real y no con un banco de pruebas.
+
+**Por qué esto no entra en `npm run verify`.** Necesita un proveedor
+configurado, y el Artículo IV exige que la verificación corra en cualquier
+máquina sin IA instalada. Vive en `npm run evaluar`, con su propia
+configuración de Playwright, y no bloquea a nadie: informa. Mismo trato que se
+le dio al asistente en D-057.
+
+La tentación de meterlo en `verify` con un modelo simulado hay que resistirla.
+Un simulador que devuelve la propuesta correcta no prueba la extracción, prueba
+el simulador.
+
+---
+
 # Decisiones pendientes
 
 _Ninguna. Todas las preguntas abiertas quedaron resueltas._

@@ -14,7 +14,8 @@
     "db:up": "docker compose up -d",
     "db:down": "docker compose down",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "evaluar": "playwright test --config=playwright.evaluacion.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.50",

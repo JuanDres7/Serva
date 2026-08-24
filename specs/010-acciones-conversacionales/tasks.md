@@ -73,24 +73,24 @@ falsable el Artículo II, y todo lo demás se apoya en ella.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-431 | Tarjeta de acción en el chat: qué hizo o hará, en una frase, con dos botones | Antes de escribir dice «confirmar» y «cancelar»; después, «está bien» y «revertir» (FR-012) |
-| ⬜ T-432 | Una tarjeta ya resuelta se lee como algo que pasó, no como algo que espera | Al volver días después, sus botones no invitan a pulsar |
-| ⬜ T-433 | Corregir hablando sobre la última acción | «No, fueron 20 mil» corrige el movimiento en vez de crear otro (E3, FR-024) |
-| ⬜ T-434 | El historial distingue lo escrito por la IA | Visible de un vistazo y sin convertir la tabla en un semáforo (FR-013) |
-| ⬜ T-435 | La tarjeta sigue D-062 y D-065 | Colores del sistema, entrada animada, `prefers-reduced-motion` respetado |
-| ⬜ T-436 | La tarjeta funciona a 390 px | Los dos botones caben sin desbordar |
+| ✅ T-431 | Tarjeta de acción en el chat: qué hizo o hará, en una frase, con dos botones | Antes de escribir dice «confirmar» y «cancelar»; después, «está bien» y «revertir» (FR-012) |
+| ✅ T-432 | Una tarjeta ya resuelta se lee como algo que pasó, no como algo que espera | Al volver días después, sus botones no invitan a pulsar |
+| ✅ T-433 | Corregir hablando sobre la última acción | «No, fueron 20 mil» corrige el movimiento en vez de crear otro (E3, FR-024) |
+| ✅ T-434 | El historial distingue lo escrito por la IA | Visible de un vistazo y sin convertir la tabla en un semáforo (FR-013) |
+| ✅ T-435 | La tarjeta sigue D-062 y D-065 | Colores del sistema, entrada animada, `prefers-reduced-motion` respetado |
+| ✅ T-436 | La tarjeta funciona a 390 px | Los dos botones caben sin desbordar |
 
 ## Fase 7 — Salvaguardas y cierre
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-437 | Sin proveedor, nada de esto se ofrece y Registro Fácil sigue intacto | `tests/e2e/chat.spec.ts` ampliado |
-| ⬜ T-438 | Una salida del modelo inválida no escribe nada y queda como `rechazada` | El chat sigue usable después del fallo (FR-017) |
-| ⬜ T-439 | Al modelo no se le envía el historial de movimientos | Prueba sobre el mensaje construido: solo la frase y el catálogo de categorías (Art. VI.2) |
-| ⬜ T-440 | `npm run verify` en verde sin modelo instalado | Todas las salvaguardas de las fases 1 y 5 cubiertas |
-| ⬜ T-441 | Banco de diez frases con su resultado esperado, y `npm run evaluar` | Corre fuera de `verify`, contra el proveedor real |
-| ⬜ T-442 | Evaluación registrada como decisión | Igual que D-057: qué se probó, qué salió, qué queda flojo |
-| ⬜ T-443 | Actualizar spec 003 (FR-010) y spec 007 (periodicidad `once`) | Ninguna spec queda desmentida por el código, que es lo que pasó con el FR-006 |
+| ✅ T-437 | Sin proveedor, nada de esto se ofrece y Registro Fácil sigue intacto | `tests/e2e/chat.spec.ts` ampliado |
+| ✅ T-438 | Una salida del modelo inválida no escribe nada y queda como `rechazada` | El chat sigue usable después del fallo (FR-017) |
+| ✅ T-439 | Al modelo no se le envía el historial de movimientos | Prueba sobre el mensaje construido: solo la frase y el catálogo de categorías (Art. VI.2) |
+| ✅ T-440 | `npm run verify` en verde sin modelo instalado | Todas las salvaguardas de las fases 1 y 5 cubiertas |
+| ✅ T-441 | Banco de diez frases con su resultado esperado, y `npm run evaluar` | Corre fuera de `verify`, contra el proveedor real |
+| ✅ T-442 | Evaluación registrada como decisión | Igual que D-057: qué se probó, qué salió, qué queda flojo |
+| ✅ T-443 | Actualizar spec 003 (FR-010) y spec 007 (periodicidad `once`) | Ninguna spec queda desmentida por el código, que es lo que pasó con el FR-006 |
 
 ---
 
