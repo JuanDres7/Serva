@@ -21,28 +21,30 @@ import { formatMoney } from '@/lib/domain/money-format'
  * Cada uno responde una pregunta que el usuario se hace de verdad; si no se
  * puede nombrar la pregunta, el gráfico no se construye (D-034).
  *
- * Los colores vienen del sistema visual, no de la paleta por defecto de
- * Recharts: un rojo de semáforo junto a un verde de semáforo convierte el
+ * Los colores vienen del sistema visual como variables CSS y no como hex, para
+ * que sigan al tema: un hex escrito aquí no sabe si el fondo es crema o verde
+ * oscuro. No vienen de la paleta por defecto de Recharts: un rojo de semáforo junto a un verde de semáforo convierte el
  * resumen del mes en un veredicto, que es justo el tono que Serva evita.
  * Aquí el gasto es terracota apagada y el ingreso salvia, los mismos tonos que
  * llevan las categorías en el resto de la aplicación.
  */
 const TINTA = {
-  ingresos: '#5f9e7d',
-  gastos: '#cf8b6f',
-  actual: '#4f7a63',
-  anterior: '#b6b3a6',
-  rejilla: '#ddd9cd',
-  eje: '#7d7f74',
+  ingresos: 'var(--grafico-ingresos)',
+  gastos: 'var(--grafico-gastos)',
+  actual: 'var(--grafico-actual)',
+  anterior: 'var(--grafico-anterior)',
+  rejilla: 'var(--grafico-rejilla)',
+  eje: 'var(--grafico-eje)',
 } as const
 
 /** Detalle emergente: la misma tarjeta crema que el resto de superficies. */
 const EMERGENTE = {
   fontSize: 13,
   borderRadius: 14,
-  border: '1px solid #ddd9cd',
-  backgroundColor: '#fdfcf8',
-  boxShadow: '0 4px 16px rgb(60 60 40 / 8%)',
+  border: '1px solid var(--grafico-rejilla)',
+  backgroundColor: 'var(--grafico-emergente)',
+  color: 'var(--foreground)',
+  boxShadow: '0 4px 16px oklch(0 0 0 / 10%)',
 } as const
 
 const EJE = { fill: TINTA.eje, fontSize: 12 } as const
@@ -79,7 +81,7 @@ export function GraficoEvolucion({
           />
           <Tooltip
             formatter={(valor) => formatear(Number(valor))}
-            cursor={{ fill: '#00000008' }}
+            cursor={{ fill: 'var(--muted)', fillOpacity: 0.5 }}
             contentStyle={EMERGENTE}
           />
           <Legend wrapperStyle={{ fontSize: 13, color: TINTA.eje }} />

@@ -1567,6 +1567,45 @@ el simulador.
 
 ---
 
+## D-070 · Modo oscuro: tres estados, en el dispositivo y sin dependencias (2026-08-23)
+
+**Decisión.** Serva puede verse en claro, en oscuro o como lo tenga el sistema.
+Se elige en Ajustes y se guarda en el navegador.
+
+**Tres estados y no dos.** «El de mi sistema» no es un adorno: es el que respeta
+lo que la persona ya configuró en su teléfono, y el que hace que la aplicación se
+oscurezca sola al anochecer si el sistema lo hace. Elegir claro u oscuro a mano
+significa «ignora al sistema», que es una decisión distinta de no haber elegido
+nada. Con dos estados hay que decidir cuál es el defecto, y cualquiera de los dos
+contradice a alguien.
+
+**En el navegador y no en la cuenta.** El tema es del dispositivo y del momento.
+Quien trabaja de día en el portátil y consulta el saldo de noche en el teléfono
+quiere cosas distintas en cada uno; guardarlo en `user_settings` le impondría la
+misma en los dos. Además evita el destello: el servidor no sabe qué tema toca
+hasta que el navegador se lo dice, así que guardarlo allí obligaría a pintar algo
+antes de saberlo.
+
+**Sin dependencias.** `next-themes` resuelve esto en una línea, y aun así no
+entra: son cuarenta líneas propias contra un paquete más en el árbol, para algo
+que no va a crecer (Art. VIII). Lo único que hacía falta era un script en línea
+en el `<head>` que aplique la clase antes del primer fotograma. Es la única razón
+por la que este proyecto usa `dangerouslySetInnerHTML`, y el contenido es una
+constante sin ningún dato dentro.
+
+**El trabajo real no era el interruptor.** Los tokens de oscuro existían desde
+D-062 y nunca se habían visto. Lo que había que arreglar eran los gráficos: la
+rejilla, los ejes y el fondo del detalle emergente estaban escritos como hex
+dentro del componente, y un hex no sabe si el fondo es crema o verde oscuro.
+Ahora son variables CSS —Recharts pinta SVG, y el SVG acepta `var()`—, con sus
+dos juegos de valores. En oscuro las barras suben de luminosidad y la rejilla
+baja: sobre verde oscuro una rejilla clara chilla.
+
+De ahí sale una regla que vale para lo que venga: **ningún color de la interfaz
+puede quedar fijo fuera del sistema de tokens** (RN-007 de la spec 004).
+
+---
+
 # Decisiones pendientes
 
 _Ninguna. Todas las preguntas abiertas quedaron resueltas._

@@ -112,3 +112,35 @@ se convierten y que el historial quedaría falseado.
 
 - El usuario completa la configuración inicial sin abandonar.
 - El usuario reconoce la aplicación como suya desde el primer uso.
+
+## Revisión de 2026-08-23 — el tema de la interfaz
+
+Se añade a esta spec y no a una nueva porque el tema es personalización, que es
+justo de lo que trata la 004. Una feature entera para un selector de tres
+botones sería ceremonia desproporcionada (Art. VIII).
+
+| ID | Requisito |
+|---|---|
+| FR-010 | El usuario debe poder elegir entre tema claro, oscuro y el de su sistema, desde Ajustes. |
+| FR-011 | La elección debe conservarse entre visitas y aplicarse antes del primer pintado, sin destello. |
+| FR-012 | Con «el de mi sistema», un cambio del sistema operativo debe reflejarse sin recargar la página. |
+
+**Escenarios.**
+
+- **E7 — Elijo oscuro.** *Dado* que estoy en Ajustes, *cuando* elijo oscuro,
+  *entonces* toda la aplicación cambia en el acto y sigue así al navegar y al
+  volver mañana.
+- **E8 — No elijo nada.** *Dado* que nunca toqué el ajuste, *cuando* mi teléfono
+  está en oscuro, *entonces* Serva también, sin haber tenido que decírselo.
+- **E9 — Anochece.** *Dado* que tengo «el de mi sistema» y la aplicación abierta,
+  *cuando* el sistema pasa a oscuro, *entonces* Serva le sigue sin recargar.
+
+**Reglas de negocio.**
+
+- **RN-006** — La preferencia es del dispositivo, no de la cuenta. El tema es del
+  momento y del sitio donde se esté: quien trabaja de día en el portátil y
+  consulta el saldo de noche en el teléfono quiere cosas distintas en cada uno, y
+  guardarlo en la cuenta le impondría la misma en los dos.
+- **RN-007** — Ningún color de la interfaz puede quedar fijo fuera del sistema de
+  tokens. Un hex escrito dentro de un componente no sabe si el fondo es crema o
+  verde oscuro.

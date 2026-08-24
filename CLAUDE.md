@@ -62,6 +62,9 @@ en esta máquina no es viable (D-056).
 **La interfaz tiene sistema visual propio** desde D-062: crema, salvia y
 terracota, con `.eyebrow` para etiquetas y `.cifra` para montos. Los tokens
 viven en `app/globals.css`; no metas colores sueltos de la paleta de Tailwind.
+Y desde D-070 hay modo oscuro: **ningún color puede quedar fijo fuera de los
+tokens**, ni siquiera dentro de un gráfico. Si escribes un hex en un `.tsx`, en
+oscuro se verá mal.
 
 **Serva AI escribe** desde la feature 010: registra, corrige, anula y programa
 cobros a partir de lo que se le cuenta. **El modelo no escribe: propone, y una
@@ -83,7 +86,7 @@ Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.
 |---|---|
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
 | `docs/vision.md` | Qué es Serva, para quién y qué no es. |
-| `docs/decisiones.md` | Las 69 decisiones tomadas, con su razón. |
+| `docs/decisiones.md` | Las 70 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |
