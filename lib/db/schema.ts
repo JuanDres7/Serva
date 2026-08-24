@@ -12,6 +12,7 @@
  */
 
 import { sql } from 'drizzle-orm'
+import type { AnyPgColumn } from 'drizzle-orm/pg-core'
 import {
   bigint,
   boolean,
@@ -73,6 +74,38 @@ export const categoryKey = pgEnum('category_key', [
 ])
 
 /** Cómo se categorizó un movimiento (spec 002, FR-006). */
+/**
+ * Quién creó la fila (spec 010, FR-011 · Art. II.2).
+ *
+ * `categorySource` dice cómo se eligió la categoría; esto dice quién escribió
+ * el movimiento entero. Sin esta distinción, uno escrito por Serva sería
+ * indistinguible de uno tecleado por la persona.
+ */
+export const movementOrigin = pgEnum('movement_origin', ['user', 'assistant'])
+
+/** Qué se le pidió hacer a Serva. Coincide con `TipoDeAccion` de la puerta. */
+export const assistantWriteKind = pgEnum('assistant_write_kind', [
+  'crear',
+  'corregir',
+  'anular',
+])
+
+/**
+ * En qué quedó una propuesta.
+ *
+ * `revertida` y `caducada` son estados terminales y existen desde el principio:
+ * la tarjeta vive dentro de una conversación guardada, así que sigue en pantalla
+ * días después. Sin un estado terminal en el servidor, pulsar «confirmar» en una
+ * tarjeta vieja volvería a escribir lo mismo (FR-025).
+ */
+export const assistantWriteStatus = pgEnum('assistant_write_status', [
+  'propuesta',
+  'aplicada',
+  'revertida',
+  'rechazada',
+  'caducada',
+])
+
 export const categorySource = pgEnum('category_source', [
   'user',
   'keywords',
@@ -98,6 +131,26 @@ export const transactions = pgTable(
     /** Nula solo cuando el movimiento es de tipo ahorro: su destino es la meta. */
     category: categoryKey('category'),
     categorySource: categorySource('category_source').notNull().default('user'),
+
+    /**
+     * Quién escribió este movimiento (spec 010, FR-011).
+     *
+     * El valor por defecto `'user'` es lo que hace segura la migración sobre lo
+     * que ya existe: todo lo registrado hasta que Serva pudo escribir lo
+     * escribió una persona, y eso es cierto.
+     */
+    createdBy: movementOrigin('created_by').notNull().default('user'),
+
+    /**
+     * La escritura de la que salió, cuando la escribió Serva. Es el puente que
+     * permite llegar desde la fila hasta la frase que la originó.
+     */
+    assistantWriteId: uuid('assistant_write_id').references(
+      (): AnyPgColumn => assistantWrites.id,
+      // Si la escritura desapareciera, el movimiento se queda: el historial del
+      // dinero no se borra por perder su rastro (Art. VII).
+      { onDelete: 'set null' },
+    ),
 
     /** Fecha civil: un día del calendario, no un instante (plan 001, §4). */
     occurredOn: date('occurred_on').notNull(),
@@ -187,6 +240,16 @@ export const userSettings = pgTable('user_settings', {
    * valores provisionales: la aplicación la lleva a la bienvenida.
    */
   onboardedAt: timestamp('onboarded_at', { withTimezone: true }),
+
+  /**
+   * Cuándo activó el usuario el registro automático (spec 010, FR-007).
+   *
+   * Marca de tiempo y no booleano, por dos razones. Coherencia: `onboardedAt` y
+   * `cycleConfiguredAt` ya siguen ese patrón en esta misma tabla. Y porque el
+   * Artículo II.1 pide activación **consciente**, y un booleano no registra
+   * cuándo se dio ese consentimiento. Revocar lo pone a `NULL`.
+   */
+  autoRegisterEnabledAt: timestamp('auto_register_enabled_at', { withTimezone: true }),
 
   createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -298,6 +361,15 @@ export const recurringMovements = pgTable(
     lastConfirmedOn: date('last_confirmed_on'),
 
     isSample: boolean('is_sample').notNull().default(false),
+
+    /**
+     * Cuándo dejó de estar vigente (spec 010, T-410).
+     *
+     * Un cobro de una sola vez no se reprograma al confirmarse: se archiva.
+     * Borrarlo eliminaría el rastro de un cobro que sí ocurrió, y el historial
+     * no se reescribe (Art. VII).
+     */
+    archivedAt: timestamp('archived_at', { withTimezone: true }),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
@@ -475,3 +547,54 @@ export const chatMessages = pgTable(
 )
 
 export type ChatMessageRow = typeof chatMessages.$inferSelect
+
+/**
+ * El registro de lo que Serva escribe (spec 010, plan §3.2).
+ *
+ * Es tres cosas a la vez: el diario que exige el Artículo III.4, la
+ * trazabilidad del FR-011 —de la fila hasta la frase— y el soporte de la propia
+ * tarjeta de confirmación.
+ *
+ * **Que la propuesta se persista antes de mostrarse no es contabilidad.** Es lo
+ * que impide que el cliente altere lo que se va a escribir: la tarjeta envía un
+ * identificador, no un cuerpo de datos. Si enviara los movimientos, quien
+ * manipule la petición escribiría lo que quisiera saltándose la extracción
+ * entera.
+ */
+export const assistantWrites = pgTable(
+  'assistant_writes',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+
+    kind: assistantWriteKind('kind').notNull(),
+    status: assistantWriteStatus('status').notNull().default('propuesta'),
+
+    /** La frase del usuario, tal cual. Es el origen al que se rastrea. */
+    inputText: text('input_text').notNull(),
+
+    /** Lo extraído y ya validado contra el esquema, listo para ejecutarse. */
+    proposal: jsonb('proposal').notNull(),
+
+    /**
+     * Única columna de coma flotante, por el mismo motivo que en
+     * `categorization_log`: es una medida de incertidumbre, no dinero (D-054).
+     */
+    confidence: real('confidence'),
+
+    model: text('model'),
+    latencyMs: integer('latency_ms'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    resolvedAt: timestamp('resolved_at', { withTimezone: true }),
+  },
+  (table) => [
+    // Se busca «las propuestas sin resolver de este usuario».
+    index('assistant_writes_user_status_idx').on(table.userId, table.status),
+  ],
+)
+
+export type AssistantWriteRow = typeof assistantWrites.$inferSelect

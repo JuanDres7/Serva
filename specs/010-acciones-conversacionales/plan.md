@@ -196,6 +196,9 @@ function decidir(params: {
 
 Sus reglas, en orden:
 
+0. `cuantos < 1`, o no entero → **rechazar**. Añadida al construirla: una
+   petición vacía no debería llegar siquiera a plantear si se confirma, y
+   rechazar es más seguro que cualquier otra salida, así que va antes que todo.
 1. `corregir` o `anular` → **confirmar** siempre (FR-010).
 2. `cuantos > 5` → **rechazar** (FR-021).
 3. `automaticoActivo === false` → **confirmar** (FR-009).
@@ -203,9 +206,12 @@ Sus reglas, en orden:
 5. En otro caso → **ejecutar**.
 
 Que sea una función pura con esta forma es deliberado: **es la pieza que hace
-falsable el Artículo II en esta feature**. Su tabla de verdad completa son unas
-veinte combinaciones, se prueban todas en vitest en milisegundos, y ninguna
-necesita un modelo, una base de datos ni un navegador.
+falsable el Artículo II en esta feature**. Su tabla de verdad completa son 48 combinaciones —tres tipos por ocho
+cantidades por dos estados de activación—, se prueban todas en vitest en
+milisegundos, y ninguna necesita un modelo, una base de datos ni un navegador.
+El fichero de pruebas escribe el resultado esperado en una función aparte de la
+implementación, para que un error de lógica no se copie a sí mismo en el
+oráculo.
 
 El orden importa y está fijado a propósito: la regla de lo destructivo va
 primero, de modo que ninguna combinación posterior pueda habilitarlo.
