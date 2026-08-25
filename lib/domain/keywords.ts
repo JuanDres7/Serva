@@ -113,13 +113,31 @@ const LARGO_MAXIMO = 45
  * está disponible produce algo mejor —«Cartón de leche» en lugar de «Fui a la
  * tienda y compré un…»—, pero el historial debe ser legible también sin ella.
  */
-export function descripcionCorta(texto: string): string {
+/**
+ * La primera letra en mayúscula, y ninguna más.
+ *
+ * Un modelo devuelve el texto como lo oyó, y quien habla no escribe mayúsculas:
+ * «palomitas cine», «primo», «mi hermana». Eso llegaba tal cual al historial y
+ * a las tarjetas, y una lista entera en minúscula se lee como algo a medio
+ * hacer.
+ *
+ * Solo la primera. Poner en Mayúscula Cada Palabra es una convención del
+ * inglés; en español «Palomitas Cine» se lee peor que «palomitas cine».
+ */
+export function enMayuscula(texto: string): string {
   // Se normaliza a NFC primero: si el acento viaja como carácter combinante
-  // aparte, cortar por posición puede partir la letra de su tilde y dejar basura.
+  // aparte, tocar la primera posición puede partir la letra de su tilde.
   const limpio = texto.normalize('NFC').trim().replace(/\s+/g, ' ')
   if (limpio === '') return ''
 
-  const capitalizado = limpio.charAt(0).toUpperCase() + limpio.slice(1)
+  return limpio.charAt(0).toUpperCase() + limpio.slice(1)
+}
+
+export function descripcionCorta(texto: string): string {
+  const limpio = texto.normalize('NFC').trim().replace(/\s+/g, ' ')
+  if (limpio === '') return ''
+
+  const capitalizado = enMayuscula(limpio)
   if (capitalizado.length <= LARGO_MAXIMO) return capitalizado
 
   // Se arma palabra a palabra en lugar de recortar por posición: así nunca se

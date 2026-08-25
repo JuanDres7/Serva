@@ -6,6 +6,7 @@ import {
   extraerPalabrasClave,
   similitud,
   descripcionCorta,
+  enMayuscula,
 } from '@/lib/domain/keywords'
 
 describe('normalización', () => {
@@ -133,5 +134,42 @@ describe('descripción corta para el historial', () => {
 
   it('un texto vacío produce texto vacío', () => {
     expect(descripcionCorta('   ')).toBe('')
+  })
+})
+
+describe('enMayuscula (D-076)', () => {
+  /*
+   * Quien habla no escribe mayúsculas, y el modelo devuelve lo que oyó. Sin
+   * esto, el historial se llenaba de «palomitas cine» y «primo».
+   */
+  it('sube la primera letra', () => {
+    expect(enMayuscula('palomitas cine')).toBe('Palomitas cine')
+    expect(enMayuscula('primo')).toBe('Primo')
+  })
+
+  it('solo la primera: Mayúsculas En Cada Palabra es del inglés', () => {
+    expect(enMayuscula('mi hermana')).toBe('Mi hermana')
+    expect(enMayuscula('abono a mi hermana')).toBe('Abono a mi hermana')
+  })
+
+  it('lo que ya venía bien no se toca', () => {
+    expect(enMayuscula('Netflix')).toBe('Netflix')
+    expect(enMayuscula('IVA del trimestre')).toBe('IVA del trimestre')
+  })
+
+  it('acentos y eñes sobreviven', () => {
+    expect(enMayuscula('árbol de navidad')).toBe('Árbol de navidad')
+    expect(enMayuscula('ñapa')).toBe('Ñapa')
+  })
+
+  it('espacios de sobra y cadenas vacías', () => {
+    expect(enMayuscula('  almuerzo  ')).toBe('Almuerzo')
+    expect(enMayuscula('café   con   leche')).toBe('Café con leche')
+    expect(enMayuscula('')).toBe('')
+    expect(enMayuscula('   ')).toBe('')
+  })
+
+  it('lo que no empieza por letra se deja en paz', () => {
+    expect(enMayuscula('3 cervezas')).toBe('3 cervezas')
   })
 })
