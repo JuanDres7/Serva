@@ -3,7 +3,7 @@ import { CATEGORIES, isValidFor, fallbackFor, type MovementKind } from '@/lib/do
 import { currencyDecimals } from '@/lib/domain/money'
 import { resolverFecha } from '@/lib/domain/fecha-hablada'
 import { compareDates, toISO, type CivilDate } from '@/lib/domain/civil-date'
-import { descripcionCorta } from '@/lib/domain/keywords'
+import { descripcionCorta, enMayuscula } from '@/lib/domain/keywords'
 import { MAXIMO_POR_MENSAJE } from '@/lib/domain/puerta'
 
 /**
@@ -38,7 +38,7 @@ export const movimientoPropuestoSchema = z.object({
     .string()
     .max(40)
     .nullable()
-    .describe('Tal como se dijo: «hoy», «ayer», «el martes», «7 de septiembre».'),
+    .describe('Tal como se dijo: «hoy», «ayer», «mañana», «el martes», «7 de septiembre».'),
 })
 
 export const propuestaSchema = z.object({
@@ -130,7 +130,10 @@ function prepararUno(
   return {
     tipo,
     amountCents: cents,
-    descripcion,
+    // La tarjeta enseña esto antes de guardarlo, así que la mayúscula del
+    // esquema de escritura llegaría tarde: se vería «palomitas cine» al
+    // confirmar y «Palomitas cine» en el historial (D-076).
+    descripcion: enMayuscula(descripcion),
     descripcionCorta: descripcionCorta(descripcion),
     // FR-005: sin categoría fiable va a «Otros», igual que hace la cascada de
     // la spec 002. No se detiene el registro por no saber clasificarlo.

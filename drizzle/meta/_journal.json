@@ -99,6 +99,13 @@
       "when": 1787618504097,
       "tag": "0013_deudas_sin_categoria",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1787625008928,
+      "tag": "0014_mayuscula_inicial",
+      "breakpoints": true
     }
   ]
 }
