@@ -321,3 +321,36 @@ describe('el vencimiento se guarda como fecha civil', () => {
     expect((await leerDeuda(ANA, deuda.id))?.fila.dueOn).toBeNull()
   })
 })
+
+describe('T-530 — lo que escribe la IA queda marcado', () => {
+  it('una deuda creada por el asistente es rastreable hasta su origen', async () => {
+    const deuda = await crearDeuda(
+      ANA,
+      {
+        direction: 'owed_by_me',
+        counterparty: 'mi hermana',
+        originalCents: 20000000,
+        createdBy: 'assistant',
+      },
+      COP,
+    )
+
+    const [fila] = await db
+      .select({ origen: debts.createdBy })
+      .from(debts)
+      .where(eq(debts.id, deuda.id))
+
+    expect(fila?.origen).toBe('assistant')
+  })
+
+  it('y una creada a mano queda como del usuario, sin pedirlo', async () => {
+    const deuda = await deudaMia()
+
+    const [fila] = await db
+      .select({ origen: debts.createdBy })
+      .from(debts)
+      .where(eq(debts.id, deuda.id))
+
+    expect(fila?.origen).toBe('user')
+  })
+})

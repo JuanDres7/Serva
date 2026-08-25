@@ -57,13 +57,13 @@ funciones puras, y son las que todo lo demás va a usar.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-524 | `proponerDeuda`, ligada al usuario por cierre | «Me prestaron 200 mil, los devuelvo el 7 de septiembre» crea la deuda con su fecha |
-| ⬜ T-525 | `proponerAbono` | «Le aboné 50 mil a mi hermana» baja el saldo y registra el gasto |
-| ⬜ T-526 | `proponerSaldarDeuda` entra por la puerta como `corregir` | **Confirma siempre**, con automático o sin él. No hace falta regla nueva en la puerta |
-| ⬜ T-527 | Buscar la deuda por contraparte, no por identificador | El modelo nunca envía un UUID; con varias coincidencias se muestran y elige la persona |
-| ⬜ T-528 | Ampliar la lista permitida de herramientas a doce | La prueba falla si aparece una decimotercera sin aprobar |
-| ⬜ T-529 | El asistente responde «¿cuánto debo?» y «¿quién me debe?» | Las cifras coinciden con el cálculo directo (FR-016) |
-| ⬜ T-530 | Lo escrito por la IA queda marcado y es rastreable | `createdBy` y `assistantWriteId` en la deuda creada |
+| ✅ T-524 | `proponerDeuda`, ligada al usuario por cierre | «Me prestaron 200 mil, los devuelvo el 7 de septiembre» crea la deuda con su fecha |
+| ✅ T-525 | `proponerAbono` | «Le aboné 50 mil a mi hermana» baja el saldo y registra el gasto |
+| ✅ T-526 | `proponerSaldarDeuda` entra por la puerta como `corregir` | **Confirma siempre**, con automático o sin él. No hace falta regla nueva en la puerta |
+| ✅ T-527 | Buscar la deuda por contraparte, no por identificador | El modelo nunca envía un UUID; con varias coincidencias se muestran y elige la persona |
+| ✅ T-528 | Ampliar la lista permitida de herramientas a **trece** | El plan preveía doce; hizo falta una más, `misDeudas`, para poder responder «¿cuánto debo?» (FR-016). La prueba falla si aparece una decimocuarta sin aprobar |
+| ✅ T-529 | El asistente responde «¿cuánto debo?» y «¿quién me debe?» | Las cifras coinciden con el cálculo directo (FR-016) |
+| ✅ T-530 | Lo escrito por la IA queda marcado y es rastreable | `createdBy` y `assistantWriteId` en la deuda creada |
 
 ## Fase 6 — Interfaz
 

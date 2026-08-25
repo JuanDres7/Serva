@@ -329,6 +329,12 @@ describe('límites del asistente', () => {
     'proponerMovimientos',
     'proponerCorreccion',
     'proponerAnulacion',
+    // Deudas (spec 011). `misDeudas` es de consulta; las tres `proponer*`
+    // pasan por la misma puerta que las demas.
+    'misDeudas',
+    'proponerDeuda',
+    'proponerAbono',
+    'proponerSaldarDeuda',
   ] as const
 
   it('solo existen las herramientas aprobadas', () => {
