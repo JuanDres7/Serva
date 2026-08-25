@@ -54,6 +54,21 @@ type Salida = {
   }
   candidatos?: { descripcion: string; monto: string; fecha: string }[]
   buscado?: string
+  /** Deudas (spec 011). */
+  deuda?: {
+    contraparte: string
+    direccion: string
+    monto?: string
+    saldo?: string
+    vence?: string | null
+  }
+  abono?: {
+    contraparte: string
+    monto: string
+    saldoAntes: string
+    saldoDespues: string
+    salda: boolean
+  }
 }
 
 type Estado = 'pendiente' | 'confirmada' | 'revertida' | 'cancelada'
@@ -93,7 +108,11 @@ export function TarjetaDeAccion({ salida }: { salida: Salida }) {
   }
 
   if (salida.resultado === 'no-encontrado') {
-    return <Aviso>No encontré ningún movimiento que coincida con «{salida.buscado}».</Aviso>
+    return <Aviso>No encontré nada que coincida con «{salida.buscado}».</Aviso>
+  }
+
+  if (salida.resultado === 'falta-fecha') {
+    return <Aviso>{salida.motivo}</Aviso>
   }
 
   if (salida.resultado === 'varias-coincidencias') {
@@ -158,6 +177,39 @@ export function TarjetaDeAccion({ salida }: { salida: Salida }) {
               )}
             </span>
           </div>
+        </div>
+      )}
+
+      {salida.deuda && (
+        <div className="space-y-1 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="flex min-w-0 items-center gap-2">
+              <span className="truncate">{salida.deuda.contraparte}</span>
+              <span className="eyebrow shrink-0 text-muted-foreground">
+                {salida.deuda.direccion}
+              </span>
+            </span>
+            <span className="cifra shrink-0">
+              {salida.deuda.monto ?? salida.deuda.saldo}
+            </span>
+          </div>
+          {salida.deuda.vence && (
+            <p className="text-xs text-muted-foreground">Vence el {salida.deuda.vence}</p>
+          )}
+        </div>
+      )}
+
+      {salida.abono && (
+        <div className="space-y-1 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="truncate">Abono a {salida.abono.contraparte}</span>
+            <span className="cifra shrink-0">– {salida.abono.monto}</span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            {salida.abono.salda
+              ? 'Con esto queda saldada.'
+              : `Quedarían ${salida.abono.saldoDespues}.`}
+          </p>
         </div>
       )}
 

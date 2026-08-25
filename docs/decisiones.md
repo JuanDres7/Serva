@@ -1731,6 +1731,43 @@ registrar un préstamo, volver a medirlos y exigir que no hayan cambiado.
 
 ---
 
+## D-074 · Las deudas aciertan 7 de 7, y aparecieron dos fallos por el camino (2026-08-24)
+
+**Qué se probó.** Siete frases de deuda contra Gemini, con `npm run evaluar`:
+prestar, que te presten, deber, abonar, saldar y dos consultas. Lo que se mide
+no es el monto sino **la elección de herramienta**: que Serva no confunda un
+préstamo con un ingreso es lo que la feature existe para garantizar.
+
+**Resultado: 7 de 7.** Incluidas las dos que más importan —«¿cuánto debo?» no
+escribe nada, y «ya le pagué todo» pide confirmación en lugar de saldar sola,
+porque saldar entra por la puerta como corrección.
+
+**Pero la primera pasada dio 2 de 7, y ninguno de los dos motivos era el
+modelo.**
+
+El primero era mi propia prueba. La cuota gratuita de Gemini admite quince
+peticiones por minuto y cada frase gasta dos o tres, así que la evaluación
+estaba midiendo la cuota y no el modelo: sus fallos decían «no respondió». Peor
+aún, el oráculo contaba como acierto que no saliera tarjeta de confirmación —y
+si el modelo no contesta, tampoco sale—, con lo que dos fallos se apuntaban
+como aciertos. Un oráculo que confunde silencio con acierto es peor que no
+tenerlo. Ahora hay pausa entre frases y se exige que Serva haya respondido algo.
+
+El segundo era un fallo real, **y es el mismo del FR-006 en miniatura**: las
+tres herramientas de deuda no estaban en el `switch` de `chat-visuales.tsx`, así
+que la propuesta se guardaba, la puerta decidía, y la interfaz tiraba el
+resultado a la basura. El modelo decía «Quedó anotado» y no aparecía ninguna
+tarjeta, de modo que no había forma de confirmar nada.
+
+Que sea el segundo caso del mismo error dice algo: **añadir una herramienta
+tiene dos mitades, y la segunda es fácil de olvidar porque no rompe nada.** No
+hay error de compilación, no falla ninguna prueba, y el chat sigue respondiendo.
+Solo se descubre mirando la pantalla.
+
+Queda anotado en `CLAUDE.md` para la próxima.
+
+---
+
 # Decisiones pendientes
 
 _Ninguna. Todas las preguntas abiertas quedaron resueltas._

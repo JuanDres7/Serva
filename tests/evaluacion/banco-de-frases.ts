@@ -90,6 +90,31 @@ export const BANCO: readonly CasoDeFrase[] = [
 ]
 
 /**
+ * Frases de deuda (spec 011, T-539).
+ *
+ * Van aparte porque se miden distinto: aquí no se comprueba qué movimiento
+ * salió, sino que Serva llamara a la herramienta de deudas y no a la de
+ * movimientos. Confundirlas es el error que importa: registrar un préstamo como
+ * ingreso es exactamente lo que la feature existe para evitar.
+ */
+export type CasoDeDeuda = {
+  readonly frase: string
+  /** Qué herramienta debería elegir. */
+  readonly espera: 'proponerDeuda' | 'proponerAbono' | 'proponerSaldarDeuda' | 'misDeudas'
+  readonly montoCents?: number
+}
+
+export const BANCO_DE_DEUDAS: readonly CasoDeDeuda[] = [
+  { frase: 'me prestaron 200 mil, tengo que devolverlos el 7 de septiembre', espera: 'proponerDeuda', montoCents: 20000000 },
+  { frase: 'le presté 80 mil a un amigo', espera: 'proponerDeuda', montoCents: 8000000 },
+  { frase: 'le debo 500 mil a mi hermana', espera: 'proponerDeuda', montoCents: 50000000 },
+  { frase: 'le aboné 50 mil a mi hermana', espera: 'proponerAbono', montoCents: 5000000 },
+  { frase: 'ya le pagué todo a mi hermana', espera: 'proponerSaldarDeuda' },
+  { frase: '¿cuánto debo?', espera: 'misDeudas' },
+  { frase: '¿quién me debe plata?', espera: 'misDeudas' },
+]
+
+/**
  * El umbral que decide si la extracción es de fiar.
  *
  * Nueve de diez, como dice la métrica de la spec §7. Por debajo, la feature no

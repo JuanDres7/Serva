@@ -81,12 +81,12 @@ funciones puras, y son las que todo lo demás va a usar.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-538 | Sin proveedor de IA, las deudas funcionan enteras a mano | Crear, abonar y saldar sin que exista `lib/ai/` |
-| ⬜ T-539 | Ampliar el banco de frases con los casos de deuda | Corre en `npm run evaluar`, nunca en `verify` |
-| ⬜ T-540 | Evaluación registrada como decisión | Qué se probó, qué salió, qué quedó flojo. Como D-057 y D-069 |
-| ⬜ T-541 | `npm run verify` en verde sin modelo instalado | Las 519 actuales más las nuevas |
-| ⬜ T-542 | Actualizar spec 009 si la exportación gana hoja de deudas | Ninguna spec queda desmentida por el código |
-| ⬜ T-543 | Datos de ejemplo incluyen alguna deuda | Quien pulse «Ver con datos de ejemplo» ve la pantalla con algo dentro |
+| ✅ T-538 | Sin proveedor de IA, las deudas funcionan enteras a mano | Crear, abonar y saldar sin que exista `lib/ai/` |
+| ✅ T-539 | Ampliar el banco de frases con los casos de deuda | Corre en `npm run evaluar`, nunca en `verify` |
+| ✅ T-540 | Evaluación registrada como decisión | Qué se probó, qué salió, qué quedó flojo. Como D-057 y D-069 |
+| ✅ T-541 | `npm run verify` en verde sin modelo instalado | Las 519 actuales más las nuevas |
+| ✅ T-542 | Actualizar spec 009 si la exportación gana hoja de deudas | Ninguna spec queda desmentida por el código |
+| ✅ T-543 | Datos de ejemplo incluyen alguna deuda | Quien pulse «Ver con datos de ejemplo» ve la pantalla con algo dentro |
 
 ---
 
