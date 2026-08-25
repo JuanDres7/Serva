@@ -271,11 +271,12 @@ export async function periodAggregates(
     .select({
       type: transactions.type,
       direction: transactions.savingDirection,
+      debtFlow: transactions.debtFlow,
       total: sql<string>`sum(${transactions.amountCents})`,
     })
     .from(transactions)
     .where(scope(userId, { period }))
-    .groupBy(transactions.type, transactions.savingDirection)
+    .groupBy(transactions.type, transactions.savingDirection, transactions.debtFlow)
 
   const result = {
     currency,
@@ -283,14 +284,47 @@ export async function periodAggregates(
     expenseCents: 0,
     savingContributionCents: 0,
     savingWithdrawalCents: 0,
+    debtReceivedCents: 0,
+    debtLentCents: 0,
+    debtCollectedCents: 0,
   }
 
+  /*
+   * Un `switch` exhaustivo y no una cadena de `if`.
+   *
+   * Antes el último `else` recogía todo lo que no fuera ingreso ni gasto, y al
+   * añadir el tipo `debt` un préstamo habría acabado contado como aporte a
+   * ahorro: el balance resta el ahorro neto, así que pedir prestado habría
+   * bajado el balance. TypeScript no lo detecta en una cadena de `if`.
+   *
+   * Con el `switch` y el caso imposible de abajo, añadir un quinto tipo de
+   * movimiento produce un error de compilación aquí, que es donde tiene que
+   * producirse.
+   */
   for (const row of rows) {
     const total = Number(row.total ?? 0)
-    if (row.type === 'income') result.incomeCents += total
-    else if (row.type === 'expense') result.expenseCents += total
-    else if (row.direction === 'withdrawal') result.savingWithdrawalCents += total
-    else result.savingContributionCents += total
+
+    switch (row.type) {
+      case 'income':
+        result.incomeCents += total
+        break
+      case 'expense':
+        result.expenseCents += total
+        break
+      case 'saving':
+        if (row.direction === 'withdrawal') result.savingWithdrawalCents += total
+        else result.savingContributionCents += total
+        break
+      case 'debt':
+        if (row.debtFlow === 'received') result.debtReceivedCents += total
+        else if (row.debtFlow === 'lent') result.debtLentCents += total
+        else result.debtCollectedCents += total
+        break
+      default: {
+        const imposible: never = row.type
+        throw new Error(`Tipo de movimiento sin contemplar: ${String(imposible)}`)
+      }
+    }
   }
 
   return result

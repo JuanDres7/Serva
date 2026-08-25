@@ -14,32 +14,32 @@ funciones puras, y son las que todo lo demás va a usar.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-501 | `lib/domain/deudas.ts`: saldo derivado del original menos los abonos | Función pura, sin `import` de base ni de red. 500.000 con abonos de 200.000 y 100.000 da 200.000 |
-| ⬜ T-502 | `estaSaldada` y `puedeAbonar`, que devuelve resultado en vez de lanzar | Un abono de 300.000 sobre un saldo de 200.000 se rechaza diciendo que quedan 200.000, no con una excepción |
-| ⬜ T-503 | `estadoDeVencimiento` con sus cuatro estados | Una deuda que vence hoy es `cerca`; una de hace siete días es `vencida`; una saldada es `saldada` aunque su fecha pasara |
-| ⬜ T-504 | `resumenDeDeudas`: totales por dirección | Con deudas en ambos sentidos, «debo» y «me deben» no se mezclan ni se restan |
-| ⬜ T-505 | Ningún cálculo con coma flotante | Los saldos salen de restar enteros; una prueba recorre los resultados y exige `Number.isInteger` |
+| ✅ T-501 | `lib/domain/deudas.ts`: saldo derivado del original menos los abonos | Función pura, sin `import` de base ni de red. 500.000 con abonos de 200.000 y 100.000 da 200.000 |
+| ✅ T-502 | `estaSaldada` y `puedeAbonar`, que devuelve resultado en vez de lanzar | Un abono de 300.000 sobre un saldo de 200.000 se rechaza diciendo que quedan 200.000, no con una excepción |
+| ✅ T-503 | `estadoDeVencimiento` con sus cuatro estados | Una deuda que vence hoy es `cerca`; una de hace siete días es `vencida`; una saldada es `saldada` aunque su fecha pasara |
+| ✅ T-504 | `resumenDeDeudas`: totales por dirección | Con deudas en ambos sentidos, «debo» y «me deben» no se mezclan ni se restan |
+| ✅ T-505 | Ningún cálculo con coma flotante | Los saldos salen de restar enteros; una prueba recorre los resultados y exige `Number.isInteger` |
 
 ## Fase 2 — Modelo de datos
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-506 | Enums `debt_direction` y `debt_flow` | Los tres flujos presentes: recibido, prestado, cobrado |
-| ⬜ T-507 | Valor `'debt'` en `movement_type` | **TypeScript señala cada `switch` que no lo contempla. Esa lista de errores es la lista de sitios a revisar** |
-| ⬜ T-508 | Tablas `debts` y `debt_payments` con sus índices | Ninguna columna de saldo: se deriva. Ningún tipo de coma flotante |
-| ⬜ T-509 | Columnas `debtFlow` y `debtId` en `transactions`, y el `CHECK` de categoría extendido | Un movimiento de tipo deuda no admite categoría, igual que uno de ahorro |
-| ⬜ T-510 | Migración leída a mano antes de aplicarla | `ALTER TYPE ... ADD VALUE` revisado; ninguna columna nueva reescribe filas existentes |
+| ✅ T-506 | Enums `debt_direction` y `debt_flow` | Los tres flujos presentes: recibido, prestado, cobrado |
+| ✅ T-507 | Valor `'debt'` en `movement_type` | **TypeScript señala cada `switch` que no lo contempla. Esa lista de errores es la lista de sitios a revisar** |
+| ✅ T-508 | Tablas `debts` y `debt_payments` con sus índices | Ninguna columna de saldo: se deriva. Ningún tipo de coma flotante |
+| ✅ T-509 | Columnas `debtFlow` y `debtId` en `transactions`, y el `CHECK` de categoría extendido | Un movimiento de tipo deuda no admite categoría, igual que uno de ahorro |
+| ✅ T-510 | Migración leída a mano antes de aplicarla | `ALTER TYPE ... ADD VALUE` revisado; ninguna columna nueva reescribe filas existentes |
 
 ## Fase 3 — Los totales, que es donde se juega la feature
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-511 | `PeriodAggregates` y `computeTotals` contemplan el tipo deuda sin meterlo en el balance | **Medir totales, registrar un préstamo, volver a medir: idénticos** (criterio 3 de la spec) |
+| ✅ T-511 | `PeriodAggregates` y `computeTotals` contemplan el tipo deuda sin meterlo en el balance | **Medir totales, registrar un préstamo, volver a medir: idénticos** (criterio 3 de la spec) |
 | ⬜ T-512 | Lo mismo comprobado en presupuestos | Un préstamo recibido no consume tope de ninguna categoría |
 | ⬜ T-513 | Lo mismo en los gráficos y en el ritmo del período | Ni la evolución ni el acumulado diario se mueven al registrar un préstamo |
 | ⬜ T-514 | Lo mismo en la exportación a Excel | Los totales del archivo coinciden con los de la pantalla |
 | ⬜ T-515 | Y en las seis herramientas de consulta del asistente | `totalesDelPeriodo` devuelve lo mismo antes y después del préstamo |
-| ⬜ T-516 | El abono **sí** cuenta como gasto | Abonar 50.000 sube el gasto del período en 50.000, en «Deudas y créditos» |
+| ✅ T-516 | El abono **sí** cuenta como gasto | Abonar 50.000 sube el gasto del período en 50.000, en «Deudas y créditos» |
 
 ## Fase 4 — Consultas y acciones
 

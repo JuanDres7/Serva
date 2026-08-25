@@ -36,7 +36,33 @@ import { user } from './auth-schema'
 export * from './auth-schema'
 
 /** Los tres tipos de movimiento (D-028). */
-export const movementType = pgEnum('movement_type', ['expense', 'income', 'saving'])
+/**
+ * Qué clase de movimiento es.
+ *
+ * `debt` es el cuarto y entra con la feature 011. Un préstamo mueve dinero real
+ * sin ser ingreso ni gasto, igual que un aporte a una meta: si te prestan
+ * 200.000, el dinero está en tu bolsillo y no es tuyo.
+ *
+ * Es un valor del enum y no una bandera a propósito. TypeScript señala cada
+ * `switch` que no lo contemple, y esa lista de errores es la lista de sitios
+ * que hay que revisar. Una bandera habría que recordarla en los totales, los
+ * presupuestos, los gráficos, la exportación y las herramientas del asistente,
+ * y olvidarla en uno solo da una cifra equivocada sin error visible (D-073).
+ */
+export const movementType = pgEnum('movement_type', ['expense', 'income', 'saving', 'debt'])
+
+/** En qué sentido se movió el dinero de una deuda. */
+export const debtFlow = pgEnum('debt_flow', [
+  /** Me prestaron: entró dinero que no es mío. */
+  'received',
+  /** Presté: salió dinero que vuelve. */
+  'lent',
+  /** Me devolvieron lo que presté. */
+  'collected',
+])
+
+/** Quién le debe a quién. */
+export const debtDirection = pgEnum('debt_direction', ['owed_by_me', 'owed_to_me'])
 
 /** Anulación como estado, nunca borrado (Art. VII). */
 export const movementStatus = pgEnum('movement_status', ['active', 'voided'])
@@ -145,6 +171,15 @@ export const transactions = pgTable(
      * La escritura de la que salió, cuando la escribió Serva. Es el puente que
      * permite llegar desde la fila hasta la frase que la originó.
      */
+    /**
+     * En qué sentido se movió el dinero, si este movimiento es de una deuda
+     * (spec 011). Nulo en todos los demás.
+     */
+    debtFlow: debtFlow('debt_flow'),
+
+    /** La deuda a la que pertenece, cuando la hay. */
+    debtId: uuid('debt_id'),
+
     assistantWriteId: uuid('assistant_write_id').references(
       (): AnyPgColumn => assistantWrites.id,
       // Si la escritura desapareciera, el movimiento se queda: el historial del
@@ -194,11 +229,13 @@ export const transactions = pgTable(
 
     check('amount_positive', sql`${table.amountCents} > 0`),
     check('date_not_future', sql`${table.occurredOn} <= CURRENT_DATE`),
-    // Un ahorro va a una meta; un gasto o ingreso, a una categoría.
+    // Un ahorro va a una meta y un préstamo a una deuda; solo los gastos y los
+    // ingresos tienen categoría. Un préstamo recibido no es de ninguna: no es
+    // gasto (spec 011).
     check(
       'category_matches_type',
-      sql`(${table.type} = 'saving' AND ${table.category} IS NULL)
-          OR (${table.type} <> 'saving' AND ${table.category} IS NOT NULL)`,
+      sql`(${table.type} IN ('saving', 'debt') AND ${table.category} IS NULL)
+          OR (${table.type} NOT IN ('saving', 'debt') AND ${table.category} IS NOT NULL)`,
     ),
   ],
 )
@@ -598,3 +635,98 @@ export const assistantWrites = pgTable(
 )
 
 export type AssistantWriteRow = typeof assistantWrites.$inferSelect
+
+/**
+ * Deudas y préstamos (spec 011).
+ *
+ * **No hay columna de saldo.** Se deriva del monto original menos la suma de
+ * sus abonos, igual que los balances del usuario se derivan del historial. Un
+ * contador que se actualiza a mano acaba desincronizado de los hechos que lo
+ * alimentan (D-073).
+ */
+export const debts = pgTable(
+  'debts',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+
+    direction: debtDirection('direction').notNull(),
+
+    /** A quién le debo, o quién me debe. Texto libre: no hay agenda (RN-005). */
+    counterparty: text('counterparty').notNull(),
+
+    /** El monto pactado. El saldo se calcula restando los abonos. */
+    originalCents: bigint('original_cents', { mode: 'number' }).notNull(),
+    currency: char('currency', { length: 3 }).notNull(),
+
+    description: text('description'),
+
+    /** Fecha civil, opcional. Vence el día, no la hora (RN-004). */
+    dueOn: date('due_on'),
+
+    /**
+     * Cuándo se saldó. Marca de tiempo y no booleano: registra el momento, y
+     * reabrir por error es ponerlo a NULL (FR-014).
+     */
+    settledAt: timestamp('settled_at', { withTimezone: true }),
+
+    isSample: boolean('is_sample').notNull().default(false),
+
+    /** Quién la creó, igual que en los movimientos (Art. II.2). */
+    createdBy: movementOrigin('created_by').notNull().default('user'),
+    assistantWriteId: uuid('assistant_write_id'),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    // Se busca «las deudas vivas de este usuario», casi siempre.
+    index('debts_user_settled_idx').on(table.userId, table.settledAt),
+
+    check('debts_original_positive', sql`${table.originalCents} > 0`),
+    check('debts_counterparty_not_empty', sql`length(trim(${table.counterparty})) > 0`),
+  ],
+)
+
+export type DebtRow = typeof debts.$inferSelect
+
+/**
+ * Cada abono a una deuda.
+ *
+ * Se guardan por separado y no como un contador para poder ver **cómo** se
+ * pagó, y porque el saldo sale de sumarlos.
+ */
+export const debtPayments = pgTable(
+  'debt_payments',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+
+    debtId: uuid('debt_id')
+      .notNull()
+      .references(() => debts.id, { onDelete: 'cascade' }),
+
+    /**
+     * El movimiento que generó este abono, cuando lo hay.
+     *
+     * `SET NULL` y no `CASCADE`: anular el movimiento no borra el registro del
+     * abono. Son dos hechos distintos, y el historial no se reescribe (Art. VII).
+     */
+    transactionId: uuid('transaction_id').references(() => transactions.id, {
+      onDelete: 'set null',
+    }),
+
+    amountCents: bigint('amount_cents', { mode: 'number' }).notNull(),
+    paidOn: date('paid_on').notNull(),
+
+    createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index('debt_payments_debt_idx').on(table.debtId, table.paidOn),
+    check('debt_payments_amount_positive', sql`${table.amountCents} > 0`),
+  ],
+)
+
+export type DebtPaymentRow = typeof debtPayments.$inferSelect

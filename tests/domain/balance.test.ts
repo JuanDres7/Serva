@@ -16,6 +16,9 @@ const aggregates = (partial: Partial<PeriodAggregates>): PeriodAggregates => ({
   expenseCents: 0,
   savingContributionCents: 0,
   savingWithdrawalCents: 0,
+  debtReceivedCents: 0,
+  debtLentCents: 0,
+  debtCollectedCents: 0,
   ...partial,
 })
 

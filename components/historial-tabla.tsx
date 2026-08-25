@@ -34,7 +34,7 @@ import {
 
 export type MovimientoVista = {
   readonly id: string
-  readonly type: 'expense' | 'income' | 'saving'
+  readonly type: 'expense' | 'income' | 'saving' | 'debt'
   readonly amountCents: number
   readonly category: string | null
   readonly occurredOn: string
