@@ -69,13 +69,13 @@ funciones puras, y son las que todo lo demás va a usar.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-531 | Pantalla `/deudas` con las dos listas y sus totales | «Debo» y «Me deben» separadas, cada una con su total |
-| ⬜ T-532 | Tarjeta de deuda con barra de saldo, reutilizando la de metas | No se inventa un componente nuevo para lo mismo |
-| ⬜ T-533 | Entrada en la navegación, entre Metas y Recurrentes | Aparece también en la tira compacta del móvil |
-| ⬜ T-534 | Abonar y saldar desde la pantalla | El saldo se actualiza sin recargar |
-| ⬜ T-535 | Aviso de vencimiento que informa y no regaña (D-024) | «Vence en 3 días», «lleva 7 días vencida». Nunca «te retrasaste» |
-| ⬜ T-536 | Estado vacío que invita a empezar | Reutiliza `components/vacio.tsx` (E11) |
-| ⬜ T-537 | Sigue D-062 y D-065, y funciona a 390 px | Colores del sistema, ningún hex suelto, sin desbordamiento horizontal |
+| ✅ T-531 | Pantalla `/deudas` con las dos listas y sus totales | «Debo» y «Me deben» separadas, cada una con su total |
+| ✅ T-532 | Tarjeta de deuda con barra de saldo, reutilizando la de metas | No se inventa un componente nuevo para lo mismo |
+| ✅ T-533 | Entrada en la navegación, entre Metas y Recurrentes | Aparece también en la tira compacta del móvil |
+| ✅ T-534 | Abonar y saldar desde la pantalla | El saldo se actualiza sin recargar |
+| ✅ T-535 | Aviso de vencimiento que informa y no regaña (D-024) | «Vence en 3 días», «lleva 7 días vencida». Nunca «te retrasaste» |
+| ✅ T-536 | Estado vacío que invita a empezar | Reutiliza `components/vacio.tsx` (E11) |
+| ✅ T-537 | Sigue D-062 y D-065, y funciona a 390 px | Colores del sistema, ningún hex suelto, sin desbordamiento horizontal |
 
 ## Fase 7 — Cierre
 

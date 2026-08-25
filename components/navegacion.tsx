@@ -23,6 +23,8 @@ const SECCIONES = [
   { href: '/historial', etiqueta: 'Historial' },
   { href: '/presupuestos', etiqueta: 'Presupuestos' },
   { href: '/metas', etiqueta: 'Metas' },
+  // Vecina de Metas: las dos son cosas que duran y tienen saldo.
+  { href: '/deudas', etiqueta: 'Deudas' },
   { href: '/recurrentes', etiqueta: 'Recurrentes' },
 ]
 
