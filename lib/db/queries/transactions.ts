@@ -25,7 +25,10 @@ export type MovementType = 'expense' | 'income' | 'saving'
 
 export const transactionInputSchema = z
   .object({
-    type: z.enum(['expense', 'income', 'saving']),
+    type: z.enum(['expense', 'income', 'saving', 'debt']),
+    /** En qué sentido se movió el dinero, si es un movimiento de deuda. */
+    debtFlow: z.enum(['received', 'lent', 'collected']).nullable().optional(),
+    debtId: z.string().uuid().nullable().optional(),
     amountCents: z.number().int().positive(),
     currency: z.string().regex(/^[A-Z]{3}$/),
     category: z.string().nullable().optional(),
@@ -51,6 +54,26 @@ export const transactionInputSchema = z
           code: 'custom',
           path: ['category'],
           message: 'Un ahorro va a una meta, no a una categoría',
+        })
+      }
+      return
+    }
+
+    // Un préstamo no es gasto de nada, así que no lleva categoría; y necesita
+    // saber en qué sentido se movió el dinero (spec 011).
+    if (value.type === 'debt') {
+      if (value.category) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['category'],
+          message: 'Un préstamo va a una deuda, no a una categoría',
+        })
+      }
+      if (!value.debtFlow) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['debtFlow'],
+          message: 'Falta saber si el dinero entró, salió o volvió',
         })
       }
       return
@@ -131,6 +154,8 @@ export async function createTransaction(
       descriptionShort: values.descriptionShort ?? null,
       createdBy: values.createdBy,
       assistantWriteId: values.assistantWriteId ?? null,
+      debtFlow: values.debtFlow ?? null,
+      debtId: values.debtId ?? null,
     })
     .returning()
 

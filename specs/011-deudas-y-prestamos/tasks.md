@@ -35,10 +35,10 @@ funciones puras, y son las que todo lo demás va a usar.
 | | Tarea | Criterio de verificación |
 |---|---|---|
 | ✅ T-511 | `PeriodAggregates` y `computeTotals` contemplan el tipo deuda sin meterlo en el balance | **Medir totales, registrar un préstamo, volver a medir: idénticos** (criterio 3 de la spec) |
-| ⬜ T-512 | Lo mismo comprobado en presupuestos | Un préstamo recibido no consume tope de ninguna categoría |
-| ⬜ T-513 | Lo mismo en los gráficos y en el ritmo del período | Ni la evolución ni el acumulado diario se mueven al registrar un préstamo |
-| ⬜ T-514 | Lo mismo en la exportación a Excel | Los totales del archivo coinciden con los de la pantalla |
-| ⬜ T-515 | Y en las seis herramientas de consulta del asistente | `totalesDelPeriodo` devuelve lo mismo antes y después del préstamo |
+| ✅ T-512 | Lo mismo comprobado en presupuestos | Un préstamo recibido no consume tope de ninguna categoría |
+| ✅ T-513 | Lo mismo en los gráficos y en el ritmo del período | Ni la evolución ni el acumulado diario se mueven al registrar un préstamo |
+| ✅ T-514 | Lo mismo en la exportación a Excel | Los totales del archivo coinciden con los de la pantalla |
+| ✅ T-515 | Y en las seis herramientas de consulta del asistente | `totalesDelPeriodo` devuelve lo mismo antes y después del préstamo |
 | ✅ T-516 | El abono **sí** cuenta como gasto | Abonar 50.000 sube el gasto del período en 50.000, en «Deudas y créditos» |
 
 ## Fase 4 — Consultas y acciones
