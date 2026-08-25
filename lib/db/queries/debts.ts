@@ -5,6 +5,7 @@ import { debts, debtPayments, type DebtRow, type DebtPaymentRow } from '@/lib/db
 import { createTransaction, voidTransaction } from '@/lib/db/queries/transactions'
 import { puedeAbonar, saldoDe, type Deuda, type Abono } from '@/lib/domain/deudas'
 import { toISO, type CivilDate } from '@/lib/domain/civil-date'
+import { enMayuscula } from '@/lib/domain/keywords'
 
 /**
  * Deudas y préstamos (spec 011).
@@ -20,7 +21,8 @@ import { toISO, type CivilDate } from '@/lib/domain/civil-date'
 
 export const deudaSchema = z.object({
   direction: z.enum(['owed_by_me', 'owed_to_me']),
-  counterparty: z.string().trim().min(1).max(80),
+  // «primo», «mi hermana»: nadie escribe mayúsculas al hablar (D-076).
+  counterparty: z.string().trim().min(1).max(80).transform(enMayuscula),
   originalCents: z.number().int().positive(),
   description: z.string().trim().max(200).nullable().optional(),
   /** Fecha civil en ISO, o nada si no se pactó (RN-004). */

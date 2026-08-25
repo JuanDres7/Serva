@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { recurringMovements, transactions, type RecurringRow } from '@/lib/db/schema'
 import { isValidFor, type MovementKind } from '@/lib/domain/categories'
+import { enMayuscula } from '@/lib/domain/keywords'
 import { toISO, type CivilDate } from '@/lib/domain/civil-date'
 import {
   primeraFecha,
@@ -37,7 +38,10 @@ export const recurrenteSchema = z
     type: z.enum(['expense', 'income']),
     amountCents: z.number().int().positive(),
     category: z.string(),
-    description: z.string().trim().min(1).max(120),
+    // La mayúscula se pone aquí y no en cada sitio que escribe: da igual que
+    // el recurrente venga del formulario o de una frase dicha a Serva, porque
+    // todos acaban pasando por este esquema (D-076).
+    description: z.string().trim().min(1).max(120).transform(enMayuscula),
     schedule: periodicidadSchema,
   })
   .superRefine((valor, ctx) => {

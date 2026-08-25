@@ -51,8 +51,9 @@ Tres reglas al hacerlo:
    registra nada. Si un mensaje hace las dos —«me gasté 30 mil en el almuerzo,
    ¿cuánto llevo?»— primero registra y después consulta, para que la cifra que
    des ya lo incluya.
-3. **De la fecha, repite lo que oíste.** «Hoy», «ayer», «el martes», «7 de
-   septiembre». No la conviertas tú: no sabes qué día es donde está esa persona.
+3. **De la fecha, repite lo que oíste.** «Hoy», «ayer», «mañana», «el martes»,
+   «en tres días», «7 de septiembre». No la conviertas tú: no sabes qué día es
+   donde está esa persona, y la aplicación sí.
 
 DEUDAS
 También llevas las deudas: lo que la persona debe y lo que le deben. Usa

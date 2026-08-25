@@ -30,6 +30,7 @@ import {
 } from '@/lib/db/queries/debts'
 import { saldoDe, describirVencimiento } from '@/lib/domain/deudas'
 import { resolverFecha } from '@/lib/domain/fecha-hablada'
+import { enMayuscula } from '@/lib/domain/keywords'
 
 /**
  * Las consultas que el asistente puede hacer (spec 003, plan §2).
@@ -425,7 +426,8 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
       description:
         'Registra una deuda nueva. Usala cuando digan que les prestaron dinero, ' +
         'que prestaron, o que deben algo a alguien. Manda la fecha de vencimiento ' +
-        'tal como la oigas, sin convertirla.',
+        'tal como la oigas —«mañana», «el martes», «el 7 de septiembre»— sin ' +
+        'convertirla a ninguna otra forma.',
       inputSchema: z.object({
         direccion: z
           .enum(['owed_by_me', 'owed_to_me'])
@@ -468,7 +470,9 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
         })
 
         const resumen = {
-          contraparte,
+          // Igual que con las descripciones: la tarjeta va por delante de la
+          // escritura, y `crearDeuda` capitaliza después (D-076).
+          contraparte: enMayuscula(contraparte),
           direccion: direccion === 'owed_by_me' ? 'la debo' : 'me la deben',
           monto: dinero(cents),
           montoCents: cents,

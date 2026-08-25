@@ -59,7 +59,8 @@ describe('T-518 — crear y leer', () => {
     const creada = await deudaMia()
     const leida = await leerDeuda(ANA, creada.id)
 
-    expect(leida?.fila.counterparty).toBe('mi hermana')
+    // Se guarda con la primera en mayúscula (D-076).
+    expect(leida?.fila.counterparty).toBe('Mi hermana')
     expect(saldoDe(comoDeuda(leida!.fila), comoAbonos(leida!.abonos)).cents).toBe(50000000)
   })
 

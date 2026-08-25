@@ -20,6 +20,11 @@ import { type MovementKind, isValidFor } from '@/lib/domain/categories'
 import type { Period } from '@/lib/domain/cycle'
 import { toISO } from '@/lib/domain/civil-date'
 import type { PeriodAggregates, CategoryAmount } from '@/lib/domain/balance'
+import { enMayuscula } from '@/lib/domain/keywords'
+
+/** `null` y vacío se dejan pasar: no hay primera letra que cambiar. */
+const soloLaPrimera = (texto: string | null | undefined) =>
+  texto ? enMayuscula(texto) : texto
 
 export type MovementType = 'expense' | 'income' | 'saving'
 
@@ -33,8 +38,17 @@ export const transactionInputSchema = z
     currency: z.string().regex(/^[A-Z]{3}$/),
     category: z.string().nullable().optional(),
     occurredOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-    description: z.string().trim().max(500).nullable().optional(),
-    descriptionShort: z.string().trim().max(120).nullable().optional(),
+    // Las dos se capitalizan aquí, el único sitio por el que pasan todos los
+    // caminos de escritura: el formulario, la IA y los recurrentes al
+    // materializarse (D-076).
+    description: z.string().trim().max(500).nullable().optional().transform(soloLaPrimera),
+    descriptionShort: z
+      .string()
+      .trim()
+      .max(120)
+      .nullable()
+      .optional()
+      .transform(soloLaPrimera),
     categorySource: z
       .enum(['user', 'keywords', 'similarity', 'model'])
       .optional()

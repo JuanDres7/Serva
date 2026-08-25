@@ -178,13 +178,13 @@ frase salió, y puedo corregirlo o anularlo como cualquier otro.
 | FR-003 | Si falta el monto, el sistema debe preguntarlo. Nunca puede inventarlo, estimarlo ni registrar cero. |
 | FR-004 | Si falta la fecha, se asume hoy en la zona horaria del usuario. |
 | FR-005 | Si no se puede determinar la categoría con confianza suficiente, el movimiento se registra en «Otros» y queda marcado como tal, igual que hace la cascada de la spec 002. |
-| FR-006 | El sistema debe resolver expresiones de fecha corrientes —«hoy», «ayer», «anteayer», «el lunes», «el 7 de septiembre»— contra la fecha civil del usuario, no contra UTC. |
+| FR-006 | El sistema debe resolver expresiones de fecha corrientes, hacia atrás y hacia adelante —«hoy», «ayer», «anteayer», «mañana», «pasado mañana», «el lunes», «en tres días», «el 7 de septiembre»— contra la fecha civil del usuario, no contra UTC. Lo que no reconozca se pregunta; no se deduce (D-075). |
 | FR-007 | Antes de escribir por primera vez, el sistema debe pedir una activación explícita, dentro del chat, que el usuario pueda conceder solo para esa vez o de forma permanente (Art. II.1). |
 | FR-008 | El usuario debe poder revocar el registro automático desde el chat, en lenguaje natural, y recibir confirmación de que quedó revocado. |
 | FR-009 | Con el registro automático desactivado, ninguna escritura ocurre sin que el usuario acepte la tarjeta de confirmación. |
 | FR-010 | Modificar o anular un movimiento existente debe pedir confirmación **siempre**, esté o no activado el registro automático (D-066). |
 | FR-011 | Todo movimiento escrito por la IA debe quedar marcado en el modelo de datos con su origen y su confianza, y debe poder rastrearse hasta el mensaje del que salió (Art. II.2). |
-| FR-012 | Toda acción de Serva debe aparecer en el chat contada en una frase y acompañada de dos botones. Antes de escribir: confirmar o cancelar. Después de escribir con el automático puesto: dejarlo así o revertirlo. |
+| FR-012 | Toda acción de Serva debe aparecer en el chat contada en una frase y acompañada de dos botones. Antes de escribir: confirmar o cancelar. Después de escribir con el automático puesto: dejarlo así o revertirlo. Al volver a una conversación guardada, cada tarjeta debe mostrar el estado en que quedó, y no ofrecer botones que ya no pueden hacer nada (D-076). |
 | FR-013 | El historial debe distinguir visualmente lo que escribió la IA de lo que registró el usuario. |
 | FR-014 | El sistema debe poder programar un cobro futuro, único o repetido, a partir de una frase, y ese cobro sigue las reglas de confirmación de la spec 007. |
 | FR-015 | Un mensaje que solo pregunta no debe escribir nada. La lectura y la escritura son intenciones distintas y el sistema debe distinguirlas. |
