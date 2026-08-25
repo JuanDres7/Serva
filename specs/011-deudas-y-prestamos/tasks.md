@@ -45,13 +45,13 @@ funciones puras, y son las que todo lo demás va a usar.
 
 | | Tarea | Criterio de verificación |
 |---|---|---|
-| ⬜ T-517 | `lib/db/queries/debts.ts`, con `userId` en cada firma | Ninguna función existe sin recibir el usuario; si falta, no compila |
-| ⬜ T-518 | Crear, listar y leer una deuda con su saldo derivado | El saldo devuelto coincide con original menos abonos, calculado en la base |
-| ⬜ T-519 | Abonar: escribe el abono y, si procede, su movimiento | Un abono a deuda propia deja las dos filas enlazadas por `transactionId` |
-| ⬜ T-520 | Saldar automáticamente al llegar el saldo a cero | El último abono deja `settledAt` sin que nadie lo pida (FR-005) |
-| ⬜ T-521 | Reabrir una deuda saldada por error | `settledAt` vuelve a `NULL` y la deuda regresa a la lista. Nada se borró (FR-014) |
-| ⬜ T-522 | Aislamiento entre cuentas | Con dos usuarios, ninguna consulta alcanza deudas ajenas ni sus abonos |
-| ⬜ T-523 | Acciones de servidor, con el usuario desde la sesión | Ninguna acepta `userId` como parámetro del cliente |
+| ✅ T-517 | `lib/db/queries/debts.ts`, con `userId` en cada firma | Ninguna función existe sin recibir el usuario; si falta, no compila |
+| ✅ T-518 | Crear, listar y leer una deuda con su saldo derivado | El saldo devuelto coincide con original menos abonos, calculado en la base |
+| ✅ T-519 | Abonar: escribe el abono y, si procede, su movimiento | Un abono a deuda propia deja las dos filas enlazadas por `transactionId` |
+| ✅ T-520 | Saldar automáticamente al llegar el saldo a cero | El último abono deja `settledAt` sin que nadie lo pida (FR-005) |
+| ✅ T-521 | Reabrir una deuda saldada por error | `settledAt` vuelve a `NULL` y la deuda regresa a la lista. Nada se borró (FR-014) |
+| ✅ T-522 | Aislamiento entre cuentas | Con dos usuarios, ninguna consulta alcanza deudas ajenas ni sus abonos |
+| ✅ T-523 | Acciones de servidor, con el usuario desde la sesión | Ninguna acepta `userId` como parámetro del cliente |
 
 ## Fase 5 — Serva AI
 
