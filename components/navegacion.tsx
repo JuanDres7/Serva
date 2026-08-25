@@ -32,7 +32,15 @@ const SECCIONES = [
    mismo tipo, es a quien se le pregunta por todas las demás. */
 const ASISTENTE = { href: '/asistente', etiqueta: 'Serva AI' }
 
-const AJUSTES = { href: '/ajustes', etiqueta: 'Ajustes' }
+/*
+ * Ajustes ya no está en esta lista: vive en el menú de la cuenta, al pie
+ * (D-077). Estaba en los dos sitios a la vez y se veía la duplicación de un
+ * vistazo, con la entrada suelta debajo de un separador y el menú justo debajo
+ * repitiéndola.
+ *
+ * Y encaja mejor donde está ahora: esta lista son lugares donde se mira el
+ * dinero; ajustes es donde se toca la cuenta, que es de lo que va ese menú.
+ */
 
 function seccionesDe(conAsistente: boolean) {
   return conAsistente ? [...SECCIONES, ASISTENTE] : SECCIONES
@@ -81,9 +89,6 @@ export function NavegacionLateral({ conAsistente }: { conAsistente: boolean }) {
         </>
       )}
 
-      <span className="my-3 h-px bg-sidebar-border" aria-hidden />
-
-      <Enlace {...AJUSTES} activa={esActiva(pathname, AJUSTES.href)} />
     </nav>
   )
 }
@@ -140,7 +145,7 @@ export function NavegacionCompacta({ conAsistente }: { conAsistente: boolean }) 
             : 'none',
         }}
       />
-      {[...seccionesDe(conAsistente), AJUSTES].map((seccion) => (
+      {seccionesDe(conAsistente).map((seccion) => (
         <Link
           key={seccion.href}
           href={seccion.href}

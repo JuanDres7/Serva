@@ -15,6 +15,21 @@ export async function currentUserId(): Promise<string | null> {
 }
 
 /**
+ * El usuario de la petición, con lo poco que la interfaz necesita enseñar.
+ *
+ * Existe para no pedir la sesión dos veces cuando además del identificador hace
+ * falta el correo. Sale de la misma fuente y con la misma garantía que
+ * `currentUserId`: de la sesión del servidor, nunca de lo que mande el
+ * navegador.
+ */
+export async function currentUser(): Promise<{ id: string; email: string } | null> {
+  const session = await auth.api.getSession({ headers: await headers() })
+  if (!session) return null
+
+  return { id: session.user.id, email: session.user.email }
+}
+
+/**
  * Igual que `currentUserId`, pero exige sesión.
  *
  * Es la que deben usar las páginas y acciones con datos del usuario: si no hay

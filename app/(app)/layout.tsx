@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
-import { currentUserId } from '@/lib/session'
+import { currentUser } from '@/lib/session'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
-import { CerrarSesion } from '@/components/cerrar-sesion'
+import { MenuDeCuenta } from '@/components/menu-de-cuenta'
 import { Marca, NavegacionLateral, NavegacionCompacta } from '@/components/navegacion'
 import { hayProveedor } from '@/lib/ai/provider'
 
@@ -16,8 +16,10 @@ import { hayProveedor } from '@/lib/ai/provider'
  * estrecha se convierte en una tira sobre el contenido.
  */
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const userId = await currentUserId()
-  if (!userId) redirect('/entrar')
+  const usuario = await currentUser()
+  if (!usuario) redirect('/entrar')
+
+  const userId = usuario.id
 
   const settings = await ensureUserSettings(userId)
 
@@ -38,17 +40,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <NavegacionLateral conAsistente={conAsistente} />
         </div>
 
-        <div className="space-y-2 px-3">
-          <p className="truncate text-sm font-medium">{settings.displayName}</p>
-          <CerrarSesion />
-        </div>
+        {/* El nombre es el botón: dentro está lo que se hace poco —ajustes y
+            cerrar sesión— para que el pie no gaste sitio permanente en ello. */}
+        <MenuDeCuenta nombre={settings.displayName} correo={usuario.email} />
       </aside>
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="z-30 shrink-0 border-b border-border bg-background/85 backdrop-blur lg:hidden">
           <div className="flex items-center justify-between gap-3 px-4 py-3">
             <Marca />
-            <CerrarSesion />
+            <MenuDeCuenta nombre={settings.displayName} correo={usuario.email} compacto />
           </div>
           <div className="px-2 pb-2">
             <NavegacionCompacta conAsistente={conAsistente} />

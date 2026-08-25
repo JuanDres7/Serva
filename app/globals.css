@@ -362,6 +362,30 @@
     animation: barrido var(--mov-lento) var(--ease-suave) both;
   }
 
+  /*
+   * Menú que crece desde el botón que lo abrió.
+   *
+   * Base UI marca el primer y el último fotograma con `data-starting-style` y
+   * `data-ending-style`, así que basta con describir el estado de reposo aquí y
+   * el estado «encogido» ahí: la transición la hace el navegador, y al cerrar
+   * recorre lo mismo al revés sin escribir una segunda animación.
+   *
+   * Baja al aparecer —`translateY` positivo— porque en la barra lateral el menú
+   * sube desde su botón, y el origen de la transformación lo pone el
+   * posicionador según por dónde acabó cabiendo. Así la animación siempre nace
+   * del sitio que se pulsó.
+   */
+  .menu-cuenta {
+    transition:
+      opacity var(--mov-rapido) var(--ease-suave),
+      transform var(--mov-medio) var(--ease-salida);
+  }
+  .menu-cuenta[data-starting-style],
+  .menu-cuenta[data-ending-style] {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+
   /* Anillo que se expande una vez desde un punto. Confirma sin interrumpir. */
   .anillo::after {
     content: '';
