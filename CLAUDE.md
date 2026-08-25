@@ -44,7 +44,7 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 | 008 — Gráficos y visualización | ✅ | — | **construida** |
 | 009 — Exportación de datos | ✅ | — | **construida** |
 | 010 — Registrar y programar hablando | ✅ | ✅ | **construida** |
-| 011 — Deudas y préstamos | — | — | prevista, depende de 010 |
+| 011 — Deudas y préstamos | ✅ | ✅ | tareas listas |
 
 La numeración identifica la feature; no es el orden de construcción.
 
@@ -74,8 +74,13 @@ herramientas `proponer*`, lee la spec 010 entera.
 La extracción se evalúa aparte con `npm run evaluar`, contra el proveedor real:
 10 de 10 en la última medida (D-069). Nunca dentro de `verify`.
 
-**Siguiente paso:** la feature 011, deudas y préstamos como entidad. Y desplegar
-en Vercel y Neon.
+**Siguiente paso:** construir la feature 011 (T-501 a T-543). Empieza por el
+dominio y **la fase 3 va antes que la interfaz**: es la única que puede romper
+features que llevan meses siendo correctas. Y desplegar en Vercel y Neon.
+
+**Ojo con la 011:** añade un cuarto valor a `movement_type`. Un préstamo recibido
+no es ingreso y prestar no es gasto; lo único que cuenta en los totales es el
+abono (D-073).
 
 **Ojo con la 010:** levanta la garantía de solo lectura del asistente (D-066).
 Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.
@@ -87,7 +92,7 @@ Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
 | `docs/vision.md` | Qué es Serva, para quién y qué no es. |
 | `docs/arquitectura.md` | Capas, rutas, stack y por qué cada pieza. El mapa. |
-| `docs/decisiones.md` | Las 72 decisiones tomadas, con su razón. |
+| `docs/decisiones.md` | Las 73 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |

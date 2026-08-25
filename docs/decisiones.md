@@ -1681,6 +1681,56 @@ quedó.
 
 ---
 
+## D-073 · Las deudas son un cuarto tipo de movimiento, no una bandera (2026-08-24)
+
+**Decisión.** Las deudas y préstamos entran como entidad propia, y el dinero que
+las mueve entra como un cuarto valor de `movement_type`: `debt`, con su propia
+dirección. Las tres respuestas que fijaron el alcance:
+
+- **Las dos direcciones**, lo que debo y lo que me deben. Prestar plata y no
+  acordarse es tan común como deberla, y son la misma pieza con el signo
+  cambiado.
+- **Saldo que baja con cada abono.** Es como funcionan las deudas de verdad, y
+  reutiliza la mecánica de aportes que ya tienen las metas.
+- **Un préstamo recibido no es ingreso.** Ni prestar es gasto, ni que te
+  devuelvan es ingreso. Lo único que cuenta en los totales es el **abono**,
+  porque ahí el dinero se fue de verdad.
+
+**Por qué un tipo y no una bandera.** La alternativa evidente era una columna
+`esPrestamo` que los cálculos ignoraran. Se descarta porque habría que recordarla
+en `computeTotals`, en los presupuestos, en los gráficos, en la exportación y en
+las herramientas del asistente. Olvidarla en uno solo produce una cifra
+equivocada sin ningún error visible, que es la peor clase de fallo que puede
+tener una aplicación de dinero.
+
+Un valor nuevo en el enum hace lo contrario: **TypeScript señala cada `switch`
+que no lo contempla**, y esa lista de errores de compilación es exactamente la
+lista de sitios que había que revisar.
+
+**El precedente ya estaba en el proyecto.** El ahorro tiene el mismo problema
+—aportar a una meta mueve dinero real sin ser un gasto— y se resolvió igual, con
+el tipo `saving` y un término propio en `computeTotals`. Las deudas siguen ese
+camino en vez de inventar otro.
+
+**Sin saldo almacenado.** El saldo se deriva del monto original menos la suma de
+los abonos, igual que los balances del usuario se derivan del historial. Un
+contador que se actualiza a mano acaba desincronizado de los hechos que lo
+alimentan.
+
+**Lo que queda fuera, y por qué.** Intereses, cuotas y amortización. Una deuda
+pide intereses, los intereses piden amortización y eso pide un simulador
+financiero, que es otra aplicación. Serva **registra** deudas, no las calcula
+(Art. VIII).
+
+**El riesgo asumido.** Esta es la primera feature que puede romper las once
+anteriores. Si la separación entre préstamo y movimiento se hace mal, no falla la
+pantalla de deudas: fallan el resumen, los presupuestos y los gráficos, que
+llevan meses siendo correctos. Por eso la fase 3 de las tareas va antes que la
+interfaz, y por eso su prueba tiene forma de comparación: medir los totales,
+registrar un préstamo, volver a medirlos y exigir que no hayan cambiado.
+
+---
+
 # Decisiones pendientes
 
 _Ninguna. Todas las preguntas abiertas quedaron resueltas._
