@@ -48,8 +48,9 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**Las diez features están construidas.** `npm run verify` pasa con 453
-comprobaciones, ninguna de las cuales requiere un modelo instalado.
+**Las doce features están construidas.** `npm run verify` pasa con 622
+comprobaciones de unidad y 70 de extremo a extremo, ninguna de las cuales
+requiere un modelo instalado.
 
 **El chat dibuja y recuerda** desde la revisión de la spec 003: las respuestas
 llevan gráfico cuando la pregunta es de distribución o comparación, y la
@@ -72,7 +73,8 @@ función pura decide** (`lib/domain/puerta.ts`). Antes de tocar esa puerta o las
 herramientas `proponer*`, lee la spec 010 entera.
 
 La extracción se evalúa aparte con `npm run evaluar`, contra el proveedor real:
-10 de 10 en la última medida (D-069). Nunca dentro de `verify`.
+11 de 11 en extracción y 8 de 8 en deudas en la última medida (D-075). Nunca
+dentro de `verify`.
 
 **Siguiente paso:** desplegar en Vercel y Neon. Es lo único pendiente del plan
 original: las doce features están construidas.
@@ -80,6 +82,27 @@ original: las doce features están construidas.
 **Ojo con las deudas:** `movement_type` tiene un cuarto valor, `debt`. Un
 préstamo recibido no es ingreso y prestar no es gasto; lo único que cuenta en los
 totales es el abono (D-073).
+
+**Ajustes y cerrar sesión no están en la navegación**: viven en el menú de la
+cuenta, al pie de la barra (`components/menu-de-cuenta.tsx`). El nombre es el
+botón que lo abre. Si añades algo ahí, va con `Menu.Item` de Base UI, no con un
+enlace suelto (D-077).
+
+**Lo que se escribe lleva mayúscula inicial, y se pone en los esquemas Zod de
+escritura** —`transactionInputSchema`, `recurrenteSchema`, `deudaSchema`— no en
+cada sitio que llama. Ahí pasan todos los caminos. La única excepción es la
+tarjeta del chat, que enseña la propuesta antes de guardarla (D-076).
+
+**Una conversación guardada no sabe en qué quedaron sus tarjetas.** La salida de
+una herramienta se serializa tal cual y dice «propuesta» para siempre; el estado
+real está en `assistant_writes.status` y se cruza al cargar, en
+`lib/ai/rehidratar.ts`. Si añades una herramienta que proponga algo, devuelve
+`propuestaId` o su tarjeta se reiniciará en cada visita (D-076).
+
+**Las fechas las resuelve `lib/domain/fecha-hablada.ts`, no el modelo.** Si una
+expresión corriente no está en su lista de patrones, Serva pide la fecha en vez
+de deducirla, y nada se pone rojo. Pasó con «mañana», que faltó dos features
+enteras (D-075). Antes de dar por buena una frase, pruébala ahí.
 
 **Al añadir una herramienta al asistente, son dos mitades.** La segunda —
 encaminarla en el `switch` de `chat-visuales.tsx`— no rompe nada si se olvida: no
@@ -96,7 +119,7 @@ Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.
 | `.specify/memory/constitution.md` | Principios innegociables (v2.0.0). Vinculantes. |
 | `docs/vision.md` | Qué es Serva, para quién y qué no es. |
 | `docs/arquitectura.md` | Capas, rutas, stack y por qué cada pieza. El mapa. |
-| `docs/decisiones.md` | Las 74 decisiones tomadas, con su razón. |
+| `docs/decisiones.md` | Las 77 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
 | `specs/NNN-*/spec.md` | Qué hace cada feature. |
 | `specs/NNN-*/plan.md` | Cómo se construye. |

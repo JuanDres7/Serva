@@ -1768,6 +1768,209 @@ Queda anotado en `CLAUDE.md` para la próxima.
 
 ---
 
+## D-075 · El vocabulario de fechas solo miraba hacia atrás (2026-08-24)
+
+**El síntoma.** «Mi hermana me prestó 50 mil y se los debo pagar mañana». Serva
+registró bien los gastos, entendió bien que había una deuda, y luego contestó:
+«No entendí para cuándo. Dime la fecha y lo dejo listo». Siendo día 24, mañana
+era el 25 y no hacía falta preguntar nada.
+
+**Dónde estaba.** No en el modelo. `RELATIVAS`, en `lib/domain/fecha-hablada.ts`,
+tenía siete entradas —hoy, ahora, esta noche, anoche, ayer, anteayer, antier— y
+**ninguna apuntaba hacia adelante**. El modelo hizo exactamente lo que se le
+pide: repitió «mañana» sin convertirlo. La función pura no conocía la palabra y
+devolvió `no-entendida`, que es su forma correcta de decir que no sabe.
+
+Es la arquitectura funcionando y fallando a la vez. La regla de la 010 —el
+modelo propone, una función pura decide— evitó que se inventara una fecha, que
+era el riesgo grande. Pero trasladó el vocabulario entero a un sitio donde nadie
+lo revisa, y ahí se quedó incompleto.
+
+**Por qué se quedó incompleto tanto tiempo.** El diseño de la 010 giraba
+alrededor de gastos, y un gasto se cuenta después de hacerlo: hoy, ayer,
+anoche. Nunca hizo falta el futuro. La 011 cambió eso sin que nadie lo notara,
+porque **un vencimiento es futuro por definición**, y una deuda sin fecha es
+justo la que uno quiere anotar. La feature nueva no rompió nada de la vieja:
+descubrió que a la vieja le faltaba algo.
+
+**Lo que se añadió.** «Mañana», «pasado mañana», «en tres días», «dentro de dos
+semanas», «la semana que viene», con números dichos además de escritos. Y el
+mapa exacto pasó a ser una lista ordenada de patrones, porque estas expresiones
+se solapan de una forma que un mapa no puede resolver:
+
+- «pasado mañana» contiene «mañana», así que va antes;
+- «ayer en la mañana» también la contiene, y es ayer;
+- **«esta mañana» es hoy**, que es la trampa propia del español: la misma
+  palabra es el día que viene y la primera mitad de este.
+
+El orden de la lista *es* la regla, y por eso está dicho en el comentario y
+fijado en nueve pruebas.
+
+**Lo que no se añadió, a propósito.** «El mes que viene», «a fin de mes», «hace
+tres días». Ampliar el vocabulario no puede convertirse en ampliar lo que se
+adivina: lo que sigue sin entenderse se pregunta, igual que antes. La prueba de
+que «el mes que viene tal vez» devuelve `null` sigue en verde y así se queda.
+
+**Medido.** Con las dos frases nuevas en el banco —«tengo que pagar 120 mil
+mañana» y «mi hermana me prestó 50 mil y se los debo pagar mañana»—, `npm run
+evaluar` da **11 de 11** en extracción y **8 de 8** en deudas contra Gemini. La
+segunda es, palabra por palabra, la frase que falló en pantalla.
+
+**Lo que deja para la próxima.** Una función pura con una tabla de palabras
+dentro no falla ruidosamente cuando la tabla se queda corta: falla pidiendo
+datos que ya tenía. Se parece al error de las dos mitades (D-068, D-074) en que
+todo compila, ninguna prueba se pone roja, y solo se ve usando la aplicación.
+La diferencia es que aquí la pista estaba escrita: las siete entradas iban del
+0 al −2, sin un solo número positivo.
+
+---
+
+## D-076 · Una tarjeta ya confirmada volvía a pedir confirmación (2026-08-24)
+
+Dos defectos distintos, encontrados en la misma pantalla, y con la misma forma:
+ninguno rompía nada, los dos se veían enseguida.
+
+### La tarjeta que olvidaba
+
+Confirmar una acción, irse al resumen y volver al chat devolvía la tarjeta a su
+estado inicial: «Confirmar», «Sí, y no preguntes más», «Cancelar». Pulsar otra
+vez no hacía nada.
+
+Esa segunda parte es la buena noticia. `reservar` marca como terminales
+`aplicada`, `revertida`, `rechazada` y `caducada`, así que confirmar dos veces
+nunca escribió dos veces. Lo que fallaba era solo lo que se enseñaba —pero
+**una interfaz que no responde al pulsarla se lee como rota**, y quien la usa no
+tiene forma de saber que por debajo está bien.
+
+La causa: la conversación se guarda tal como el SDK la emitió, y la salida de
+una herramienta es el registro de lo que contestó **aquel día**. Dice
+«propuesta» para siempre, porque nadie vuelve a reescribirla cuando alguien
+pulsa un botón. El estado de verdad vive en `assistant_writes.status`, en otra
+tabla, y no se cruzaban.
+
+Ahora se cruzan al cargar: `propuestasEn` recoge los identificadores,
+`estadosDePropuestas` los busca, y `conEstados` añade `estadoGuardado` a cada
+salida. **Se añade un campo en lugar de reescribir `resultado`**, porque
+`resultado` es lo que pasó y eso no cambia; lo que cambia con el tiempo merece
+su propio nombre.
+
+De paso se cierra algo que la documentación ya daba por hecho: una propuesta sin
+resolver que pasó sus 24 horas se enseña como caducada. El comentario de
+`HORAS_DE_VIGENCIA` decía que sin caducidad la tarjeta «seguiría invitando a
+pulsar una semana después», y era justo lo que hacía.
+
+### Las minúsculas
+
+«palomitas cine». «primo». «mi hermana». Un modelo devuelve el texto como lo
+oyó, y quien habla no escribe mayúsculas. Eso llegaba al historial y a las
+tarjetas tal cual, y una lista entera en minúscula se lee como algo a medio
+hacer.
+
+La mayúscula se pone **en los esquemas de escritura**, no en cada sitio que
+escribe: `transactionInputSchema`, `recurrenteSchema` y `deudaSchema`. Por ahí
+pasan todos los caminos —el formulario, Serva AI, y los recurrentes al
+materializarse—, así que no hay ninguno que pueda saltársela. Ponerlo en cada
+llamada era la versión frágil, y con cuatro sitios ya habría fallado.
+
+Dos salvedades, ambas con prueba:
+
+- **Solo la primera letra.** Poner en Mayúscula Cada Palabra es una convención
+  del inglés; en español «Palomitas Cine» se lee peor que dejarlo en minúscula.
+- **La tarjeta también, por separado.** Enseña la propuesta antes de guardarla,
+  así que el esquema llega tarde: sin capitalizar en `prepararUno` se vería
+  «palomitas cine» al confirmar y «Palomitas cine» en el historial.
+
+Y una asimetría deliberada: lo que queda **incompleto** no se capitaliza,
+porque se cita dentro de una frase —«de «unas cervezas» me falta el monto»— y
+ahí la mayúscula chirría.
+
+Buscar deudas por contraparte compara en minúsculas por ambos lados, así que
+guardar «Primo» no rompe «le aboné 50 mil a mi primo». Eso lo sujeta una prueba
+que ejecuta la herramienta de verdad, no una que reimplemente la comparación:
+lo segundo es lo que ya dio garantía falsa en D-074.
+
+### Y lo ya escrito
+
+Capitalizar de ahora en adelante habría partido el historial en dos épocas, y la
+que peor se ve es la que ya está. La migración `0014_mayuscula_inicial` sube la
+primera letra de las cuatro columnas que escriben texto: las dos descripciones
+de los movimientos, la de los recurrentes y la contraparte de las deudas.
+
+Al aplicarla quedaban **78.814 descripciones** en minúscula, de las que 77.166
+eran datos de ejemplo de las 2.154 cuentas que dejan los e2e; las cuentas reales
+sumaban unas 270. Después, cero filas en minúscula en las cuatro columnas.
+
+**No lleva vuelta atrás, a propósito.** Bajar la primera letra otra vez
+estropearía lo que siempre estuvo en mayúscula —«Netflix», «IVA»— y ya no hay
+forma de distinguirlo. Como lo que cambia es la caja de un carácter y ninguna
+clave ni ninguna búsqueda depende de ella, se asume.
+
+### Lo que tienen en común
+
+Ninguno de los dos rompía nada. Todo compilaba, ninguna prueba se ponía roja, y
+la aplicación respondía. Se ven usándola y de ninguna otra forma —igual que las
+dos mitades de D-068 y D-074, e igual que «mañana» en D-075. Van cuatro.
+
+---
+
+## D-077 · El nombre pasa a ser el botón de la cuenta (2026-08-25)
+
+El pie de la barra tenía el nombre como texto muerto y debajo un botón «Salir»
+siempre a la vista. Dos cosas mal: **el nombre parecía pulsable sin serlo**, y
+lo que menos se hace en toda la aplicación ocupaba sitio permanente al lado de
+lo que más.
+
+Ahora el nombre **es** el botón, y dentro están Ajustes y Cerrar sesión.
+
+**Que se note que se puede pulsar no se dejó a una sola señal.** Hay fondo al
+pasar por encima, la chevron gira al abrir, y el botón se hunde un punto al
+presionar: antes, durante y después. Una sola se pierde en una barra donde
+todas las secciones también reaccionan al ratón; lo que distingue a este control
+es que responden las tres en momentos distintos.
+
+**La animación sale del botón**, no de un borde de la pantalla. Base UI marca el
+primer y el último fotograma con `data-starting-style` y `data-ending-style`, de
+modo que basta con describir el reposo en `.menu-cuenta` y el estado encogido
+ahí: el navegador hace la transición y al cerrar la recorre al revés, sin una
+segunda animación escrita. El origen lo pone el posicionador según por dónde
+acabó cabiendo, así que el menú siempre crece del sitio que se tocó. Dentro, los
+elementos entran escalonados con `.escalonado`, que ya existía.
+
+**Se usa `Menu` de Base UI y no un `Popover` con enlaces.** Ya era dependencia,
+y trae lo que un menú hecho a mano tarda semanas en igualar: recorrido con
+flechas, Escape, clic fuera, foco que vuelve al botón, y `role="menuitem"`.
+
+### Tres cosas que aparecieron al construirlo
+
+**Ajustes salía dos veces.** Estaba en la lista de secciones y ahora también en
+el menú, con la entrada suelta debajo de un separador y el menú repitiéndola dos
+centímetros más abajo. Se quitó de la navegación. Encaja mejor donde quedó: esa
+lista son sitios donde se mira el dinero, y ajustes es donde se toca la cuenta,
+que es justo de lo que va este menú.
+
+**El nombre salía dos veces**, en el botón y en la cabecera del menú. La
+cabecera se quedó solo con el correo, que es lo único que distingue dos cuentas
+—y hay dos en esta máquina—.
+
+**En pantalla estrecha el botón se quedaba mudo.** Ahí no se pinta el nombre y
+la inicial es decorativa, así que el botón no tenía nombre accesible: un lector
+de pantalla habría anunciado «botón» y nada más. Lo destapó el guion de
+capturas, al no encontrar el control por su rol —la accesibilidad y la
+automatización buscan por lo mismo, y por eso una revela los fallos de la otra—.
+Ahora lleva `aria-label` en las dos variantes.
+
+### Lo que queda sujeto
+
+Cerrar sesión dejó de estar a la vista y vive dentro de un menú: si el menú se
+rompe no hay forma de salir de la aplicación. Eso no puede depender de que
+alguien lo pruebe a mano, así que hay tres pruebas de extremo a extremo —abrir y
+salir, abrir e ir a Ajustes, y que Escape cierre sin hacer nada—.
+
+Se comprobó además en claro, en oscuro y a 390 px. Ningún color sale de los
+tokens (D-070).
+
+---
+
 # Decisiones pendientes
 
 _Ninguna. Todas las preguntas abiertas quedaron resueltas._
