@@ -15,13 +15,22 @@ import { findCategory, CATEGORIES } from '@/lib/domain/categories'
 import { extraerPalabrasClave } from '@/lib/domain/keywords'
 import { nombrarPeriodo } from '@/components/etiqueta-periodo'
 import { currencyDecimals } from '@/lib/domain/money'
-import { movimientoPropuestoSchema, prepararMovimientos } from '@/lib/ai/propuesta'
+import { movimientoPropuestoSchema, prepararMovimientos, aUnidadMenor } from '@/lib/ai/propuesta'
 import { decidir, explicar } from '@/lib/domain/puerta'
 import {
   guardarPropuesta,
   aplicarCreacion,
   automaticoActivo,
 } from '@/lib/db/queries/assistant-writes'
+import {
+  listarDeudas,
+  comoDeuda,
+  comoAbonos,
+  totalesDeDeuda,
+} from '@/lib/db/queries/debts'
+import { saldoDe, describirVencimiento } from '@/lib/domain/deudas'
+import { resolverFecha } from '@/lib/domain/fecha-hablada'
+import { enMayuscula } from '@/lib/domain/keywords'
 
 /**
  * Las consultas que el asistente puede hacer (spec 003, plan §2).
@@ -382,7 +391,264 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
       execute: async ({ descripcion }) =>
         proponerSobreExistente(contexto, dinero, 'anular', descripcion, {}),
     }),
+    /* Deudas (spec 011). */
+
+    misDeudas: tool({
+      description:
+        'Cuanto debo y quien me debe, con sus saldos. Usala para "cuanto debo", ' +
+        '"a quien le debo" o "quien me debe plata".',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const hoy = todayIn(contexto.timeZone)
+        const vivas = await listarDeudas(contexto.userId)
+        const totales = await totalesDeDeuda(contexto.userId)
+
+        const detalle = vivas.map(({ fila, abonos }) => ({
+          contraparte: fila.counterparty,
+          direccion: fila.direction === 'owed_by_me' ? 'la debo' : 'me la deben',
+          saldo: dinero(saldoDe(comoDeuda(fila), comoAbonos(abonos)).cents),
+          saldoCents: saldoDe(comoDeuda(fila), comoAbonos(abonos)).cents,
+          vencimiento: describirVencimiento(comoDeuda(fila), comoAbonos(abonos), hoy),
+        }))
+
+        return {
+          sinDatos: vivas.length === 0,
+          debo: dinero(totales.debo),
+          meDeben: dinero(totales.meDeben),
+          deboCents: totales.debo,
+          meDebenCents: totales.meDeben,
+          deudas: detalle,
+        }
+      },
+    }),
+
+    proponerDeuda: tool({
+      description:
+        'Registra una deuda nueva. Usala cuando digan que les prestaron dinero, ' +
+        'que prestaron, o que deben algo a alguien. Manda la fecha de vencimiento ' +
+        'tal como la oigas —«mañana», «el martes», «el 7 de septiembre»— sin ' +
+        'convertirla a ninguna otra forma.',
+      inputSchema: z.object({
+        direccion: z
+          .enum(['owed_by_me', 'owed_to_me'])
+          .describe('owed_by_me si la persona debe; owed_to_me si le deben'),
+        contraparte: z.string().min(1).max(80).describe('A quien, o quien'),
+        monto: z.number().positive().describe('En unidades corrientes, no centavos'),
+        vence: z.string().max(40).nullable().describe('Tal como se dijo, o null'),
+      }),
+      execute: async ({ direccion, contraparte, monto, vence }) => {
+        const hoy = todayIn(contexto.timeZone)
+        const cents = aUnidadMenor(monto, contexto.currency)
+
+        if (cents === null) {
+          return { resultado: 'rechazado' as const, motivo: 'Ese monto no lo entendi.' }
+        }
+
+        const fecha = resolverFecha(vence, hoy)
+        if (!fecha.ok) {
+          return {
+            resultado: 'falta-fecha' as const,
+            motivo: 'No entendi para cuando. Dime la fecha y lo dejo listo.',
+          }
+        }
+
+        const automatico = await automaticoActivo(contexto.userId)
+        const decision = decidir({ tipo: 'crear', cuantos: 1, automaticoActivo: automatico })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'crear',
+          inputText: `deuda con ${contraparte}`,
+          proposal: {
+            deuda: {
+              direction: direccion,
+              counterparty: contraparte,
+              originalCents: cents,
+              dueOn: vence ? toISO(fecha.fecha) : null,
+            },
+          },
+        })
+
+        const resumen = {
+          // Igual que con las descripciones: la tarjeta va por delante de la
+          // escritura, y `crearDeuda` capitaliza después (D-076).
+          contraparte: enMayuscula(contraparte),
+          direccion: direccion === 'owed_by_me' ? 'la debo' : 'me la deben',
+          monto: dinero(cents),
+          montoCents: cents,
+          vence: vence ? toISO(fecha.fecha) : null,
+        }
+
+        if (decision.accion === 'ejecutar') {
+          await aplicarCreacion({
+            userId: contexto.userId,
+            id: propuestaId,
+            currency: contexto.currency,
+            hoy,
+          })
+          return { resultado: 'registrado' as const, propuestaId, deuda: resumen, revertible: true }
+        }
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: decision.accion === 'confirmar' ? decision.motivo : 'sin-activar',
+          explicacion: explicar(decision),
+          deuda: resumen,
+          primeraVez: !automatico,
+        }
+      },
+    }),
+
+    proponerAbono: tool({
+      description:
+        'Abona a una deuda existente. Usala cuando digan que pagaron parte de lo ' +
+        'que deben, o que les devolvieron parte de lo que prestaron.',
+      inputSchema: z.object({
+        contraparte: z.string().min(1).max(80),
+        monto: z.number().positive().describe('En unidades corrientes'),
+      }),
+      execute: async ({ contraparte, monto }) => {
+        const hoy = todayIn(contexto.timeZone)
+        const cents = aUnidadMenor(monto, contexto.currency)
+        if (cents === null) {
+          return { resultado: 'rechazado' as const, motivo: 'Ese monto no lo entendi.' }
+        }
+
+        const encontrada = await buscarDeudaPorContraparte(contexto.userId, contraparte)
+        if (encontrada.resultado !== 'una') return encontrada.salida
+
+        const { fila, abonos } = encontrada.deuda
+        const saldo = saldoDe(comoDeuda(fila), comoAbonos(abonos))
+
+        if (cents > saldo.cents) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: `Solo quedan ${dinero(saldo.cents)} por pagar.`,
+          }
+        }
+
+        const automatico = await automaticoActivo(contexto.userId)
+        const decision = decidir({ tipo: 'crear', cuantos: 1, automaticoActivo: automatico })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'crear',
+          inputText: `abono a ${contraparte}`,
+          proposal: { abono: { debtId: fila.id, amountCents: cents, paidOn: toISO(hoy) } },
+        })
+
+        const resumen = {
+          contraparte: fila.counterparty,
+          monto: dinero(cents),
+          montoCents: cents,
+          saldoAntes: dinero(saldo.cents),
+          saldoDespues: dinero(saldo.cents - cents),
+          salda: saldo.cents - cents === 0,
+        }
+
+        if (decision.accion === 'ejecutar') {
+          await aplicarCreacion({
+            userId: contexto.userId,
+            id: propuestaId,
+            currency: contexto.currency,
+            hoy,
+          })
+          return { resultado: 'registrado' as const, propuestaId, abono: resumen, revertible: true }
+        }
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: 'sin-activar' as const,
+          explicacion: explicar(decision),
+          abono: resumen,
+          primeraVez: !automatico,
+        }
+      },
+    }),
+
+    proponerSaldarDeuda: tool({
+      description:
+        'Da una deuda por saldada entera. Usala cuando digan que ya pagaron todo ' +
+        'lo que debian a alguien, o que ya les devolvieron todo.',
+      inputSchema: z.object({
+        contraparte: z.string().min(1).max(80),
+      }),
+      execute: async ({ contraparte }) => {
+        const encontrada = await buscarDeudaPorContraparte(contexto.userId, contraparte)
+        if (encontrada.resultado !== 'una') return encontrada.salida
+
+        const { fila, abonos } = encontrada.deuda
+        const saldo = saldoDe(comoDeuda(fila), comoAbonos(abonos))
+
+        // Saldar modifica algo que ya existe, asi que entra por la puerta como
+        // `corregir`: confirma siempre, con automatico o sin el (FR-010 de la
+        // spec 010). No hizo falta ninguna regla nueva.
+        const decision = decidir({ tipo: 'corregir', cuantos: 1, automaticoActivo: true })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'corregir',
+          inputText: `saldar deuda con ${contraparte}`,
+          proposal: { saldar: { debtId: fila.id } },
+        })
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: 'destructivo' as const,
+          explicacion: explicar(decision),
+          deuda: {
+            contraparte: fila.counterparty,
+            direccion: fila.direction === 'owed_by_me' ? 'la debo' : 'me la deben',
+            saldo: dinero(saldo.cents),
+            saldoCents: saldo.cents,
+          },
+        }
+      },
+    }),
   }
+}
+
+/**
+ * Encuentra la deuda de la que habla la persona.
+ *
+ * **El modelo no envia un identificador**: envia el nombre de la contraparte y
+ * el sistema busca, igual que en `proponerAnulacion`. Dejarle inventar un UUID
+ * seria darle una forma de apuntar a una fila que no vio.
+ */
+async function buscarDeudaPorContraparte(userId: string, contraparte: string) {
+  const vivas = await listarDeudas(userId)
+  const buscado = contraparte.toLowerCase().trim()
+
+  const coinciden = vivas.filter(({ fila }) => {
+    const nombre = fila.counterparty.toLowerCase()
+    return nombre.includes(buscado) || buscado.includes(nombre)
+  })
+
+  if (coinciden.length === 0) {
+    return {
+      resultado: 'ninguna' as const,
+      salida: { resultado: 'no-encontrado' as const, buscado: contraparte },
+    }
+  }
+
+  if (coinciden.length > 1) {
+    return {
+      resultado: 'varias' as const,
+      salida: {
+        resultado: 'varias-coincidencias' as const,
+        candidatos: coinciden.slice(0, 5).map(({ fila }) => ({
+          descripcion: fila.counterparty,
+          monto: '',
+          fecha: fila.dueOn ?? '',
+        })),
+      },
+    }
+  }
+
+  return { resultado: 'una' as const, deuda: coinciden[0]! }
 }
 
 /** Lo minimo que la tarjeta necesita para contar que paso. */

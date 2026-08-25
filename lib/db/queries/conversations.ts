@@ -1,6 +1,8 @@
 import { and, asc, desc, eq, lt, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { conversations, chatMessages } from '@/lib/db/schema'
+import { estadosDePropuestas } from '@/lib/db/queries/assistant-writes'
+import { propuestasEn, conEstados } from '@/lib/ai/rehidratar'
 
 /**
  * La conversación con Serva AI (spec 003, D-067).
@@ -69,7 +71,13 @@ export async function conversacionViva(
     .where(eq(chatMessages.conversationId, conversacion.id))
     .orderBy(asc(chatMessages.position))
 
-  return { id: conversacion.id, mensajes: filas }
+  // Las tarjetas de acción se guardaron con el resultado que tenían al
+  // emitirse, que dice «propuesta» para siempre. El estado de verdad está en
+  // `assistant_writes`, y sin cruzarlo aquí una acción ya confirmada vuelve a
+  // pedir confirmación cada vez que se entra al chat (D-076).
+  const estados = await estadosDePropuestas(userId, propuestasEn(filas))
+
+  return { id: conversacion.id, mensajes: conEstados(filas, estados) }
 }
 
 /**

@@ -112,10 +112,17 @@ describe('configuración inicial', () => {
   it('las cuentas que ya estaban en uso quedaron marcadas como configuradas', async () => {
     // Lo hizo la migración 0005. Sin ella, toda cuenta anterior a esta pantalla
     // sería enviada a configurarse cada vez que entra.
+    //
+    // Se excluyen las cuentas de prueba: otras suites crean ajustes y
+    // movimientos sin pasar por la configuración, que es legítimo para lo que
+    // comprueban. Sin esta exclusión, el resultado de esta prueba dependería de
+    // qué otras estuvieran corriendo en paralelo, y un oráculo que cambia según
+    // el reparto de trabajo no sirve como señal.
     const [fila] = await db.execute<{ pendientes: number }>(sql`
       SELECT count(*)::int AS pendientes
       FROM user_settings s
       WHERE s.onboarded_at IS NULL
+        AND s.user_id NOT LIKE 'test-%'
         AND EXISTS (SELECT 1 FROM transactions t WHERE t.user_id = s.user_id)
     `)
 

@@ -33,6 +33,9 @@ const TIPOS: Record<string, string> = {
   expense: 'Gasto',
   income: 'Ingreso',
   saving: 'Ahorro',
+  // Un préstamo aparece en el archivo, pero no suma a ingresos ni a gastos: es
+  // un traslado (spec 011). Sin esta línea saldría «debt» en crudo.
+  debt: 'Préstamo',
 }
 
 const ORIGENES: Record<string, string> = {

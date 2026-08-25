@@ -1,8 +1,9 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { assistantWrites, transactions, userSettings } from '@/lib/db/schema'
 import { createTransaction, voidTransaction, updateTransaction } from '@/lib/db/queries/transactions'
 import { crearRecurrente } from '@/lib/db/queries/recurring'
+import { crearDeuda, abonar, saldar, registrarMovimientoDeDeuda } from '@/lib/db/queries/debts'
 import { fromISO, type CivilDate } from '@/lib/domain/civil-date'
 import type { MovimientoListo } from '@/lib/ai/propuesta'
 import type { TipoDeAccion } from '@/lib/domain/puerta'
@@ -87,6 +88,39 @@ export async function leerPropuesta(
   return fila ?? null
 }
 
+/**
+ * El estado en que ha quedado cada propuesta, para pintar sus tarjetas.
+ *
+ * Una propuesta sin resolver que ya pasó su vigencia se devuelve como
+ * `caducada` aunque en la tabla siga diciendo `propuesta`. La fila no se toca:
+ * marcarla exigiría escribir cada vez que alguien abre el chat, y el estado
+ * real lo fija `reservar` cuando de verdad se intenta aplicar. Aquí solo se
+ * decide qué enseñar, y enseñar botones que van a fallar es peor que no
+ * enseñarlos (FR-025).
+ */
+export async function estadosDePropuestas(
+  userId: string,
+  ids: readonly string[],
+): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map()
+
+  const filas = await db
+    .select({
+      id: assistantWrites.id,
+      status: assistantWrites.status,
+      createdAt: assistantWrites.createdAt,
+    })
+    .from(assistantWrites)
+    .where(and(eq(assistantWrites.userId, userId), inArray(assistantWrites.id, [...ids])))
+
+  return new Map(
+    filas.map((fila) => [
+      fila.id,
+      fila.status === 'propuesta' && haCaducado(fila.createdAt) ? 'caducada' : fila.status,
+    ]),
+  )
+}
+
 function haCaducado(creada: Date): boolean {
   return Date.now() - creada.getTime() > HORAS_DE_VIGENCIA * 60 * 60 * 1000
 }
@@ -137,8 +171,54 @@ export async function aplicarCreacion(params: {
   const reserva = await reservar(params.userId, params.id)
   if (!reserva.ok) return { ok: false, motivo: reserva.motivo }
 
-  const movimientos = (reserva.propuesta.proposal as { movimientos?: MovimientoListo[] })
-    .movimientos
+  const propuesta = reserva.propuesta.proposal as {
+    movimientos?: MovimientoListo[]
+    deuda?: {
+      direction: 'owed_by_me' | 'owed_to_me'
+      counterparty: string
+      originalCents: number
+      dueOn: string | null
+    }
+    abono?: { debtId: string; amountCents: number; paidOn: string }
+  }
+
+  /*
+   * Una propuesta de deuda (spec 011).
+   *
+   * Se encamina aquí y no en una función aparte porque el recorrido es el
+   * mismo: la puerta ya decidió, la propuesta está guardada, y lo único que
+   * cambia es qué se escribe al final.
+   */
+  if (propuesta.deuda) {
+    const deuda = await crearDeuda(
+      params.userId,
+      {
+        ...propuesta.deuda,
+        createdBy: 'assistant',
+        assistantWriteId: params.id,
+      },
+      params.currency,
+    )
+
+    const movimiento = await registrarMovimientoDeDeuda(params.userId, deuda, params.hoy)
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: [movimiento] }
+  }
+
+  if (propuesta.abono) {
+    const resultado = await abonar(params.userId, propuesta.abono.debtId, {
+      amountCents: propuesta.abono.amountCents,
+      paidOn: propuesta.abono.paidOn,
+      currency: params.currency,
+    })
+
+    if (!resultado.ok) return { ok: false, motivo: 'nada-que-hacer' }
+
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: resultado.transactionId ? [resultado.transactionId] : [] }
+  }
+
+  const movimientos = propuesta.movimientos
   if (!Array.isArray(movimientos) || movimientos.length === 0) {
     return { ok: false, motivo: 'nada-que-hacer' }
   }
@@ -197,7 +277,19 @@ export async function aplicarCorreccion(params: {
     transactionId?: string
     amountCents?: number
     category?: string
+    saldar?: { debtId: string }
   }
+
+  // Dar una deuda por saldada es una corrección: cambia algo que ya existe, así
+  // que llegó aquí después de que el usuario lo confirmara (spec 011, T-526).
+  if (propuesta.saldar) {
+    const hecho = await saldar(params.userId, propuesta.saldar.debtId)
+    if (!hecho) return { ok: false, motivo: 'nada-que-hacer' }
+
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: [] }
+  }
+
   if (!propuesta.transactionId) return { ok: false, motivo: 'nada-que-hacer' }
 
   await updateTransaction(params.userId, propuesta.transactionId, {

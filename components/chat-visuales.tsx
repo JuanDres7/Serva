@@ -54,6 +54,11 @@ export function VisualDeHerramienta({
     case 'proponerMovimientos':
     case 'proponerCorreccion':
     case 'proponerAnulacion':
+    // Las de deuda comparten tarjeta: la pregunta sigue siendo «¿esto está
+    // bien?» (spec 011).
+    case 'proponerDeuda':
+    case 'proponerAbono':
+    case 'proponerSaldarDeuda':
       return <TarjetaDeAccion salida={salida} />
     default:
       return null

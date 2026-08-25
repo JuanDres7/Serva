@@ -138,7 +138,7 @@ describe('borrado de los datos de ejemplo', () => {
     const quedan = await listTransactions(USUARIO, { limit: 500 })
     expect(quedan).toHaveLength(1)
     expect(quedan[0]?.id).toBe(propio.id)
-    expect(quedan[0]?.description).toBe('esto lo registré yo')
+    expect(quedan[0]?.description).toBe('Esto lo registré yo')
   })
 
   it('se lleva consigo el aprendizaje de los ejemplos', async () => {

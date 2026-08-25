@@ -124,3 +124,54 @@ test('el nombre se puede cambiar y el saludo lo refleja', async ({ page }) => {
   await page.goto('/')
   await expect(page.getByRole('heading', { name: /Juana/ })).toBeVisible()
 })
+
+/*
+ * El menú de cuenta (D-077).
+ *
+ * Lo que se protege no es el aspecto sino el camino: cerrar sesión dejó de
+ * estar a la vista y ahora vive dentro de un menú. Si el menú se rompe, no hay
+ * forma de salir de la aplicación, y eso no puede depender de que alguien lo
+ * pruebe a mano.
+ */
+test('el nombre abre el menú de cuenta, y desde ahí se sale', async ({ page }) => {
+  await crearCuenta(page, 'Ana')
+
+  // El nombre es un botón de verdad, no un div con un clic encima: eso es lo
+  // que hace que el teclado llegue hasta él.
+  const disparador = page.getByRole('button', { name: /Ana/ })
+  await expect(disparador).toBeVisible()
+
+  // Cerrado, lo de dentro no existe todavía.
+  await expect(page.getByRole('menuitem', { name: 'Ajustes' })).toHaveCount(0)
+
+  await disparador.click()
+
+  await expect(page.getByRole('menuitem', { name: 'Ajustes' })).toBeVisible()
+  await expect(page.getByRole('menuitem', { name: 'Cerrar sesión' })).toBeVisible()
+
+  await page.getByRole('menuitem', { name: 'Cerrar sesión' }).click()
+
+  await expect(page).toHaveURL(/\/entrar/)
+})
+
+test('desde el menú se llega a Ajustes', async ({ page }) => {
+  await crearCuenta(page, 'Ana')
+
+  await page.getByRole('button', { name: /Ana/ }).click()
+  await page.getByRole('menuitem', { name: 'Ajustes' }).click()
+
+  await expect(page).toHaveURL(/\/ajustes/)
+})
+
+test('Escape cierra el menú sin hacer nada', async ({ page }) => {
+  await crearCuenta(page, 'Ana')
+
+  await page.getByRole('button', { name: /Ana/ }).click()
+  await expect(page.getByRole('menuitem', { name: 'Ajustes' })).toBeVisible()
+
+  await page.keyboard.press('Escape')
+
+  await expect(page.getByRole('menuitem', { name: 'Ajustes' })).toHaveCount(0)
+  // Sigue dentro: cerrar el menú no es cerrar la sesión.
+  await expect(page.getByRole('button', { name: /Ana/ })).toBeVisible()
+})

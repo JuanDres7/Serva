@@ -4,6 +4,7 @@ import { db, client } from '@/lib/db'
 import { user, transactions } from '@/lib/db/schema'
 import { crearHerramientas, type ContextoHerramientas } from '@/lib/ai/tools'
 import { createTransaction } from '@/lib/db/queries/transactions'
+import { crearDeuda } from '@/lib/db/queries/debts'
 import { todayIn, toISO, addDays } from '@/lib/domain/civil-date'
 import { findCategory } from '@/lib/domain/categories'
 
@@ -302,6 +303,30 @@ describe('aislamiento del asistente', () => {
   })
 })
 
+describe('contrapartes capitalizadas (D-076)', () => {
+  /*
+   * La contraparte se guarda con la primera en mayúscula, pero quien habla
+   * sigue diciendo «mi primo» en minúscula. Si la búsqueda dejara de comparar
+   * sin distinguir mayúsculas, abonar a una deuda existente empezaría a crear
+   * deudas nuevas, que es un fallo silencioso y feo de deshacer.
+   */
+  it('«primo» encuentra la deuda guardada como «Primo»', async () => {
+    await crearDeuda(
+      ANA,
+      { direction: 'owed_by_me', counterparty: 'primo', originalCents: 5000000 },
+      'COP',
+    )
+
+    const salida = await ejecutar(ANA, 'proponerAbono', {
+      contraparte: 'primo',
+      monto: 20000,
+    })
+
+    expect(salida.resultado).not.toBe('no-encontrado')
+    expect(salida.abono).toMatchObject({ contraparte: 'Primo' })
+  })
+})
+
 describe('límites del asistente', () => {
   /*
    * El conjunto permitido, enumerado.
@@ -329,6 +354,12 @@ describe('límites del asistente', () => {
     'proponerMovimientos',
     'proponerCorreccion',
     'proponerAnulacion',
+    // Deudas (spec 011). `misDeudas` es de consulta; las tres `proponer*`
+    // pasan por la misma puerta que las demas.
+    'misDeudas',
+    'proponerDeuda',
+    'proponerAbono',
+    'proponerSaldarDeuda',
   ] as const
 
   it('solo existen las herramientas aprobadas', () => {

@@ -20,18 +20,35 @@ import { type MovementKind, isValidFor } from '@/lib/domain/categories'
 import type { Period } from '@/lib/domain/cycle'
 import { toISO } from '@/lib/domain/civil-date'
 import type { PeriodAggregates, CategoryAmount } from '@/lib/domain/balance'
+import { enMayuscula } from '@/lib/domain/keywords'
+
+/** `null` y vacío se dejan pasar: no hay primera letra que cambiar. */
+const soloLaPrimera = (texto: string | null | undefined) =>
+  texto ? enMayuscula(texto) : texto
 
 export type MovementType = 'expense' | 'income' | 'saving'
 
 export const transactionInputSchema = z
   .object({
-    type: z.enum(['expense', 'income', 'saving']),
+    type: z.enum(['expense', 'income', 'saving', 'debt']),
+    /** En qué sentido se movió el dinero, si es un movimiento de deuda. */
+    debtFlow: z.enum(['received', 'lent', 'collected']).nullable().optional(),
+    debtId: z.string().uuid().nullable().optional(),
     amountCents: z.number().int().positive(),
     currency: z.string().regex(/^[A-Z]{3}$/),
     category: z.string().nullable().optional(),
     occurredOn: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
-    description: z.string().trim().max(500).nullable().optional(),
-    descriptionShort: z.string().trim().max(120).nullable().optional(),
+    // Las dos se capitalizan aquí, el único sitio por el que pasan todos los
+    // caminos de escritura: el formulario, la IA y los recurrentes al
+    // materializarse (D-076).
+    description: z.string().trim().max(500).nullable().optional().transform(soloLaPrimera),
+    descriptionShort: z
+      .string()
+      .trim()
+      .max(120)
+      .nullable()
+      .optional()
+      .transform(soloLaPrimera),
     categorySource: z
       .enum(['user', 'keywords', 'similarity', 'model'])
       .optional()
@@ -51,6 +68,26 @@ export const transactionInputSchema = z
           code: 'custom',
           path: ['category'],
           message: 'Un ahorro va a una meta, no a una categoría',
+        })
+      }
+      return
+    }
+
+    // Un préstamo no es gasto de nada, así que no lleva categoría; y necesita
+    // saber en qué sentido se movió el dinero (spec 011).
+    if (value.type === 'debt') {
+      if (value.category) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['category'],
+          message: 'Un préstamo va a una deuda, no a una categoría',
+        })
+      }
+      if (!value.debtFlow) {
+        ctx.addIssue({
+          code: 'custom',
+          path: ['debtFlow'],
+          message: 'Falta saber si el dinero entró, salió o volvió',
         })
       }
       return
@@ -131,6 +168,8 @@ export async function createTransaction(
       descriptionShort: values.descriptionShort ?? null,
       createdBy: values.createdBy,
       assistantWriteId: values.assistantWriteId ?? null,
+      debtFlow: values.debtFlow ?? null,
+      debtId: values.debtId ?? null,
     })
     .returning()
 
@@ -271,11 +310,12 @@ export async function periodAggregates(
     .select({
       type: transactions.type,
       direction: transactions.savingDirection,
+      debtFlow: transactions.debtFlow,
       total: sql<string>`sum(${transactions.amountCents})`,
     })
     .from(transactions)
     .where(scope(userId, { period }))
-    .groupBy(transactions.type, transactions.savingDirection)
+    .groupBy(transactions.type, transactions.savingDirection, transactions.debtFlow)
 
   const result = {
     currency,
@@ -283,14 +323,47 @@ export async function periodAggregates(
     expenseCents: 0,
     savingContributionCents: 0,
     savingWithdrawalCents: 0,
+    debtReceivedCents: 0,
+    debtLentCents: 0,
+    debtCollectedCents: 0,
   }
 
+  /*
+   * Un `switch` exhaustivo y no una cadena de `if`.
+   *
+   * Antes el último `else` recogía todo lo que no fuera ingreso ni gasto, y al
+   * añadir el tipo `debt` un préstamo habría acabado contado como aporte a
+   * ahorro: el balance resta el ahorro neto, así que pedir prestado habría
+   * bajado el balance. TypeScript no lo detecta en una cadena de `if`.
+   *
+   * Con el `switch` y el caso imposible de abajo, añadir un quinto tipo de
+   * movimiento produce un error de compilación aquí, que es donde tiene que
+   * producirse.
+   */
   for (const row of rows) {
     const total = Number(row.total ?? 0)
-    if (row.type === 'income') result.incomeCents += total
-    else if (row.type === 'expense') result.expenseCents += total
-    else if (row.direction === 'withdrawal') result.savingWithdrawalCents += total
-    else result.savingContributionCents += total
+
+    switch (row.type) {
+      case 'income':
+        result.incomeCents += total
+        break
+      case 'expense':
+        result.expenseCents += total
+        break
+      case 'saving':
+        if (row.direction === 'withdrawal') result.savingWithdrawalCents += total
+        else result.savingContributionCents += total
+        break
+      case 'debt':
+        if (row.debtFlow === 'received') result.debtReceivedCents += total
+        else if (row.debtFlow === 'lent') result.debtLentCents += total
+        else result.debtCollectedCents += total
+        break
+      default: {
+        const imposible: never = row.type
+        throw new Error(`Tipo de movimiento sin contemplar: ${String(imposible)}`)
+      }
+    }
   }
 
   return result

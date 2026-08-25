@@ -1190,12 +1190,11 @@ que nadie alcanzara datos ajenos —lo que decide si el asistente es fiable—, 
 no podían detectar que la búsqueda no entendiera un plural. Eso solo lo encuentra
 alguien preguntando de verdad.
 
-## D-058 · ~~Licencia MIT~~ REVERTIDA (2026-08-23)
+## D-058 · Licencia MIT (2026-08-23)
 
-> Revertida por **D-071**: el proyecto pasa a ser de pago, y MIT permitía a
-> cualquiera desplegarlo y venderlo. Se conserva por trazabilidad, porque el
-> razonamiento de por qué se eligió una licencia permisiva sigue siendo válido
-> para lo que se eligió entonces: un proyecto de portafolio sin ánimo comercial.
+> Estuvo revertida por D-071 durante unas horas, y **D-072 la restableció**. El
+> ir y venir se conserva porque el razonamiento de ambos lados sigue siendo
+> útil el día que la pregunta vuelva.
 
 El repositorio se publica bajo licencia MIT. Cualquiera puede usar, modificar y
 distribuir el código, incluso con fines comerciales, conservando el aviso de
@@ -1611,7 +1610,11 @@ puede quedar fijo fuera del sistema de tokens** (RN-007 de la spec 004).
 
 ---
 
-## D-071 · Todos los derechos reservados, no MIT (2026-08-23)
+## D-071 · ~~Todos los derechos reservados, no MIT~~ REVERTIDA (2026-08-23)
+
+> Revertida el mismo día por **D-072**. Se conserva entera porque su análisis
+> —qué permite MIT exactamente, y por qué no se puede revocar hacia atrás— es lo
+> que hay que releer si la pregunta de la licencia vuelve a abrirse.
 
 **Decisión.** El código se publica con todos los derechos reservados. Se puede
 leer, estudiar, bifurcar dentro de GitHub y ejecutar en local para evaluarlo;
@@ -1648,6 +1651,323 @@ cambio de la visibilidad. No autoriza a desplegarlo ni a usarlo fuera.
 directas es copyleft —todas MIT, Apache-2.0, ISC, BSD o Unlicense—, así que nada
 obliga a liberar este código. Con una sola dependencia GPL o AGPL, esta decisión
 no habría sido posible.
+
+---
+
+## D-072 · Se vuelve a MIT (2026-08-24)
+
+**Decisión.** El proyecto vuelve a publicarse bajo licencia MIT. Revierte
+**D-071** y restablece **D-058**.
+
+**Lo que esto significa, dicho una vez y con claridad:** cualquiera puede tomar
+este código, desplegarlo, cobrar por él y competir, sin pedir permiso ni pagar
+nada. Lo único que debe conservar es el aviso de copyright. Esa consecuencia se
+analizó en D-071 antes de decidir, y se asume a sabiendas.
+
+**Lo que MIT no impide:** cobrar por Serva. Eso nunca dependió de la licencia.
+Se puede desplegar el servicio y venderlo con MIT igual que sin ella; lo que
+cambia es si otros pueden hacer lo mismo.
+
+**Por qué se vuelve.** Es la decisión del dueño del proyecto. Las razones de
+D-058 —que una licencia permisiva no estorba en un proyecto que quiere leerse y
+compartirse— siguen en pie, y son las que vuelven a aplicarse.
+
+**Nota de trazabilidad.** D-071 se escribió y se revirtió el mismo día, sin que
+llegara a publicarse nada bajo esa licencia: el repositorio se borró antes. Así
+que no queda ninguna versión de Serva circulando con la licencia cerrada, ni
+ninguna con MIT que después se hubiera cerrado. El historial de git sí conserva
+ambos textos, que es lo correcto: registra lo que se pensó, no solo lo que
+quedó.
+
+---
+
+## D-073 · Las deudas son un cuarto tipo de movimiento, no una bandera (2026-08-24)
+
+**Decisión.** Las deudas y préstamos entran como entidad propia, y el dinero que
+las mueve entra como un cuarto valor de `movement_type`: `debt`, con su propia
+dirección. Las tres respuestas que fijaron el alcance:
+
+- **Las dos direcciones**, lo que debo y lo que me deben. Prestar plata y no
+  acordarse es tan común como deberla, y son la misma pieza con el signo
+  cambiado.
+- **Saldo que baja con cada abono.** Es como funcionan las deudas de verdad, y
+  reutiliza la mecánica de aportes que ya tienen las metas.
+- **Un préstamo recibido no es ingreso.** Ni prestar es gasto, ni que te
+  devuelvan es ingreso. Lo único que cuenta en los totales es el **abono**,
+  porque ahí el dinero se fue de verdad.
+
+**Por qué un tipo y no una bandera.** La alternativa evidente era una columna
+`esPrestamo` que los cálculos ignoraran. Se descarta porque habría que recordarla
+en `computeTotals`, en los presupuestos, en los gráficos, en la exportación y en
+las herramientas del asistente. Olvidarla en uno solo produce una cifra
+equivocada sin ningún error visible, que es la peor clase de fallo que puede
+tener una aplicación de dinero.
+
+Un valor nuevo en el enum hace lo contrario: **TypeScript señala cada `switch`
+que no lo contempla**, y esa lista de errores de compilación es exactamente la
+lista de sitios que había que revisar.
+
+**El precedente ya estaba en el proyecto.** El ahorro tiene el mismo problema
+—aportar a una meta mueve dinero real sin ser un gasto— y se resolvió igual, con
+el tipo `saving` y un término propio en `computeTotals`. Las deudas siguen ese
+camino en vez de inventar otro.
+
+**Sin saldo almacenado.** El saldo se deriva del monto original menos la suma de
+los abonos, igual que los balances del usuario se derivan del historial. Un
+contador que se actualiza a mano acaba desincronizado de los hechos que lo
+alimentan.
+
+**Lo que queda fuera, y por qué.** Intereses, cuotas y amortización. Una deuda
+pide intereses, los intereses piden amortización y eso pide un simulador
+financiero, que es otra aplicación. Serva **registra** deudas, no las calcula
+(Art. VIII).
+
+**El riesgo asumido.** Esta es la primera feature que puede romper las once
+anteriores. Si la separación entre préstamo y movimiento se hace mal, no falla la
+pantalla de deudas: fallan el resumen, los presupuestos y los gráficos, que
+llevan meses siendo correctos. Por eso la fase 3 de las tareas va antes que la
+interfaz, y por eso su prueba tiene forma de comparación: medir los totales,
+registrar un préstamo, volver a medirlos y exigir que no hayan cambiado.
+
+---
+
+## D-074 · Las deudas aciertan 7 de 7, y aparecieron dos fallos por el camino (2026-08-24)
+
+**Qué se probó.** Siete frases de deuda contra Gemini, con `npm run evaluar`:
+prestar, que te presten, deber, abonar, saldar y dos consultas. Lo que se mide
+no es el monto sino **la elección de herramienta**: que Serva no confunda un
+préstamo con un ingreso es lo que la feature existe para garantizar.
+
+**Resultado: 7 de 7.** Incluidas las dos que más importan —«¿cuánto debo?» no
+escribe nada, y «ya le pagué todo» pide confirmación en lugar de saldar sola,
+porque saldar entra por la puerta como corrección.
+
+**Pero la primera pasada dio 2 de 7, y ninguno de los dos motivos era el
+modelo.**
+
+El primero era mi propia prueba. La cuota gratuita de Gemini admite quince
+peticiones por minuto y cada frase gasta dos o tres, así que la evaluación
+estaba midiendo la cuota y no el modelo: sus fallos decían «no respondió». Peor
+aún, el oráculo contaba como acierto que no saliera tarjeta de confirmación —y
+si el modelo no contesta, tampoco sale—, con lo que dos fallos se apuntaban
+como aciertos. Un oráculo que confunde silencio con acierto es peor que no
+tenerlo. Ahora hay pausa entre frases y se exige que Serva haya respondido algo.
+
+El segundo era un fallo real, **y es el mismo del FR-006 en miniatura**: las
+tres herramientas de deuda no estaban en el `switch` de `chat-visuales.tsx`, así
+que la propuesta se guardaba, la puerta decidía, y la interfaz tiraba el
+resultado a la basura. El modelo decía «Quedó anotado» y no aparecía ninguna
+tarjeta, de modo que no había forma de confirmar nada.
+
+Que sea el segundo caso del mismo error dice algo: **añadir una herramienta
+tiene dos mitades, y la segunda es fácil de olvidar porque no rompe nada.** No
+hay error de compilación, no falla ninguna prueba, y el chat sigue respondiendo.
+Solo se descubre mirando la pantalla.
+
+Queda anotado en `CLAUDE.md` para la próxima.
+
+---
+
+## D-075 · El vocabulario de fechas solo miraba hacia atrás (2026-08-24)
+
+**El síntoma.** «Mi hermana me prestó 50 mil y se los debo pagar mañana». Serva
+registró bien los gastos, entendió bien que había una deuda, y luego contestó:
+«No entendí para cuándo. Dime la fecha y lo dejo listo». Siendo día 24, mañana
+era el 25 y no hacía falta preguntar nada.
+
+**Dónde estaba.** No en el modelo. `RELATIVAS`, en `lib/domain/fecha-hablada.ts`,
+tenía siete entradas —hoy, ahora, esta noche, anoche, ayer, anteayer, antier— y
+**ninguna apuntaba hacia adelante**. El modelo hizo exactamente lo que se le
+pide: repitió «mañana» sin convertirlo. La función pura no conocía la palabra y
+devolvió `no-entendida`, que es su forma correcta de decir que no sabe.
+
+Es la arquitectura funcionando y fallando a la vez. La regla de la 010 —el
+modelo propone, una función pura decide— evitó que se inventara una fecha, que
+era el riesgo grande. Pero trasladó el vocabulario entero a un sitio donde nadie
+lo revisa, y ahí se quedó incompleto.
+
+**Por qué se quedó incompleto tanto tiempo.** El diseño de la 010 giraba
+alrededor de gastos, y un gasto se cuenta después de hacerlo: hoy, ayer,
+anoche. Nunca hizo falta el futuro. La 011 cambió eso sin que nadie lo notara,
+porque **un vencimiento es futuro por definición**, y una deuda sin fecha es
+justo la que uno quiere anotar. La feature nueva no rompió nada de la vieja:
+descubrió que a la vieja le faltaba algo.
+
+**Lo que se añadió.** «Mañana», «pasado mañana», «en tres días», «dentro de dos
+semanas», «la semana que viene», con números dichos además de escritos. Y el
+mapa exacto pasó a ser una lista ordenada de patrones, porque estas expresiones
+se solapan de una forma que un mapa no puede resolver:
+
+- «pasado mañana» contiene «mañana», así que va antes;
+- «ayer en la mañana» también la contiene, y es ayer;
+- **«esta mañana» es hoy**, que es la trampa propia del español: la misma
+  palabra es el día que viene y la primera mitad de este.
+
+El orden de la lista *es* la regla, y por eso está dicho en el comentario y
+fijado en nueve pruebas.
+
+**Lo que no se añadió, a propósito.** «El mes que viene», «a fin de mes», «hace
+tres días». Ampliar el vocabulario no puede convertirse en ampliar lo que se
+adivina: lo que sigue sin entenderse se pregunta, igual que antes. La prueba de
+que «el mes que viene tal vez» devuelve `null` sigue en verde y así se queda.
+
+**Medido.** Con las dos frases nuevas en el banco —«tengo que pagar 120 mil
+mañana» y «mi hermana me prestó 50 mil y se los debo pagar mañana»—, `npm run
+evaluar` da **11 de 11** en extracción y **8 de 8** en deudas contra Gemini. La
+segunda es, palabra por palabra, la frase que falló en pantalla.
+
+**Lo que deja para la próxima.** Una función pura con una tabla de palabras
+dentro no falla ruidosamente cuando la tabla se queda corta: falla pidiendo
+datos que ya tenía. Se parece al error de las dos mitades (D-068, D-074) en que
+todo compila, ninguna prueba se pone roja, y solo se ve usando la aplicación.
+La diferencia es que aquí la pista estaba escrita: las siete entradas iban del
+0 al −2, sin un solo número positivo.
+
+---
+
+## D-076 · Una tarjeta ya confirmada volvía a pedir confirmación (2026-08-24)
+
+Dos defectos distintos, encontrados en la misma pantalla, y con la misma forma:
+ninguno rompía nada, los dos se veían enseguida.
+
+### La tarjeta que olvidaba
+
+Confirmar una acción, irse al resumen y volver al chat devolvía la tarjeta a su
+estado inicial: «Confirmar», «Sí, y no preguntes más», «Cancelar». Pulsar otra
+vez no hacía nada.
+
+Esa segunda parte es la buena noticia. `reservar` marca como terminales
+`aplicada`, `revertida`, `rechazada` y `caducada`, así que confirmar dos veces
+nunca escribió dos veces. Lo que fallaba era solo lo que se enseñaba —pero
+**una interfaz que no responde al pulsarla se lee como rota**, y quien la usa no
+tiene forma de saber que por debajo está bien.
+
+La causa: la conversación se guarda tal como el SDK la emitió, y la salida de
+una herramienta es el registro de lo que contestó **aquel día**. Dice
+«propuesta» para siempre, porque nadie vuelve a reescribirla cuando alguien
+pulsa un botón. El estado de verdad vive en `assistant_writes.status`, en otra
+tabla, y no se cruzaban.
+
+Ahora se cruzan al cargar: `propuestasEn` recoge los identificadores,
+`estadosDePropuestas` los busca, y `conEstados` añade `estadoGuardado` a cada
+salida. **Se añade un campo en lugar de reescribir `resultado`**, porque
+`resultado` es lo que pasó y eso no cambia; lo que cambia con el tiempo merece
+su propio nombre.
+
+De paso se cierra algo que la documentación ya daba por hecho: una propuesta sin
+resolver que pasó sus 24 horas se enseña como caducada. El comentario de
+`HORAS_DE_VIGENCIA` decía que sin caducidad la tarjeta «seguiría invitando a
+pulsar una semana después», y era justo lo que hacía.
+
+### Las minúsculas
+
+«palomitas cine». «primo». «mi hermana». Un modelo devuelve el texto como lo
+oyó, y quien habla no escribe mayúsculas. Eso llegaba al historial y a las
+tarjetas tal cual, y una lista entera en minúscula se lee como algo a medio
+hacer.
+
+La mayúscula se pone **en los esquemas de escritura**, no en cada sitio que
+escribe: `transactionInputSchema`, `recurrenteSchema` y `deudaSchema`. Por ahí
+pasan todos los caminos —el formulario, Serva AI, y los recurrentes al
+materializarse—, así que no hay ninguno que pueda saltársela. Ponerlo en cada
+llamada era la versión frágil, y con cuatro sitios ya habría fallado.
+
+Dos salvedades, ambas con prueba:
+
+- **Solo la primera letra.** Poner en Mayúscula Cada Palabra es una convención
+  del inglés; en español «Palomitas Cine» se lee peor que dejarlo en minúscula.
+- **La tarjeta también, por separado.** Enseña la propuesta antes de guardarla,
+  así que el esquema llega tarde: sin capitalizar en `prepararUno` se vería
+  «palomitas cine» al confirmar y «Palomitas cine» en el historial.
+
+Y una asimetría deliberada: lo que queda **incompleto** no se capitaliza,
+porque se cita dentro de una frase —«de «unas cervezas» me falta el monto»— y
+ahí la mayúscula chirría.
+
+Buscar deudas por contraparte compara en minúsculas por ambos lados, así que
+guardar «Primo» no rompe «le aboné 50 mil a mi primo». Eso lo sujeta una prueba
+que ejecuta la herramienta de verdad, no una que reimplemente la comparación:
+lo segundo es lo que ya dio garantía falsa en D-074.
+
+### Y lo ya escrito
+
+Capitalizar de ahora en adelante habría partido el historial en dos épocas, y la
+que peor se ve es la que ya está. La migración `0014_mayuscula_inicial` sube la
+primera letra de las cuatro columnas que escriben texto: las dos descripciones
+de los movimientos, la de los recurrentes y la contraparte de las deudas.
+
+Al aplicarla quedaban **78.814 descripciones** en minúscula, de las que 77.166
+eran datos de ejemplo de las 2.154 cuentas que dejan los e2e; las cuentas reales
+sumaban unas 270. Después, cero filas en minúscula en las cuatro columnas.
+
+**No lleva vuelta atrás, a propósito.** Bajar la primera letra otra vez
+estropearía lo que siempre estuvo en mayúscula —«Netflix», «IVA»— y ya no hay
+forma de distinguirlo. Como lo que cambia es la caja de un carácter y ninguna
+clave ni ninguna búsqueda depende de ella, se asume.
+
+### Lo que tienen en común
+
+Ninguno de los dos rompía nada. Todo compilaba, ninguna prueba se ponía roja, y
+la aplicación respondía. Se ven usándola y de ninguna otra forma —igual que las
+dos mitades de D-068 y D-074, e igual que «mañana» en D-075. Van cuatro.
+
+---
+
+## D-077 · El nombre pasa a ser el botón de la cuenta (2026-08-25)
+
+El pie de la barra tenía el nombre como texto muerto y debajo un botón «Salir»
+siempre a la vista. Dos cosas mal: **el nombre parecía pulsable sin serlo**, y
+lo que menos se hace en toda la aplicación ocupaba sitio permanente al lado de
+lo que más.
+
+Ahora el nombre **es** el botón, y dentro están Ajustes y Cerrar sesión.
+
+**Que se note que se puede pulsar no se dejó a una sola señal.** Hay fondo al
+pasar por encima, la chevron gira al abrir, y el botón se hunde un punto al
+presionar: antes, durante y después. Una sola se pierde en una barra donde
+todas las secciones también reaccionan al ratón; lo que distingue a este control
+es que responden las tres en momentos distintos.
+
+**La animación sale del botón**, no de un borde de la pantalla. Base UI marca el
+primer y el último fotograma con `data-starting-style` y `data-ending-style`, de
+modo que basta con describir el reposo en `.menu-cuenta` y el estado encogido
+ahí: el navegador hace la transición y al cerrar la recorre al revés, sin una
+segunda animación escrita. El origen lo pone el posicionador según por dónde
+acabó cabiendo, así que el menú siempre crece del sitio que se tocó. Dentro, los
+elementos entran escalonados con `.escalonado`, que ya existía.
+
+**Se usa `Menu` de Base UI y no un `Popover` con enlaces.** Ya era dependencia,
+y trae lo que un menú hecho a mano tarda semanas en igualar: recorrido con
+flechas, Escape, clic fuera, foco que vuelve al botón, y `role="menuitem"`.
+
+### Tres cosas que aparecieron al construirlo
+
+**Ajustes salía dos veces.** Estaba en la lista de secciones y ahora también en
+el menú, con la entrada suelta debajo de un separador y el menú repitiéndola dos
+centímetros más abajo. Se quitó de la navegación. Encaja mejor donde quedó: esa
+lista son sitios donde se mira el dinero, y ajustes es donde se toca la cuenta,
+que es justo de lo que va este menú.
+
+**El nombre salía dos veces**, en el botón y en la cabecera del menú. La
+cabecera se quedó solo con el correo, que es lo único que distingue dos cuentas
+—y hay dos en esta máquina—.
+
+**En pantalla estrecha el botón se quedaba mudo.** Ahí no se pinta el nombre y
+la inicial es decorativa, así que el botón no tenía nombre accesible: un lector
+de pantalla habría anunciado «botón» y nada más. Lo destapó el guion de
+capturas, al no encontrar el control por su rol —la accesibilidad y la
+automatización buscan por lo mismo, y por eso una revela los fallos de la otra—.
+Ahora lleva `aria-label` en las dos variantes.
+
+### Lo que queda sujeto
+
+Cerrar sesión dejó de estar a la vista y vive dentro de un menú: si el menú se
+rompe no hay forma de salir de la aplicación. Eso no puede depender de que
+alguien lo pruebe a mano, así que hay tres pruebas de extremo a extremo —abrir y
+salir, abrir e ir a Ajustes, y que Escape cierre sin hacer nada—.
+
+Se comprobó además en claro, en oscuro y a 390 px. Ningún color sale de los
+tokens (D-070).
 
 ---
 

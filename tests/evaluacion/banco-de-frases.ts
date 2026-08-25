@@ -81,12 +81,44 @@ export const BANCO: readonly CasoDeFrase[] = [
     espera: [{ montoCents: 20000000, categoria: 'debt', tipo: 'expense', programado: true }],
   },
   {
+    // D-075: «mañana» estuvo dos features sin resolverse.
+    frase: 'tengo que pagar 120 mil mañana',
+    espera: [{ montoCents: 12000000, categoria: 'debt', tipo: 'expense', programado: true }],
+  },
+  {
     frase: 'pagué 75 mil de internet y 43 mil de Netflix',
     espera: [
       { montoCents: 7500000, categoria: 'utilities', tipo: 'expense' },
       { montoCents: 4300000, categoria: 'subscriptions', tipo: 'expense' },
     ],
   },
+]
+
+/**
+ * Frases de deuda (spec 011, T-539).
+ *
+ * Van aparte porque se miden distinto: aquí no se comprueba qué movimiento
+ * salió, sino que Serva llamara a la herramienta de deudas y no a la de
+ * movimientos. Confundirlas es el error que importa: registrar un préstamo como
+ * ingreso es exactamente lo que la feature existe para evitar.
+ */
+export type CasoDeDeuda = {
+  readonly frase: string
+  /** Qué herramienta debería elegir. */
+  readonly espera: 'proponerDeuda' | 'proponerAbono' | 'proponerSaldarDeuda' | 'misDeudas'
+  readonly montoCents?: number
+}
+
+export const BANCO_DE_DEUDAS: readonly CasoDeDeuda[] = [
+  { frase: 'me prestaron 200 mil, tengo que devolverlos el 7 de septiembre', espera: 'proponerDeuda', montoCents: 20000000 },
+  { frase: 'le presté 80 mil a un amigo', espera: 'proponerDeuda', montoCents: 8000000 },
+  // El caso real que destapó D-075: el vencimiento dicho como «mañana».
+  { frase: 'mi hermana me prestó 50 mil y se los debo pagar mañana', espera: 'proponerDeuda', montoCents: 5000000 },
+  { frase: 'le debo 500 mil a mi hermana', espera: 'proponerDeuda', montoCents: 50000000 },
+  { frase: 'le aboné 50 mil a mi hermana', espera: 'proponerAbono', montoCents: 5000000 },
+  { frase: 'ya le pagué todo a mi hermana', espera: 'proponerSaldarDeuda' },
+  { frase: '¿cuánto debo?', espera: 'misDeudas' },
+  { frase: '¿quién me debe plata?', espera: 'misDeudas' },
 ]
 
 /**

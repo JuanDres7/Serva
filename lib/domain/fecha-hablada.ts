@@ -25,15 +25,45 @@ export type FechaResuelta =
   | { readonly ok: true; readonly fecha: CivilDate }
   | { readonly ok: false; readonly motivo: 'no-entendida' }
 
-const RELATIVAS: Record<string, number> = {
-  hoy: 0,
-  ahora: 0,
-  'esta noche': 0,
-  anoche: -1,
-  ayer: -1,
-  anteayer: -2,
-  'antier': -2,
+/**
+ * Desplazamientos en días, en orden de prueba. **El orden es la regla**, no un
+ * detalle de implementación: se recorre de arriba abajo y gana el primero que
+ * encaja.
+ *
+ * Hace falta ordenarlas porque estas expresiones se solapan. «Pasado mañana»
+ * contiene «mañana», y «ayer en la mañana» también: quien mire solo la palabra
+ * suelta manda un gasto de ayer al día siguiente. Por eso lo compuesto va antes
+ * que lo simple, y lo que mira al pasado antes que «mañana» a secas.
+ *
+ * Y el caso que obliga a separar «esta mañana» de «mañana» es el de siempre en
+ * español: la misma palabra es el día que viene y la primera mitad de hoy.
+ */
+const RELATIVAS: readonly { readonly patron: RegExp; readonly dias: number }[] = [
+  { patron: /\bpasado\s*manana\b/, dias: 2 },
+  { patron: /\banteayer\b|\bantier\b/, dias: -2 },
+  { patron: /\bayer\b|\banoche\b/, dias: -1 },
+  { patron: /\bhoy\b|\bahora\b|\besta (manana|tarde|noche)\b/, dias: 0 },
+  { patron: /\bmanana\b/, dias: 1 },
+  { patron: /\bla (proxima|otra) semana\b|\bla semana que viene\b/, dias: 7 },
+]
+
+/** Números dichos, no escritos: «en dos días» es tan corriente como «en 2 días». */
+const NUMEROS: Record<string, number> = {
+  un: 1,
+  una: 1,
+  dos: 2,
+  tres: 3,
+  cuatro: 4,
+  cinco: 5,
+  seis: 6,
+  siete: 7,
+  ocho: 8,
+  nueve: 9,
+  diez: 10,
 }
+
+const PLAZO =
+  /\b(?:en|dentro de|de aca a)\s+(\d{1,3}|un|una|dos|tres|cuatro|cinco|seis|siete|ocho|nueve|diez)\s+(dias?|semanas?)\b/
 
 /** Lunes es 1, domingo es 7, como en ISO. */
 const DIAS_SEMANA: Record<string, number> = {
@@ -95,9 +125,13 @@ export function resolverFecha(expresion: string | null | undefined, hoy: CivilDa
 
   const texto = normalizar(expresion)
 
-  if (texto in RELATIVAS) {
-    return { ok: true, fecha: addDays(hoy, RELATIVAS[texto]!) }
+  const relativa = RELATIVAS.find((regla) => regla.patron.test(texto))
+  if (relativa) {
+    return { ok: true, fecha: addDays(hoy, relativa.dias) }
   }
+
+  const porPlazo = resolverPlazo(texto, hoy)
+  if (porPlazo) return { ok: true, fecha: porPlazo }
 
   if (ISO.test(texto)) {
     try {
@@ -114,6 +148,25 @@ export function resolverFecha(expresion: string | null | undefined, hoy: CivilDa
   if (porFechaEscrita) return { ok: true, fecha: porFechaEscrita }
 
   return { ok: false, motivo: 'no-entendida' }
+}
+
+/**
+ * «En tres días», «dentro de 2 semanas», «de acá a una semana».
+ *
+ * Siempre hacia adelante: nadie dice «en tres días» hablando del pasado. Para
+ * atrás existen «hace tres días» y compañía, que aquí no se resuelven a
+ * propósito —quien cuenta un gasto viejo suele dar la fecha— y por tanto se
+ * preguntan en lugar de adivinarse.
+ */
+function resolverPlazo(texto: string, hoy: CivilDate): CivilDate | null {
+  const encaje = texto.match(PLAZO)
+  if (!encaje) return null
+
+  const dicho = encaje[1]!
+  const cuantos = /^\d+$/.test(dicho) ? Number(dicho) : NUMEROS[dicho]
+  if (!cuantos) return null
+
+  return addDays(hoy, encaje[2]!.startsWith('semana') ? cuantos * 7 : cuantos)
 }
 
 /**

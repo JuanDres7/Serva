@@ -24,11 +24,26 @@ export type PeriodAggregates = {
   readonly expenseCents: number
   readonly savingContributionCents: number
   readonly savingWithdrawalCents: number
+  /**
+   * Dinero de préstamos que entró o salió en el período (spec 011).
+   *
+   * Se agrega para poder mostrarlo, **no para meterlo en el balance**. Un
+   * préstamo recibido no es ingreso y prestar no es gasto: es un traslado entre
+   * tu bolsillo y una obligación (RN-002). Lo que sí cuenta es el abono, que
+   * entra como gasto normal en «Deudas y créditos».
+   */
+  readonly debtReceivedCents: number
+  readonly debtLentCents: number
+  readonly debtCollectedCents: number
 }
 
 export type PeriodTotals = {
   readonly income: Money
   readonly expense: Money
+  /** Movimiento de préstamos del período. No entra en `balance` (spec 011). */
+  readonly prestado?: Money
+  readonly recibido?: Money
+  readonly cobrado?: Money
   /** Neto ahorrado: aportes menos retiros. Puede ser negativo. */
   readonly savedNet: Money
   /** Saldo del período según RN-002. */
@@ -43,9 +58,17 @@ export function computeTotals(aggregates: PeriodAggregates): PeriodTotals {
   const withdrawals = money(aggregates.savingWithdrawalCents, currency)
 
   const savedNet = subtract(contributions, withdrawals)
+
+  // Los préstamos quedan deliberadamente fuera del balance. Si entraran, un mes
+  // en que pediste prestado se vería como un mes bueno, que es lo contrario de
+  // la verdad (RN-002 de la spec 011).
   const balance = subtract(subtract(income, expense), savedNet)
 
-  return { income, expense, savedNet, balance }
+  const prestado = money(aggregates.debtLentCents, currency)
+  const recibido = money(aggregates.debtReceivedCents, currency)
+  const cobrado = money(aggregates.debtCollectedCents, currency)
+
+  return { income, expense, savedNet, balance, prestado, recibido, cobrado }
 }
 
 export type CategoryAmount = {

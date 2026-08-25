@@ -1,6 +1,6 @@
 import { and, eq, sql } from 'drizzle-orm'
 import { db } from '@/lib/db'
-import { transactions, categorizationLog, recurringMovements } from '@/lib/db/schema'
+import { transactions, categorizationLog, recurringMovements, debts, debtPayments } from '@/lib/db/schema'
 import { addDays, toISO, type CivilDate } from '@/lib/domain/civil-date'
 import { extraerPalabrasClave, normalizar, descripcionCorta } from '@/lib/domain/keywords'
 import { primeraFecha } from '@/lib/domain/recurrence'
@@ -180,6 +180,41 @@ export async function generarDatosDeEjemplo(
     )
     .returning({ id: recurringMovements.id })
 
+  /*
+   * Dos deudas, una en cada dirección (spec 011, T-543).
+   *
+   * Quien pulsa «ver con datos de ejemplo» tiene que encontrar la pantalla de
+   * deudas con algo dentro, o parecerá que no funciona. Una a medio pagar y un
+   * préstamo a favor sin cobrar, que son los dos casos que la feature resuelve.
+   */
+  const [deudaPropia] = await db
+    .insert(debts)
+    .values({
+      userId,
+      direction: 'owed_by_me',
+      counterparty: 'mi hermana',
+      originalCents: 50000000,
+      currency: opciones.currency,
+      dueOn: toISO(addDays(opciones.hoy, 12)),
+      isSample: true,
+    })
+    .returning({ id: debts.id })
+
+  await db.insert(debtPayments).values({
+    debtId: deudaPropia!.id,
+    amountCents: 20000000,
+    paidOn: toISO(addDays(opciones.hoy, -20)),
+  })
+
+  await db.insert(debts).values({
+    userId,
+    direction: 'owed_to_me',
+    counterparty: 'Andrés',
+    originalCents: 8000000,
+    currency: opciones.currency,
+    isSample: true,
+  })
+
   return { movimientos: insertadas.length, recurrentes: recurrentes.length }
 }
 
@@ -188,6 +223,9 @@ export async function eliminarDatosDeEjemplo(userId: string): Promise<number> {
   await db
     .delete(recurringMovements)
     .where(and(eq(recurringMovements.userId, userId), eq(recurringMovements.isSample, true)))
+
+  // Los abonos se van con su deuda por la cascada.
+  await db.delete(debts).where(and(eq(debts.userId, userId), eq(debts.isSample, true)))
 
   const borradas = await db
     .delete(transactions)

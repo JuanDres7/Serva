@@ -202,6 +202,7 @@ Si vienes a ver el código, quizá te interese más esto:
 | Documento | Qué contiene |
 |---|---|
 | [Visión](docs/vision.md) | Qué es Serva, para quién y qué **no** es |
+| [Arquitectura](docs/arquitectura.md) | Capas, estructura de archivos, stack y para qué sirve cada pieza |
 | [Constitución](.specify/memory/constitution.md) | Los principios innegociables del proyecto |
 | [Decisiones](docs/decisiones.md) | Cada decisión tomada, por qué, y las que se revirtieron |
 | [Método](docs/metodo.md) | Cómo se trabaja |
@@ -220,12 +221,5 @@ La justificación de cada elección está en
 
 ## Licencia
 
-**Todos los derechos reservados** ([LICENSE](LICENSE)). Este código se publica
-para que pueda leerse, estudiarse y evaluarse; no es código abierto.
-
-Puedes leerlo, bifurcarlo dentro de GitHub, citarlo con atribución y ejecutarlo
-en local para evaluarlo. Cualquier otro uso —desplegarlo, incorporarlo a un
-producto, distribuirlo— requiere permiso previo por escrito.
-
-Si quieres usarlo para algo, escríbeme. El razonamiento del cambio desde MIT
-está en [decisiones.md](docs/decisiones.md) (D-071).
+[MIT](LICENSE). Puedes usar, modificar y distribuir este código, incluso con
+fines comerciales, conservando el aviso de copyright.
