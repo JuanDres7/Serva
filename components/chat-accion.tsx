@@ -54,6 +54,8 @@ type Salida = {
   }
   candidatos?: { descripcion: string; monto: string; fecha: string }[]
   buscado?: string
+  /** En qué quedó la propuesta, puesto al recargar la conversación (D-076). */
+  estadoGuardado?: string
   /** Deudas (spec 011). */
   deuda?: {
     contraparte: string
@@ -71,13 +73,36 @@ type Salida = {
   }
 }
 
-type Estado = 'pendiente' | 'confirmada' | 'revertida' | 'cancelada'
+type Estado = 'pendiente' | 'confirmada' | 'revertida' | 'cancelada' | 'caducada'
+
+/**
+ * Con qué estado nace la tarjeta.
+ *
+ * Recién emitida solo se sabe lo que contestó la herramienta. Recargada desde
+ * la conversación guardada viene además `estadoGuardado`, que es el único que
+ * dice la verdad días después: sin él, algo ya confirmado vuelve a pedir
+ * confirmación y el botón no hace nada visible al pulsarlo.
+ */
+function estadoInicial(salida: Salida): Estado {
+  switch (salida.estadoGuardado) {
+    case 'aplicada':
+      return 'confirmada'
+    case 'revertida':
+      return 'revertida'
+    case 'rechazada':
+      return 'cancelada'
+    case 'caducada':
+      return 'caducada'
+    case 'propuesta':
+      return 'pendiente'
+  }
+
+  return salida.resultado === 'registrado' ? 'confirmada' : 'pendiente'
+}
 
 export function TarjetaDeAccion({ salida }: { salida: Salida }) {
   const router = useRouter()
-  const [estado, setEstado] = useState<Estado>(
-    salida.resultado === 'registrado' ? 'confirmada' : 'pendiente',
-  )
+  const [estado, setEstado] = useState<Estado>(() => estadoInicial(salida))
   const [ocupada, setOcupada] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
@@ -284,6 +309,9 @@ export function TarjetaDeAccion({ salida }: { salida: Salida }) {
 function leyenda(estado: Estado, salida: Salida): string {
   if (estado === 'revertida') return 'Revertido'
   if (estado === 'cancelada') return 'Cancelado'
+  // Pasado un día ya no se puede confirmar, porque la fecha que se escribiría
+  // no sería la que se dijo. Se dice en vez de dejar un botón que falla.
+  if (estado === 'caducada') return 'Caducado sin confirmar'
   return salida.resultado === 'registrado' ? 'Registrado' : 'Confirmado'
 }
 

@@ -150,6 +150,70 @@ describe('T-413 y T-414 — fechas dichas en voz corriente', () => {
   })
 })
 
+describe('D-075 — el futuro también se dice', () => {
+  const resolver = (expresion: string | null) => {
+    const r = resolverFecha(expresion, HOY)
+    return r.ok ? toISO(r.fecha) : null
+  }
+
+  /*
+   * Durante dos features el vocabulario solo miraba hacia atrás: hoy, ayer,
+   * anoche, anteayer. Ni una palabra apuntaba al día siguiente, y eso se notó
+   * en cuanto llegaron las deudas, porque un vencimiento es futuro por
+   * definición. «Te lo pago mañana» acababa en «no entendí para cuándo».
+   */
+  it('«mañana» es el día siguiente, que es lo que faltaba', () => {
+    expect(resolver('mañana')).toBe('2026-08-24')
+    expect(resolver('MAÑANA')).toBe('2026-08-24')
+    expect(resolver('manana')).toBe('2026-08-24')
+  })
+
+  it('«pasado mañana» no se lee como «mañana»', () => {
+    expect(resolver('pasado mañana')).toBe('2026-08-25')
+  })
+
+  /*
+   * El solape que obliga a ordenar las reglas: en español la misma palabra es
+   * el día que viene y la primera mitad de hoy.
+   */
+  it('«esta mañana» es hoy, no el día siguiente', () => {
+    expect(resolver('esta mañana')).toBe('2026-08-23')
+    expect(resolver('hoy en la mañana')).toBe('2026-08-23')
+  })
+
+  it('«ayer en la mañana» sigue siendo ayer', () => {
+    expect(resolver('ayer en la mañana')).toBe('2026-08-22')
+    expect(resolver('anteayer en la mañana')).toBe('2026-08-21')
+  })
+
+  it('«mañana por la mañana» es mañana', () => {
+    expect(resolver('mañana por la mañana')).toBe('2026-08-24')
+    expect(resolver('mañana temprano')).toBe('2026-08-24')
+  })
+
+  it('plazos, en cifra y en palabra', () => {
+    expect(resolver('en 3 días')).toBe('2026-08-26')
+    expect(resolver('en tres días')).toBe('2026-08-26')
+    expect(resolver('dentro de una semana')).toBe('2026-08-30')
+    expect(resolver('dentro de 2 semanas')).toBe('2026-09-06')
+  })
+
+  it('«la semana que viene»', () => {
+    expect(resolver('la semana que viene')).toBe('2026-08-30')
+    expect(resolver('la próxima semana')).toBe('2026-08-30')
+  })
+
+  /*
+   * Ampliar el vocabulario no puede ampliar lo que se adivina: lo que sigue sin
+   * entenderse se pregunta igual que antes.
+   */
+  it('lo demás se sigue preguntando', () => {
+    expect(resolver('cuando cobre')).toBeNull()
+    expect(resolver('hace tres días')).toBeNull()
+    expect(resolver('el mes que viene tal vez')).toBeNull()
+  })
+})
+
 describe('T-415 — sin monto no hay propuesta (FR-003)', () => {
   it('«me tomé unas cervezas» no produce ninguna fila ni ningún cero', () => {
     const { listos, incompletos } = prepararMovimientos(
@@ -183,7 +247,10 @@ describe('FR-018 — cada movimiento se evalúa por separado (E11)', () => {
       { currency: COP, hoy: HOY },
     )
 
-    expect(listos.map((m) => m.descripcion)).toEqual(['almuerzo', 'bus'])
+    // Lo que se va a registrar lleva mayúscula, porque acabará en el
+    // historial (D-076). Lo incompleto no: se va a citar dentro de una frase
+    // —«de «unas cervezas» me falta el monto»— y ahí la mayúscula chirría.
+    expect(listos.map((m) => m.descripcion)).toEqual(['Almuerzo', 'Bus'])
     expect(incompletos.map((m) => m.descripcion)).toEqual(['unas cervezas'])
   })
 })

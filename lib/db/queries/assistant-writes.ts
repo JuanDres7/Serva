@@ -1,4 +1,4 @@
-import { and, eq } from 'drizzle-orm'
+import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { assistantWrites, transactions, userSettings } from '@/lib/db/schema'
 import { createTransaction, voidTransaction, updateTransaction } from '@/lib/db/queries/transactions'
@@ -86,6 +86,39 @@ export async function leerPropuesta(
     .limit(1)
 
   return fila ?? null
+}
+
+/**
+ * El estado en que ha quedado cada propuesta, para pintar sus tarjetas.
+ *
+ * Una propuesta sin resolver que ya pasó su vigencia se devuelve como
+ * `caducada` aunque en la tabla siga diciendo `propuesta`. La fila no se toca:
+ * marcarla exigiría escribir cada vez que alguien abre el chat, y el estado
+ * real lo fija `reservar` cuando de verdad se intenta aplicar. Aquí solo se
+ * decide qué enseñar, y enseñar botones que van a fallar es peor que no
+ * enseñarlos (FR-025).
+ */
+export async function estadosDePropuestas(
+  userId: string,
+  ids: readonly string[],
+): Promise<Map<string, string>> {
+  if (ids.length === 0) return new Map()
+
+  const filas = await db
+    .select({
+      id: assistantWrites.id,
+      status: assistantWrites.status,
+      createdAt: assistantWrites.createdAt,
+    })
+    .from(assistantWrites)
+    .where(and(eq(assistantWrites.userId, userId), inArray(assistantWrites.id, [...ids])))
+
+  return new Map(
+    filas.map((fila) => [
+      fila.id,
+      fila.status === 'propuesta' && haCaducado(fila.createdAt) ? 'caducada' : fila.status,
+    ]),
+  )
 }
 
 function haCaducado(creada: Date): boolean {
