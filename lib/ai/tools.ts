@@ -7,11 +7,11 @@ import {
 } from '@/lib/db/queries/transactions'
 import { gastoPorDia } from '@/lib/db/queries/charts'
 import { periodFor, previousPeriod, type CycleConfig } from '@/lib/domain/cycle'
-import { todayIn, toISO, type CivilDate } from '@/lib/domain/civil-date'
+import { todayIn, toISO, daysBetween, type CivilDate } from '@/lib/domain/civil-date'
 import { computeTotals, computeBreakdown, compareWithPrevious } from '@/lib/domain/balance'
 import { compararRitmo, ritmoRelativo } from '@/lib/domain/series'
 import { formatMoney } from '@/lib/domain/money-format'
-import { findCategory, CATEGORIES } from '@/lib/domain/categories'
+import { findCategory, CATEGORIES, isValidFor } from '@/lib/domain/categories'
 import { extraerPalabrasClave } from '@/lib/domain/keywords'
 import { nombrarPeriodo } from '@/components/etiqueta-periodo'
 import { currencyDecimals } from '@/lib/domain/money'
@@ -31,6 +31,78 @@ import {
 import { saldoDe, describirVencimiento } from '@/lib/domain/deudas'
 import { resolverFecha } from '@/lib/domain/fecha-hablada'
 import { enMayuscula } from '@/lib/domain/keywords'
+import { listarMetas, buscarMetaPorNombre } from '@/lib/db/queries/goals'
+import {
+  listarRecurrentes,
+  pendientesDeConfirmar,
+  buscarRecurrentePorDescripcion,
+} from '@/lib/db/queries/recurring'
+import {
+  presupuestosConGasto,
+  buscarPresupuestoPorCategoria,
+  resolverCategoria,
+} from '@/lib/db/queries/budgets'
+import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+import { resolverPeriodicidad, describirPeriodicidad } from '@/lib/domain/recurrence'
+
+/**
+ * Esquema para propuesta de meta desde el chat (spec 012, §4).
+ *
+ * `monto` va en unidades corrientes: el modelo dice `2000000` para dos millones,
+ * nunca centavos.
+ */
+export const metaChatSchema = z.object({
+  nombre: z.string().trim().min(1).max(60),
+  monto: z.number().positive().finite(),
+  fecha: z
+    .string()
+    .max(40)
+    .nullable()
+    .optional()
+    .describe('Tal como se dijo: «el martes», «para diciembre». Null si no se dijo.'),
+})
+
+export type MetaChatInput = z.infer<typeof metaChatSchema>
+
+export type MetaPreparada = {
+  readonly nombre: string
+  readonly targetCents: number
+  readonly targetDate: string | null
+}
+
+/**
+ * Prepara una meta propuesta desde el chat.
+ *
+ * Convierte el monto a centavos, resuelve la fecha y capitaliza el nombre.
+ */
+export function prepararMeta(
+  input: MetaChatInput,
+  contexto: { currency: string; hoy: CivilDate },
+): MetaPreparada | { readonly falta: 'monto' | 'nombre' } {
+  const cents = aUnidadMenor(input.monto, contexto.currency)
+  if (cents === null || cents <= 0) {
+    return { falta: 'monto' as const }
+  }
+
+  const nombreLimpio = input.nombre.trim()
+  if (!nombreLimpio) {
+    return { falta: 'nombre' as const }
+  }
+
+  let targetDate: string | null = null
+  if (input.fecha) {
+    const resolved = resolverFecha(input.fecha, contexto.hoy)
+    if (resolved.ok) {
+      targetDate = toISO(resolved.fecha)
+    }
+  }
+
+  return {
+    nombre: enMayuscula(nombreLimpio),
+    targetCents: cents,
+    targetDate,
+  }
+}
 
 /**
  * Las consultas que el asistente puede hacer (spec 003, plan §2).
@@ -54,6 +126,7 @@ import { enMayuscula } from '@/lib/domain/keywords'
 export type ContextoHerramientas = {
   readonly userId: string
   readonly cycleConfig: CycleConfig
+  readonly cycleConfiguredAt: Date | null
   readonly currency: string
   readonly locale: string
   readonly timeZone: string
@@ -605,6 +678,670 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
             saldo: dinero(saldo.cents),
             saldoCents: saldo.cents,
           },
+        }
+      },
+    }),
+
+    /* Lectura: metas, presupuestos y recurrentes (spec 012). */
+
+    misMetas: tool({
+      description:
+        'Metas de ahorro con su progreso. Usala para «¿cómo voy con las metas?» ' +
+        'o «¿cuánto falta para el viaje?».',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const metas = await listarMetas(contexto.userId)
+        const hoy = todayIn(contexto.timeZone)
+        return {
+          sinDatos: metas.length === 0,
+          metas: metas.map((m) => {
+            const estado = calcularEstado(m.aportadoCents, m.targetCents)
+            const ritmo = ritmoDiario(m.aportes, hoy)
+            const falta = m.targetCents - m.aportadoCents
+            const diasEstimados =
+              ritmo !== null && ritmo > 0 && falta > 0 ? Math.ceil(falta / ritmo) : null
+            return {
+              nombre: m.name,
+              objetivo: dinero(m.targetCents),
+              objetivoCents: m.targetCents,
+              aportado: dinero(m.aportadoCents),
+              aportadoCents: m.aportadoCents,
+              porcentaje: estado.porcentaje,
+              falta: dinero(falta),
+              faltaCents: falta,
+              estado: estado.alcanzada ? 'alcanzada' : 'en-progreso',
+              fechaEstimada: diasEstimados,
+            }
+          }),
+        }
+      },
+    }),
+
+    misPresupuestos: tool({
+      description:
+        'Presupuestos del período con lo gastado. Usala para «¿cómo van los ' +
+        'presupuestos?» o «¿cuánto me falta para comida?».',
+      inputSchema: z.object({}),
+      execute: async () => {
+        if (!contexto.cycleConfiguredAt) {
+          return {
+            sinCiclo: true,
+            mensaje:
+              'Primero configura tu ciclo de facturación en Ajustes para usar presupuestos.',
+          }
+        }
+        const hoy = todayIn(contexto.timeZone)
+        const periodo = periodFor(contexto.cycleConfig, hoy)
+        const conGasto = await presupuestosConGasto(contexto.userId, periodo)
+        const diasRestantes = daysBetween(hoy, periodo.end)
+
+        return {
+          sinDatos: conGasto.length === 0,
+          periodo: nombrarPeriodo(periodo, contexto.locale),
+          diasRestantes,
+          presupuestos: conGasto.map((p) => {
+            const gastado = p.gastadoCents
+            const restante = p.limitCents - gastado
+            const porcentaje = Math.round((gastado / p.limitCents) * 100)
+            const nivel =
+              porcentaje >= 100 ? 'excedido' : porcentaje >= 80 ? 'alerta' : 'ok'
+            const categoria = findCategory(p.category)
+            return {
+              categoria: categoria?.name ?? p.category,
+              clave: p.category,
+              tope: dinero(p.limitCents),
+              topeCents: p.limitCents,
+              gastado: dinero(gastado),
+              gastadoCents: gastado,
+              restante: dinero(restante),
+              restanteCents: restante,
+              porcentaje,
+              nivel,
+            }
+          }),
+        }
+      },
+    }),
+
+    misRecurrentes: tool({
+      description:
+        'Cobros recurrentes: pendientes y programados. Usala para «¿qué cobros ' +
+        'tengo pendientes?» o «¿qué se me viene?».',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const hoy = todayIn(contexto.timeZone)
+        const [todos, pendientes] = await Promise.all([
+          listarRecurrentes(contexto.userId),
+          pendientesDeConfirmar(contexto.userId, hoy),
+        ])
+        const pendientesIds = new Set(pendientes.map((p) => p.id))
+
+        return {
+          sinDatos: todos.length === 0,
+          pendientes: pendientes.map((r) => ({
+            descripcion: r.description,
+            monto: dinero(r.amountCents),
+            montoCents: r.amountCents,
+            tipo: r.type === 'expense' ? 'gasto' : 'ingreso',
+            categoria: findCategory(r.category)?.name ?? r.category,
+            clave: r.category,
+            fecha: r.nextDueOn,
+          })),
+          programados: todos
+            .filter((r) => !pendientesIds.has(r.id))
+            .map((r) => ({
+              descripcion: r.description,
+              monto: dinero(r.amountCents),
+              montoCents: r.amountCents,
+              tipo: r.type === 'expense' ? 'gasto' : 'ingreso',
+              categoria: findCategory(r.category)?.name ?? r.category,
+              clave: r.category,
+              proximaFecha: r.nextDueOn,
+            })),
+        }
+      },
+    }),
+
+    /* Escritura: metas (spec 012). */
+
+    proponerMeta: tool({
+      description:
+        'Crea una meta de ahorro nueva. Usala cuando digan que quieren ahorrar ' +
+        'para algo, o que quieren crear una meta. Si no dicen la fecha, mandala ' +
+        'null.',
+      inputSchema: metaChatSchema,
+      execute: async (input) => {
+        const hoy = todayIn(contexto.timeZone)
+        const preparada = prepararMeta(input, { currency: contexto.currency, hoy })
+
+        if ('falta' in preparada) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: `Falta el ${preparada.falta}. Dime cuánto quieres ahorrar y para qué.`,
+          }
+        }
+
+        // Verificar si ya existe una meta con ese nombre
+        const existente = await buscarMetaPorNombre(contexto.userId, preparada.nombre)
+        if (existente.resultado === 'exacta') {
+          return {
+            resultado: 'meta-existente' as const,
+            meta: {
+              nombre: existente.meta.name,
+              objetivo: dinero(existente.meta.targetCents),
+              aportado: dinero(existente.meta.aportadoCents),
+              porcentaje: calcularEstado(
+                existente.meta.aportadoCents,
+                existente.meta.targetCents,
+              ).porcentaje,
+            },
+          }
+        }
+
+        const automatico = await automaticoActivo(contexto.userId)
+        const decision = decidir({ tipo: 'crear', cuantos: 1, automaticoActivo: automatico })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'crear',
+          inputText: `meta ${preparada.nombre}`,
+          proposal: {
+            meta: {
+              name: preparada.nombre,
+              targetCents: preparada.targetCents,
+              targetDate: preparada.targetDate,
+            },
+          },
+        })
+
+        const resumen = {
+          nombre: preparada.nombre,
+          objetivo: dinero(preparada.targetCents),
+          objetivoCents: preparada.targetCents,
+          fechaObjetivo: preparada.targetDate,
+        }
+
+        if (decision.accion === 'ejecutar') {
+          await aplicarCreacion({
+            userId: contexto.userId,
+            id: propuestaId,
+            currency: contexto.currency,
+            hoy,
+          })
+          return {
+            resultado: 'registrado' as const,
+            propuestaId,
+            meta: resumen,
+            revertible: true,
+          }
+        }
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: decision.motivo,
+          explicacion: explicar(decision),
+          meta: resumen,
+          primeraVez: !automatico,
+        }
+      },
+    }),
+
+    proponerAporteMeta: tool({
+      description:
+        'Aporta o retira dinero de una meta de ahorro existente. Usala cuando ' +
+        'digan que van a ahorrar para una meta, o que quieren sacar dinero de ' +
+        'una meta. Si el monto es negativo, es un retiro.',
+      inputSchema: z.object({
+        meta: z.string().min(1).max(60).describe('Nombre de la meta'),
+        monto: z.number().positive().finite().describe('En unidades corrientes'),
+        esRetiro: z.boolean().default(false),
+      }),
+      execute: async ({ meta, monto, esRetiro }) => {
+        const hoy = todayIn(contexto.timeZone)
+        const cents = aUnidadMenor(monto, contexto.currency)
+        if (cents === null || cents <= 0) {
+          return { resultado: 'rechazado' as const, motivo: 'Ese monto no lo entendí.' }
+        }
+
+        const encontrada = await buscarMetaPorNombre(contexto.userId, meta)
+        if (encontrada.resultado === 'ninguna') {
+          return {
+            resultado: 'no-encontrado' as const,
+            buscado: meta,
+            opciones: encontrada.metasActivas.map((m) => m.name),
+          }
+        }
+        if (encontrada.resultado === 'varias') {
+          return {
+            resultado: 'varias-coincidencias' as const,
+            candidatos: encontrada.candidatos.map((m) => ({
+              nombre: m.name,
+              aportado: dinero(m.aportadoCents),
+            })),
+          }
+        }
+
+        const metaEncontrada = encontrada.meta
+        const direccion = esRetiro ? 'withdrawal' : 'contribution'
+
+        // Validar que no se retire más de lo aportado
+        if (esRetiro && cents > metaEncontrada.aportadoCents) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: `Solo tienes ${dinero(metaEncontrada.aportadoCents)} aportados en "${metaEncontrada.name}".`,
+          }
+        }
+
+        const automatico = await automaticoActivo(contexto.userId)
+        const decision = decidir({ tipo: 'crear', cuantos: 1, automaticoActivo: automatico })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'crear',
+          inputText: `${esRetiro ? 'retiro' : 'aporte'} meta ${metaEncontrada.name}`,
+          proposal: {
+            aporteMeta: {
+              goalId: metaEncontrada.id,
+              amountCents: cents,
+              direction: direccion,
+              fecha: toISO(hoy),
+            },
+          },
+        })
+
+        const resumen = {
+          nombre: metaEncontrada.name,
+          monto: dinero(cents),
+          montoCents: cents,
+          tipo: esRetiro ? 'retiro' : 'aporte',
+          metaObjetivo: dinero(metaEncontrada.targetCents),
+          metaAportado: dinero(metaEncontrada.aportadoCents),
+          metaAportadoCents: metaEncontrada.aportadoCents,
+        }
+
+        if (decision.accion === 'ejecutar') {
+          await aplicarCreacion({
+            userId: contexto.userId,
+            id: propuestaId,
+            currency: contexto.currency,
+            hoy,
+          })
+          return {
+            resultado: 'registrado' as const,
+            propuestaId,
+            aporte: resumen,
+            revertible: true,
+          }
+        }
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: decision.motivo,
+          explicacion: explicar(decision),
+          aporte: resumen,
+          primeraVez: !automatico,
+        }
+      },
+    }),
+
+    /* Escritura: presupuestos (spec 012). */
+
+    proponerPresupuesto: tool({
+      description:
+        'Crea o actualiza un presupuesto para una categoría de gasto. Usala cuando ' +
+        'digan que quieren poner un tope a algo. La categoría debe ser de gasto.',
+      inputSchema: z.object({
+        categoria: z.string().min(1).max(40).describe('Nombre de la categoría'),
+        tope: z.number().positive().finite().describe('En unidades corrientes'),
+      }),
+      execute: async ({ categoria, tope }) => {
+        if (!contexto.cycleConfiguredAt) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo:
+              'Primero configura tu ciclo de facturación en Ajustes para usar presupuestos.',
+          }
+        }
+
+        const clave = resolverCategoria(categoria)
+        if (!clave) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: `No reconozco la categoría "${categoria}". Prueba con otra.`,
+          }
+        }
+
+        if (!isValidFor(clave, 'expense')) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: 'Los presupuestos solo aplican a categorías de gasto.',
+          }
+        }
+
+        const cents = aUnidadMenor(tope, contexto.currency)
+        if (cents === null || cents <= 0) {
+          return { resultado: 'rechazado' as const, motivo: 'Ese tope no lo entendí.' }
+        }
+
+        const automatico = await automaticoActivo(contexto.userId)
+        const decision = decidir({ tipo: 'crear', cuantos: 1, automaticoActivo: automatico })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'crear',
+          inputText: `presupuesto ${categoria}`,
+          proposal: {
+            presupuesto: {
+              category: clave,
+              limitCents: cents,
+            },
+          },
+        })
+
+        const categoriaInfo = findCategory(clave)
+        const resumen = {
+          categoria: categoriaInfo?.name ?? clave,
+          clave,
+          tope: dinero(cents),
+          topeCents: cents,
+        }
+
+        if (decision.accion === 'ejecutar') {
+          await aplicarCreacion({
+            userId: contexto.userId,
+            id: propuestaId,
+            currency: contexto.currency,
+            hoy: todayIn(contexto.timeZone),
+          })
+          return {
+            resultado: 'registrado' as const,
+            propuestaId,
+            presupuesto: resumen,
+            revertible: true,
+          }
+        }
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: decision.motivo,
+          explicacion: explicar(decision),
+          presupuesto: resumen,
+          primeraVez: !automatico,
+        }
+      },
+    }),
+
+    proponerEliminarPresupuesto: tool({
+      description:
+        'Elimina un presupuesto existente. Usala cuando digan que ya no quieren ' +
+        'seguir con un presupuesto.',
+      inputSchema: z.object({
+        categoria: z.string().min(1).max(40).describe('Nombre de la categoría'),
+      }),
+      execute: async ({ categoria }) => {
+        if (!contexto.cycleConfiguredAt) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo:
+              'Primero configura tu ciclo de facturación en Ajustes para usar presupuestos.',
+          }
+        }
+
+        const clave = resolverCategoria(categoria)
+        if (!clave) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: `No reconozco la categoría "${categoria}". Prueba con otra.`,
+          }
+        }
+
+        const encontrada = await buscarPresupuestoPorCategoria(contexto.userId, clave)
+        if (encontrada.resultado === 'ninguna') {
+          return {
+            resultado: 'no-encontrado' as const,
+            buscado: categoria,
+            opciones: encontrada.presupuestos.map((p) => {
+              const info = findCategory(p.category)
+              return info?.name ?? p.category
+            }),
+          }
+        }
+
+        const presupuesto = encontrada.presupuesto
+        const decision = decidir({ tipo: 'corregir', cuantos: 1, automaticoActivo: true })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'corregir',
+          inputText: `eliminar presupuesto ${categoria}`,
+          proposal: {
+            eliminarPresupuesto: {
+              budgetId: presupuesto.id,
+              category: presupuesto.category,
+            },
+          },
+        })
+
+        const categoriaInfo = findCategory(presupuesto.category)
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: 'destructivo' as const,
+          explicacion: explicar(decision),
+          presupuesto: {
+            categoria: categoriaInfo?.name ?? presupuesto.category,
+            clave: presupuesto.category,
+            tope: dinero(presupuesto.limitCents),
+            topeCents: presupuesto.limitCents,
+          },
+        }
+      },
+    }),
+
+    /* Escritura: recurrentes (spec 012). */
+
+    proponerRecurrente: tool({
+      description:
+        'Crea un cobro recurrente nuevo. Usala cuando digan que tienen un gasto ' +
+        'o ingreso que se repite. Necesita periodicidad («cada mes», «semanal») ' +
+        'y si es «cada mes» sin día, pide el día.',
+      inputSchema: z.object({
+        tipo: z.enum(['expense', 'income']),
+        monto: z.number().positive().finite().describe('En unidades corrientes'),
+        categoria: z.string().min(1).max(40),
+        descripcion: z.string().min(1).max(120),
+        periodicidad: z.string().min(1).max(40).describe('Tal como la dijo el usuario'),
+      }),
+      execute: async ({ tipo, monto, categoria, descripcion, periodicidad }) => {
+        const clave = resolverCategoria(categoria)
+        if (!clave) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: `No reconozco la categoría "${categoria}". Prueba con otra.`,
+          }
+        }
+
+        if (!isValidFor(clave, tipo as 'expense' | 'income')) {
+          return {
+            resultado: 'rechazado' as const,
+            motivo: `La categoría "${categoria}" no corresponde a un ${tipo === 'expense' ? 'gasto' : 'ingreso'}.`,
+          }
+        }
+
+        const cents = aUnidadMenor(monto, contexto.currency)
+        if (cents === null || cents <= 0) {
+          return { resultado: 'rechazado' as const, motivo: 'Ese monto no lo entendí.' }
+        }
+
+        const res = resolverPeriodicidad(periodicidad)
+        if (!res.ok) {
+          if (res.necesitaDia) {
+            return {
+              resultado: 'falta-dia' as const,
+              motivo: '¿Qué día del mes? Por ejemplo: «el 5» o «el 15».',
+            }
+          }
+          return {
+            resultado: 'rechazado' as const,
+            motivo: `No entendí la periodicidad "${periodicidad}". Prueba con «cada mes el 5», «semanal» o «quincenal».`,
+          }
+        }
+
+        const automatico = await automaticoActivo(contexto.userId)
+        const decision = decidir({ tipo: 'crear', cuantos: 1, automaticoActivo: automatico })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'crear',
+          inputText: `recurrente ${descripcion}`,
+          proposal: {
+            recurrente: {
+              type: tipo,
+              amountCents: cents,
+              category: clave,
+              description: enMayuscula(descripcion),
+              schedule: res.periodicidad,
+            },
+          },
+        })
+
+        const categoriaInfo = findCategory(clave)
+        const resumen = {
+          descripcion: enMayuscula(descripcion),
+          monto: dinero(cents),
+          montoCents: cents,
+          tipo: tipo === 'expense' ? 'gasto' : 'ingreso',
+          categoria: categoriaInfo?.name ?? clave,
+          clave,
+          periodicidad: describirPeriodicidad(res.periodicidad),
+        }
+
+        if (decision.accion === 'ejecutar') {
+          await aplicarCreacion({
+            userId: contexto.userId,
+            id: propuestaId,
+            currency: contexto.currency,
+            hoy: todayIn(contexto.timeZone),
+          })
+          return {
+            resultado: 'registrado' as const,
+            propuestaId,
+            recurrente: resumen,
+            revertible: true,
+          }
+        }
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: decision.motivo,
+          explicacion: explicar(decision),
+          recurrente: resumen,
+          primeraVez: !automatico,
+        }
+      },
+    }),
+
+    confirmarRecurrente: tool({
+      description:
+        'Confirma un cobro recurrente pendiente. Usala cuando digan que ya les ' +
+        'cobraron algo que tenían pendiente. Si el monto fue diferente, dile cuánto.',
+      inputSchema: z.object({
+        descripcion: z.string().min(1).max(80).describe('Cómo se refiere al cobro'),
+        monto: z
+          .number()
+          .positive()
+          .finite()
+          .nullable()
+          .describe('Si fue diferente al de siempre'),
+        permanente: z
+          .boolean()
+          .default(false)
+          .describe('Si el monto nuevo es para siempre'),
+      }),
+      execute: async ({ descripcion, monto, permanente }) => {
+        const hoy = todayIn(contexto.timeZone)
+        const encontrados = await buscarRecurrentePorDescripcion(contexto.userId, descripcion)
+
+        if (encontrados.resultado === 'ninguna') {
+          return {
+            resultado: 'no-encontrado' as const,
+            buscado: descripcion,
+            opciones: encontrados.recurrentes.map((r) => ({
+              descripcion: r.description,
+              monto: dinero(r.amountCents),
+              fecha: r.nextDueOn,
+            })),
+          }
+        }
+
+        if (encontrados.resultado === 'varias') {
+          return {
+            resultado: 'varias-coincidencias' as const,
+            candidatos: encontrados.candidatos.map((r) => ({
+              descripcion: r.description,
+              monto: dinero(r.amountCents),
+              fecha: r.nextDueOn,
+            })),
+          }
+        }
+
+        const recurrente = encontrados.recurrente
+        const cents = monto != null ? aUnidadMenor(monto, contexto.currency) : null
+        if (monto != null && cents === null) {
+          return { resultado: 'rechazado' as const, motivo: 'Ese monto no lo entendí.' }
+        }
+
+        const decision = decidir({ tipo: 'crear', cuantos: 1, automaticoActivo: true })
+
+        const propuestaId = await guardarPropuesta({
+          userId: contexto.userId,
+          kind: 'crear',
+          inputText: `confirmar ${recurrente.description}`,
+          proposal: {
+            confirmarRecurrente: {
+              recurringId: recurrente.id,
+              amountCents: cents,
+              permanente,
+              fecha: toISO(hoy),
+            },
+          },
+        })
+
+        const resumen = {
+          descripcion: recurrente.description,
+          monto: dinero(cents ?? recurrente.amountCents),
+          montoCents: cents ?? recurrente.amountCents,
+          montoOriginal: dinero(recurrente.amountCents),
+          montoOriginalCents: recurrente.amountCents,
+          cambioMonto: cents !== null && cents !== recurrente.amountCents,
+          permanente,
+        }
+
+        if (decision.accion === 'ejecutar') {
+          await aplicarCreacion({
+            userId: contexto.userId,
+            id: propuestaId,
+            currency: contexto.currency,
+            hoy,
+          })
+          return {
+            resultado: 'registrado' as const,
+            propuestaId,
+            confirmacion: resumen,
+            revertible: true,
+          }
+        }
+
+        return {
+          resultado: 'por-confirmar' as const,
+          propuestaId,
+          motivo: decision.motivo,
+          explicacion: explicar(decision),
+          confirmacion: resumen,
         }
       },
     }),

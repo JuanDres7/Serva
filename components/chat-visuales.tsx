@@ -59,6 +59,13 @@ export function VisualDeHerramienta({
     case 'proponerDeuda':
     case 'proponerAbono':
     case 'proponerSaldarDeuda':
+    // Metas, presupuestos y recurrentes (spec 012).
+    case 'proponerMeta':
+    case 'proponerAporteMeta':
+    case 'proponerPresupuesto':
+    case 'proponerEliminarPresupuesto':
+    case 'proponerRecurrente':
+    case 'confirmarRecurrente':
       return <TarjetaDeAccion salida={salida} />
     default:
       return null

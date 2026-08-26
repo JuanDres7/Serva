@@ -133,3 +133,84 @@ export function describirPeriodicidad(periodicidad: Periodicidad): string {
   }
   return `El ${periodicidad.day} de cada mes`
 }
+
+export type ResultadoPeriodicidad =
+  | { readonly ok: true; readonly periodicidad: Periodicidad }
+  | { readonly ok: false; readonly necesitaDia: boolean }
+
+/**
+ * Resuelve el texto del modelo a una Periodicidad soportada (spec 012, §4).
+ *
+ * «cada mes el 5» → monthly/5, «semanal» → every-n-days/7, «quincenal» →
+ * every-n-days/15. Sin día para mensual → necesitaDia.
+ */
+export function resolverPeriodicidad(texto: string): ResultadoPeriodicidad {
+  const normalizado = texto.toLowerCase().trim()
+
+  // Mensual con día
+  const mensualConDia = normalizado.match(
+    /cada\s+mes\s+(?:el\s+)?(\d{1,2})/,
+  )
+  if (mensualConDia) {
+    const day = parseInt(mensualConDia[1]!, 10)
+    if (day >= 1 && day <= 31) {
+      return { ok: true, periodicidad: { kind: 'monthly', day } }
+    }
+  }
+
+  // Mensual sin día
+  if (
+    normalizado === 'cada mes' ||
+    normalizado === 'mensual' ||
+    normalizado === 'mes'
+  ) {
+    return { ok: false, necesitaDia: true }
+  }
+
+  // Semanal
+  if (
+    normalizado === 'semanal' ||
+    normalizado === 'cada semana' ||
+    normalizado === 'semana'
+  ) {
+    return { ok: true, periodicidad: { kind: 'every-n-days', n: 7 } }
+  }
+
+  // Quincenal
+  if (
+    normalizado === 'quincenal' ||
+    normalizado === 'cada dos semanas' ||
+    normalizado === 'quincena'
+  ) {
+    return { ok: true, periodicidad: { kind: 'every-n-days', n: 15 } }
+  }
+
+  // Diario
+  if (
+    normalizado === 'diario' ||
+    normalizado === 'cada día' ||
+    normalizado === 'todos los días'
+  ) {
+    return { ok: true, periodicidad: { kind: 'every-n-days', n: 1 } }
+  }
+
+  // Anual
+  if (
+    normalizado === 'anual' ||
+    normalizado === 'cada año' ||
+    normalizado === 'una vez al año'
+  ) {
+    return { ok: true, periodicidad: { kind: 'every-n-days', n: 365 } }
+  }
+
+  // «cada X días»
+  const cadaXDias = normalizado.match(/cada\s+(\d{1,3})\s+días?/)
+  if (cadaXDias) {
+    const n = parseInt(cadaXDias[1]!, 10)
+    if (n >= 1 && n <= 365) {
+      return { ok: true, periodicidad: { kind: 'every-n-days', n } }
+    }
+  }
+
+  return { ok: false, necesitaDia: false }
+}

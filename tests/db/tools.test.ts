@@ -23,6 +23,7 @@ const ZONA = 'America/Bogota'
 const contextoDe = (userId: string): ContextoHerramientas => ({
   userId,
   cycleConfig: { kind: 'calendar-month' },
+  cycleConfiguredAt: new Date(),
   currency: 'COP',
   locale: 'es-CO',
   timeZone: ZONA,
@@ -360,6 +361,16 @@ describe('límites del asistente', () => {
     'proponerDeuda',
     'proponerAbono',
     'proponerSaldarDeuda',
+    // Metas, presupuestos y recurrentes (spec 012).
+    'misMetas',
+    'misPresupuestos',
+    'misRecurrentes',
+    'proponerMeta',
+    'proponerAporteMeta',
+    'proponerPresupuesto',
+    'proponerEliminarPresupuesto',
+    'proponerRecurrente',
+    'confirmarRecurrente',
   ] as const
 
   it('solo existen las herramientas aprobadas', () => {

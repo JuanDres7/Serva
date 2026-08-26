@@ -45,10 +45,11 @@ Justificación en D-039. Detalle de aplicación en el `plan.md` de cada feature.
 | 009 — Exportación de datos | ✅ | — | **construida** |
 | 010 — Registrar y programar hablando | ✅ | ✅ | **construida** |
 | 011 — Deudas y préstamos | ✅ | ✅ | **construida** |
+| 012 — IA: metas, presupuestos y recurrentes | ✅ | ✅ | **construida** |
 
 La numeración identifica la feature; no es el orden de construcción.
 
-**Las doce features están construidas.** `npm run verify` pasa con 622
+**Las trece features están construidas.** `npm run verify` pasa con 661
 comprobaciones de unidad y 70 de extremo a extremo, ninguna de las cuales
 requiere un modelo instalado.
 
@@ -71,6 +72,11 @@ oscuro se verá mal.
 cobros a partir de lo que se le cuenta. **El modelo no escribe: propone, y una
 función pura decide** (`lib/domain/puerta.ts`). Antes de tocar esa puerta o las
 herramientas `proponer*`, lee la spec 010 entera.
+
+**El asistente gestiona metas, presupuestos y recurrentes** desde la feature 012:
+crea metas de ahorro, aporta o retira de ellas, configura presupuestos y gestiona
+cobros recurrentes. Usa `buscarMetaPorNombre`, `buscarRecurrentePorDescripcion` y
+`buscarPresupuestoPorCategoria` para encontrar entidades por texto (spec 012, §4).
 
 La extracción se evalúa aparte con `npm run evaluar`, contra el proveedor real:
 11 de 11 en extracción y 8 de 8 en deudas en la última medida (D-075). Nunca

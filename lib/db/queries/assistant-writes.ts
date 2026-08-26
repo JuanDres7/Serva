@@ -2,8 +2,10 @@ import { and, eq, inArray } from 'drizzle-orm'
 import { db } from '@/lib/db'
 import { assistantWrites, transactions, userSettings } from '@/lib/db/schema'
 import { createTransaction, voidTransaction, updateTransaction } from '@/lib/db/queries/transactions'
-import { crearRecurrente } from '@/lib/db/queries/recurring'
+import { crearRecurrente, confirmarCobro } from '@/lib/db/queries/recurring'
 import { crearDeuda, abonar, saldar, registrarMovimientoDeDeuda } from '@/lib/db/queries/debts'
+import { crearMeta, moverEnMeta } from '@/lib/db/queries/goals'
+import { guardarPresupuesto, eliminarPresupuesto } from '@/lib/db/queries/budgets'
 import { fromISO, type CivilDate } from '@/lib/domain/civil-date'
 import type { MovimientoListo } from '@/lib/ai/propuesta'
 import type { TipoDeAccion } from '@/lib/domain/puerta'
@@ -180,6 +182,28 @@ export async function aplicarCreacion(params: {
       dueOn: string | null
     }
     abono?: { debtId: string; amountCents: number; paidOn: string }
+    meta?: { name: string; targetCents: number; targetDate: string | null }
+    aporteMeta?: {
+      goalId: string
+      amountCents: number
+      direction: 'contribution' | 'withdrawal'
+      fecha: string
+    }
+    presupuesto?: { category: string; limitCents: number }
+    eliminarPresupuesto?: { budgetId: string; category: string }
+    recurrente?: {
+      type: 'expense' | 'income'
+      amountCents: number
+      category: string
+      description: string
+      schedule: import('@/lib/domain/recurrence').Periodicidad
+    }
+    confirmarRecurrente?: {
+      recurringId: string
+      amountCents: number | null
+      permanente: boolean
+      fecha: string
+    }
   }
 
   /*
@@ -216,6 +240,90 @@ export async function aplicarCreacion(params: {
 
     await marcarResuelta(params.userId, params.id, 'aplicada')
     return { ok: true, transactionIds: resultado.transactionId ? [resultado.transactionId] : [] }
+  }
+
+  /* Metas (spec 012). */
+
+  if (propuesta.meta) {
+    await crearMeta(
+      params.userId,
+      {
+        name: propuesta.meta.name,
+        targetCents: propuesta.meta.targetCents,
+        targetDate: propuesta.meta.targetDate,
+      },
+      { currency: params.currency },
+    )
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: [] }
+  }
+
+  if (propuesta.aporteMeta) {
+    const resultado = await moverEnMeta(params.userId, propuesta.aporteMeta.goalId, {
+      amountCents: propuesta.aporteMeta.amountCents,
+      direccion: propuesta.aporteMeta.direction,
+      fecha: fromISO(propuesta.aporteMeta.fecha),
+    })
+
+    if (!resultado) return { ok: false, motivo: 'nada-que-hacer' }
+
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: [resultado.transactionId] }
+  }
+
+  /* Presupuestos (spec 012). */
+
+  if (propuesta.presupuesto) {
+    await guardarPresupuesto(
+      params.userId,
+      {
+        category: propuesta.presupuesto.category,
+        limitCents: propuesta.presupuesto.limitCents,
+      },
+      { currency: params.currency },
+    )
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: [] }
+  }
+
+  if (propuesta.eliminarPresupuesto) {
+    await eliminarPresupuesto(params.userId, propuesta.eliminarPresupuesto.budgetId)
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: [] }
+  }
+
+  /* Recurrentes (spec 012). */
+
+  if (propuesta.recurrente) {
+    await crearRecurrente(
+      params.userId,
+      {
+        type: propuesta.recurrente.type,
+        amountCents: propuesta.recurrente.amountCents,
+        category: propuesta.recurrente.category,
+        description: propuesta.recurrente.description,
+        schedule: propuesta.recurrente.schedule,
+      },
+      { currency: params.currency, hoy: params.hoy },
+    )
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: [] }
+  }
+
+  if (propuesta.confirmarRecurrente) {
+    const resultado = await confirmarCobro(
+      params.userId,
+      propuesta.confirmarRecurrente.recurringId,
+      {
+        amountCents: propuesta.confirmarRecurrente.amountCents ?? undefined,
+        montoPermanente: propuesta.confirmarRecurrente.permanente,
+      },
+    )
+
+    if (!resultado) return { ok: false, motivo: 'nada-que-hacer' }
+
+    await marcarResuelta(params.userId, params.id, 'aplicada')
+    return { ok: true, transactionIds: [resultado.transactionId] }
   }
 
   const movimientos = propuesta.movimientos

@@ -1,0 +1,786 @@
+
+> serva@0.1.0 dev
+> drizzle-kit migrate && next dev
+
+No config path provided, using default 'drizzle.config.ts'
+Reading config file 'C:\Users\Juan\Serva\drizzle.config.ts'
+◇ injected env (10) from .env.local // tip: ⌘ suppress logs { quiet: true }
+Using 'postgres' driver for database querying
+[⣷] applying migrations...{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42P06',
+  message: 'schema "drizzle" already exists, skipping',
+  file: 'schemacmds.c',
+  line: '132',
+  routine: 'CreateSchemaCommand'
+}
+{
+  severity_local: 'NOTICE',
+  severity: 'NOTICE',
+  code: '42P07',
+  message: 'relation "__drizzle_migrations" already exists, skipping',
+  file: 'parse_utilcmd.c',
+  line: '207',
+  routine: 'transformCreateStmt'
+}
+[2K[1G[✓] migrations applied successfully!▲ Next.js 16.3.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://172.31.96.1:3000
+- Environments: .env.local
+✓ Ready in 1143ms
+✓ Running next.config.ts took 231ms
+
+ GET / 307 in 3.6s (next.js: 1842ms, application-code: 1747ms)
+ GET /entrar 200 in 796ms (next.js: 293ms, application-code: 503ms)
+ GET /registro 200 in 1293ms (next.js: 219ms, application-code: 1074ms)
+ POST /registro 200 in 202ms (next.js: 27ms, application-code: 175ms)
+  └─ ƒ sugerirCategoria("ALMUERZO", "expense") in 108ms lib/actions/categorize.ts
+ GET /asistente 200 in 385ms (next.js: 159ms, application-code: 226ms)
+ POST /asistente 200 in 517ms (next.js: 16ms, application-code: 501ms)
+  └─ ƒ empezarConversacion() in 35ms lib/actions/conversations.ts
+ GET /asistente 200 in 467ms (next.js: 33ms, application-code: 433ms)
+ POST /asistente 200 in 464ms (next.js: 27ms, application-code: 437ms)
+  └─ ƒ cancelarAccion("d04f3ae6-66b4-4d6e-abe4-11c80f0eb502") in 41ms lib/actions/asistente.ts
+ GET /asistente 200 in 262ms (next.js: 31ms, application-code: 230ms)
+ POST /asistente 200 in 490ms (next.js: 20ms, application-code: 470ms)
+  └─ ƒ empezarConversacion() in 21ms lib/actions/conversations.ts
+ GET /asistente 200 in 305ms (next.js: 38ms, application-code: 267ms)
+ GET /historial 200 in 540ms (next.js: 152ms, application-code: 388ms)
+ GET /asistente 200 in 184ms (next.js: 17ms, application-code: 166ms)
+ POST /api/chat 200 in 8.5s (next.js: 17ms, application-code: 8.5s)
+ POST /asistente 200 in 556ms (next.js: 21ms, application-code: 535ms)
+  └─ ƒ confirmarAccion("e4e3093c-ddfc-4ad7-92a9-8500cc709cd7") in 82ms lib/actions/asistente.ts
+ GET /asistente 200 in 313ms (next.js: 23ms, application-code: 290ms)
+ GET /historial 200 in 216ms (next.js: 17ms, application-code: 199ms)
+ GET /asistente 200 in 179ms (next.js: 23ms, application-code: 156ms)
+ POST /api/chat 200 in 1908ms (next.js: 12ms, application-code: 1896ms)
+ POST /api/chat 200 in 107s (next.js: 823ms, application-code: 106s)
+ POST /asistente 200 in 633ms (next.js: 19ms, application-code: 614ms)
+  └─ ƒ empezarConversacion() in 81ms lib/actions/conversations.ts
+ GET /asistente 200 in 395ms (next.js: 35ms, application-code: 360ms)
+ GET / 200 in 541ms (next.js: 23ms, application-code: 518ms)
+ POST / 200 in 841ms (next.js: 21ms, application-code: 820ms)
+  └─ ƒ borrarDatosDeEjemplo() in 66ms lib/actions/sample-data.ts
+ GET / 200 in 621ms (next.js: 70ms, application-code: 551ms)
+ GET / 200 in 1455ms (next.js: 137ms, application-code: 1318ms)
+ GET /metas 200 in 231ms (next.js: 143ms, application-code: 88ms)
+○ Compiling /deudas ...
+ GET /deudas 200 in 5.7s (next.js: 5.6s, application-code: 107ms)
+ GET /recurrentes 200 in 266ms (next.js: 86ms, application-code: 180ms)
+ GET /deudas 200 in 82ms (next.js: 12ms, application-code: 71ms)
+ GET /historial 200 in 180ms (next.js: 40ms, application-code: 140ms)
+ GET /deudas 200 in 103ms (next.js: 24ms, application-code: 79ms)
+ GET /metas 200 in 88ms (next.js: 18ms, application-code: 70ms)
+ GET /presupuestos 200 in 142ms (next.js: 68ms, application-code: 73ms)
+ GET /metas 200 in 58ms (next.js: 8ms, application-code: 50ms)
+ GET /deudas 200 in 57ms (next.js: 8ms, application-code: 49ms)
+ GET /recurrentes 200 in 72ms (next.js: 14ms, application-code: 58ms)
+ GET /metas 200 in 100ms (next.js: 11ms, application-code: 89ms)
+ POST /metas 200 in 327ms (next.js: 11ms, application-code: 316ms)
+  └─ ƒ nuevaMeta({}) in 80ms lib/actions/goals.ts
+ GET /metas 200 in 156ms (next.js: 26ms, application-code: 130ms)
+○ Compiling /api/metas/[id]/imagen ...
+ GET /api/metas/202db3c0-47b7-49cc-9e33-cafa39343539/imagen 200 in 7.4s (next.js: 7.3s, application-code: 116ms)
+ POST /metas 200 in 452ms (next.js: 94ms, application-code: 358ms)
+  └─ ƒ aportarAMeta("202db3c0-47b7-49cc-9e33-cafa39343539", 900000000, "contribution") in 112ms lib/actions/goals.ts
+ GET /metas 200 in 170ms (next.js: 12ms, application-code: 158ms)
+ POST /metas 200 in 278ms (next.js: 11ms, application-code: 268ms)
+  └─ ƒ aportarAMeta("202db3c0-47b7-49cc-9e33-cafa39343539", 30000000, "contribution") in 58ms lib/actions/goals.ts
+ GET /metas 200 in 144ms (next.js: 13ms, application-code: 131ms)
+ POST /metas 200 in 192ms (next.js: 7ms, application-code: 185ms)
+  └─ ƒ aportarAMeta("202db3c0-47b7-49cc-9e33-cafa39343539", 10000000, "contribution") in 37ms lib/actions/goals.ts
+ GET /metas 200 in 132ms (next.js: 16ms, application-code: 116ms)
+ POST /metas 200 in 191ms (next.js: 13ms, application-code: 178ms)
+  └─ ƒ aportarAMeta("202db3c0-47b7-49cc-9e33-cafa39343539", 5000000, "contribution") in 26ms lib/actions/goals.ts
+ GET /metas 200 in 111ms (next.js: 7ms, application-code: 104ms)
+ POST /metas 200 in 259ms (next.js: 9ms, application-code: 250ms)
+  └─ ƒ borrarMeta("202db3c0-47b7-49cc-9e33-cafa39343539") in 16ms lib/actions/goals.ts
+ GET /metas 200 in 164ms (next.js: 32ms, application-code: 132ms)
+ GET /metas 200 in 717ms (next.js: 245ms, application-code: 472ms)
+ GET /metas 200 in 154ms (next.js: 12ms, application-code: 142ms)
+ GET /metas 200 in 393ms (next.js: 48ms, application-code: 345ms)
+ GET /metas 200 in 512ms (next.js: 130ms, application-code: 383ms)
+ GET /metas 200 in 141ms (next.js: 13ms, application-code: 127ms)
+ GET /metas 200 in 769ms (next.js: 148ms, application-code: 620ms)
+[browser] ./lib/ai/tools.ts:47:10
+Error: the name `isValidFor` is defined multiple times
+  45 | } from '@/lib/db/queries/budgets'
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+> 47 | import { isValidFor } from '@/lib/domain/categories'
+     |          ^^^^^^^^^^
+  48 |
+  49 | /**
+  50 |  * Esquema para propuesta de meta desde el chat (spec 012, §4).
+
+Ecmascript file had an error
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 | import { isValidFor } from '@/lib/domain/categories'
+  48 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:47:10
+Error: the name `isValidFor` is defined multiple times
+  45 | } from '@/lib/db/queries/budgets'
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+> 47 | import { isValidFor } from '@/lib/domain/categories'
+     |          ^^^^^^^^^^
+  48 |
+  49 | /**
+  50 |  * Esquema para propuesta de meta desde el chat (spec 012, §4).
+
+Ecmascript file had an error
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 | import { isValidFor } from '@/lib/domain/categories'
+  48 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 |
+  48 | /**
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 |
+  48 | /**
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 |
+  48 | /**
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 |
+  48 | /**
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 |
+  48 | /**
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 | import { resolverPeriodicidad, type Periodicidad } from '@/lib/domain/recurrence'
+  48 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:40:1
+Error: Export resolverCategoria doesn't exist in target module
+  38 |   type RecurringRow,
+  39 | } from '@/lib/db/queries/recurring'
+> 40 | import {
+     | ^^^^^^^
+> 41 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 42 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 44 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 45 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  46 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  47 | import { resolverPeriodicidad, type Periodicidad } from '@/lib/domain/recurrence'
+  48 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+[browser] ./lib/ai/tools.ts:41:1
+Error: Export resolverCategoria doesn't exist in target module
+  39 |   type RecurringRow,
+  40 | } from '@/lib/db/queries/recurring'
+> 41 | import {
+     | ^^^^^^^
+> 42 |   presupuestosConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^
+> 43 |   buscarPresupuestoPorCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 44 |   resolverCategoria,
+     | ^^^^^^^^^^^^^^^^^^^^
+> 45 |   type PresupuestoConGasto,
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+> 46 | } from '@/lib/db/queries/budgets'
+     | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  47 | import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
+  48 | import { resolverPeriodicidad, describirPeriodicidad, type Periodicidad } from '@/lib/doma...
+  49 |
+
+The export resolverCategoria was not found in module [project]/lib/db/queries/budgets.ts [app-route] (ecmascript).
+Did you mean to import buscarPresupuestoPorCategoria?
+All exports of the module are statically known (It doesn't have dynamic exports). So it's known statically that the requested export doesn't exist.
+
+Import trace:
+  App Route:
+    ./lib/ai/tools.ts
+    ./app/api/chat/route.ts 
+ GET / 307 in 2.2s (next.js: 768ms, application-code: 1472ms)
+ GET /entrar 200 in 277ms (next.js: 56ms, application-code: 221ms)
+ GET / 307 in 397ms (next.js: 90ms, application-code: 307ms)
+ GET /entrar 200 in 273ms (next.js: 15ms, application-code: 258ms)
+[?25h

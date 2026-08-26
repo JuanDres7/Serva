@@ -104,8 +104,8 @@ después, para no descontar el mismo dinero dos veces.
 - **RN-003** — Para usar el dinero: primero retiro, después gasto. Registrar el
   gasto sin retirar descontaría el mismo dinero dos veces.
 - **RN-004** — Una meta alcanzada se archiva, no se borra.
-- **RN-005** — Los aportes se registran desde la meta, no desde Registro Fácil
-  (D-031).
+- **RN-005** — Los aportes se registran desde la meta o desde el chat
+  (D-031, spec 012).
 
 ## 6. Criterios de aceptación
 

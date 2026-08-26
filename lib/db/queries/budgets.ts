@@ -3,7 +3,7 @@ import { z } from 'zod'
 import { db } from '@/lib/db'
 import { budgets, type BudgetRow } from '@/lib/db/schema'
 import { categoryBreakdown } from '@/lib/db/queries/transactions'
-import { isValidFor } from '@/lib/domain/categories'
+import { isValidFor, CATEGORIES } from '@/lib/domain/categories'
 import { previousPeriod, type CycleConfig, type Period } from '@/lib/domain/cycle'
 import { promedioPorPeriodo, sugerirTope } from '@/lib/domain/budgets'
 
@@ -158,4 +158,48 @@ export async function contarPresupuestos(userId: string): Promise<number> {
     .where(eq(budgets.userId, userId))
 
   return fila?.total ?? 0
+}
+
+export type ResultadoBusquedaPresupuesto =
+  | { readonly resultado: 'exacta'; readonly presupuesto: BudgetRow }
+  | { readonly resultado: 'ninguna'; readonly presupuestos: readonly BudgetRow[] }
+
+/**
+ * Busca un presupuesto por categoría, resolviendo el texto a una clave (spec 012, §4).
+ *
+ * El modelo envía un texto como "comida" o "mercado", y el sistema lo resuelve
+ * a una clave de categoría usando el catálogo fijo.
+ */
+export async function buscarPresupuestoPorCategoria(
+  userId: string,
+  texto: string,
+): Promise<ResultadoBusquedaPresupuesto> {
+  const clave = resolverCategoria(texto)
+  if (!clave) {
+    const presupuestos = await listarPresupuestos(userId)
+    return { resultado: 'ninguna', presupuestos }
+  }
+
+  const presupuestos = await listarPresupuestos(userId)
+  const encontrado = presupuestos.find((p) => p.category === clave)
+
+  if (encontrado) {
+    return { resultado: 'exacta', presupuesto: encontrado }
+  }
+  return { resultado: 'ninguna', presupuestos }
+}
+
+export function resolverCategoria(texto: string): string | null {
+  const buscado = texto.toLowerCase().trim()
+
+  // Primero intenta coincidencia exacta con clave
+  const porClave = CATEGORIES.find((c) => c.key === buscado)
+  if (porClave) return porClave.key
+
+  // Luego busca por nombre (parcial, bidireccional)
+  const porNombre = CATEGORIES.find((c) => {
+    const nombre = c.name.toLowerCase()
+    return nombre.includes(buscado) || buscado.includes(nombre)
+  })
+  return porNombre?.key ?? null
 }

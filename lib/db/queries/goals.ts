@@ -252,6 +252,37 @@ export function ritmoDeMeta(meta: MetaConProgreso, hoy: CivilDate): number | nul
   return ritmoDiario(meta.aportes, hoy)
 }
 
+export type ResultadoBusquedaMeta =
+  | { readonly resultado: 'exacta'; readonly meta: MetaConProgreso }
+  | { readonly resultado: 'varias'; readonly candidatos: readonly MetaConProgreso[] }
+  | { readonly resultado: 'ninguna'; readonly metasActivas: readonly MetaConProgreso[] }
+
+/**
+ * Busca una meta por nombre, con matching bidireccional (spec 012, §4).
+ *
+ * El modelo no envía un UUID: envía el nombre y el sistema busca.
+ */
+export async function buscarMetaPorNombre(
+  userId: string,
+  texto: string,
+): Promise<ResultadoBusquedaMeta> {
+  const metas = await listarMetas(userId)
+  const buscado = texto.toLowerCase().trim()
+
+  const coinciden = metas.filter((m) => {
+    const nombre = m.name.toLowerCase()
+    return nombre.includes(buscado) || buscado.includes(nombre)
+  })
+
+  if (coinciden.length === 1) {
+    return { resultado: 'exacta', meta: coinciden[0]! }
+  }
+  if (coinciden.length > 1) {
+    return { resultado: 'varias', candidatos: coinciden.slice(0, 5) }
+  }
+  return { resultado: 'ninguna', metasActivas: metas }
+}
+
 function fechaDesdeISO(valor: string): CivilDate {
   const [year, month, day] = valor.split('-').map(Number)
   return { year: year!, month: month!, day: day! }

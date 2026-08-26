@@ -2,6 +2,8 @@ import { and, asc, eq, isNull, lte, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { db } from '@/lib/db'
 import { recurringMovements, transactions, type RecurringRow } from '@/lib/db/schema'
+
+export type { RecurringRow }
 import { isValidFor, type MovementKind } from '@/lib/domain/categories'
 import { enMayuscula } from '@/lib/domain/keywords'
 import { toISO, type CivilDate } from '@/lib/domain/civil-date'
@@ -247,6 +249,37 @@ export async function eliminarRecurrente(userId: string, id: string): Promise<bo
     .returning({ id: recurringMovements.id })
 
   return Boolean(fila)
+}
+
+export type ResultadoBusquedaRecurrente =
+  | { readonly resultado: 'exacta'; readonly recurrente: RecurringRow }
+  | { readonly resultado: 'varias'; readonly candidatos: readonly RecurringRow[] }
+  | { readonly resultado: 'ninguna'; readonly recurrentes: readonly RecurringRow[] }
+
+/**
+ * Busca un recurrente por descripción, con matching bidireccional (spec 012, §4).
+ *
+ * El modelo no envía un UUID: envía una descripción y el sistema busca.
+ */
+export async function buscarRecurrentePorDescripcion(
+  userId: string,
+  texto: string,
+): Promise<ResultadoBusquedaRecurrente> {
+  const recurrentes = await listarRecurrentes(userId)
+  const buscado = texto.toLowerCase().trim()
+
+  const coinciden = recurrentes.filter((r) => {
+    const desc = r.description.toLowerCase()
+    return desc.includes(buscado) || buscado.includes(desc)
+  })
+
+  if (coinciden.length === 1) {
+    return { resultado: 'exacta', recurrente: coinciden[0]! }
+  }
+  if (coinciden.length > 1) {
+    return { resultado: 'varias', candidatos: coinciden.slice(0, 5) }
+  }
+  return { resultado: 'ninguna', recurrentes }
 }
 
 function fechaDesdeISO(valor: string): CivilDate {

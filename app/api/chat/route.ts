@@ -46,6 +46,7 @@ export async function POST(peticion: Request) {
   const tools = crearHerramientas({
     userId,
     cycleConfig: settings.cycleConfig,
+    cycleConfiguredAt: settings.cycleConfiguredAt,
     currency: settings.currency,
     locale: settings.locale,
     timeZone: settings.timeZone,
