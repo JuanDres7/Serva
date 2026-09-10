@@ -12,6 +12,8 @@ import {
 } from '@/lib/db/queries/transactions'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
 import { confirmarCategorizacion } from '@/lib/db/queries/learning'
+import { codificarYGuardar } from '@/lib/db/queries/embeddings'
+import { encoderDisponible } from '@/lib/ai/encoder'
 
 /**
  * Mutaciones de movimientos.
@@ -74,6 +76,17 @@ export async function registrarMovimiento(
         })
       } catch {
         // Se pierde una muestra de aprendizaje; el registro del usuario, no.
+      }
+
+      // Generar embedding para futuras búsquedas semánticas (spec 013).
+      // No bloquea la respuesta al usuario.
+      if (encoderDisponible) {
+        const texto = entrada.description ?? ''
+        if (texto.trim()) {
+          codificarYGuardar(logId, texto).catch(() => {
+            // Silencioso: el embedding es una mejora, no un requisito.
+          })
+        }
       }
     }
 

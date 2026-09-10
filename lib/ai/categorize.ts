@@ -7,22 +7,20 @@ import {
 import type { ProveedorIA } from './provider'
 
 /**
- * La cascada de categorización (D-013, D-044).
+ * La cascada de categorización (D-013, D-044, spec 013).
  *
- *   1. Palabras clave ─ ¿coincide con lo que este usuario ya categorizó?
- *   2. Similitud ────── aplazado a una feature posterior
- *   3. Modelo ───────── solo lo genuinamente nuevo
+ *   1. Búsqueda semántica ─ ¿hay algo similar en el historial?
+ *   2. LLM ─────────────── solo lo genuinamente nuevo
  *
- * Se detiene en el primer nivel que alcance el umbral. Que la mayoría de los
- * registros se resuelvan en el nivel 1 es lo que hace que la sugerencia se sienta
- * instantánea en una máquina sin tarjeta gráfica, y lo que permite sostener varios
- * usuarios a la vez dentro de una capa gratuita (D-041).
+ * Se detiene en el primer nivel que alcance el umbral. La búsqueda semántica
+ * reemplaza las keywords (Nivel 1 anterior) porque es más precisa: "Rappi"
+ * matchea con "comida" sin necesitar que compartan palabras clave.
  *
  * Esta función no toca la base de datos ni la red: recibe la búsqueda y el
  * proveedor como dependencias. Por eso se prueba entera sin modelo instalado.
  */
 
-export type Mecanismo = 'keywords' | 'similarity' | 'model' | 'none'
+export type Mecanismo = 'similarity' | 'keywords' | 'model' | 'none'
 
 export type CoincidenciaHistorial = {
   readonly categoria: string
@@ -31,6 +29,11 @@ export type CoincidenciaHistorial = {
 
 export type BuscarEnHistorial = (
   palabrasClave: readonly string[],
+  tipo: MovementKind,
+) => Promise<CoincidenciaHistorial | null>
+
+export type BuscarSimilares = (
+  descripcion: string,
   tipo: MovementKind,
 ) => Promise<CoincidenciaHistorial | null>
 
@@ -59,9 +62,10 @@ export async function categorizar(params: {
   texto: string
   tipo: MovementKind
   buscarEnHistorial: BuscarEnHistorial
+  buscarSimilares?: BuscarSimilares
   proveedor: ProveedorIA
 }): Promise<ResultadoCategorizacion> {
-  const { texto, tipo, buscarEnHistorial, proveedor } = params
+  const { texto, tipo, buscarEnHistorial, buscarSimilares, proveedor } = params
   const inicio = Date.now()
 
   const textoNormalizado = normalizar(texto)
@@ -81,7 +85,30 @@ export async function categorizar(params: {
 
   if (textoNormalizado === '') return sinSugerencia()
 
-  // ── Nivel 1: lo que este usuario ya categorizó ──────────────────────────
+  // ── Nivel 1: búsqueda semántica (spec 013) ──────────────────────────
+  // El encoder busca descripciones similares en el historial del usuario.
+  // Si el encoder no está disponible, se intenta con keywords como fallback.
+  if (buscarSimilares) {
+    try {
+      const coincidencia = await buscarSimilares(texto, tipo)
+      if (coincidencia && coincidencia.confianza >= UMBRAL_CONFIANZA) {
+        return {
+          categoria: coincidencia.categoria,
+          confianza: coincidencia.confianza,
+          mecanismo: 'similarity',
+          descripcionCorta: cortaLocal,
+          textoNormalizado,
+          palabrasClave,
+          latenciaMs: Date.now() - inicio,
+        }
+      }
+    } catch {
+      // Un fallo en la búsqueda semántica no impide intentar con keywords
+      // o el modelo: se sigue adelante.
+    }
+  }
+
+  // ── Nivel 1b: keywords (fallback si no hay encoder) ─────────────────
   if (palabrasClave.length > 0) {
     try {
       const coincidencia = await buscarEnHistorial(palabrasClave, tipo)
@@ -102,7 +129,7 @@ export async function categorizar(params: {
     }
   }
 
-  // ── Nivel 3: el modelo, solo para lo nuevo ──────────────────────────────
+  // ── Nivel 3: el modelo, solo para lo nuevo ──────────────────────────
   if (!proveedor.disponible) return sinSugerencia()
 
   const respuesta = await proveedor.sugerir({ texto, tipo })

@@ -7,6 +7,8 @@ import {
   buscarPorPalabrasClave,
   registrarCategorizacion,
 } from '@/lib/db/queries/learning'
+import { buscarSimilares, codificarYGuardar } from '@/lib/db/queries/embeddings'
+import { encoderDisponible } from '@/lib/ai/encoder'
 import type { MovementKind } from '@/lib/domain/categories'
 
 /**
@@ -50,6 +52,17 @@ export async function sugerirCategoria(
       proveedor: crearProveedor(),
       buscarEnHistorial: (palabrasClave, tipoMovimiento) =>
         buscarPorPalabrasClave(userId, palabrasClave, tipoMovimiento),
+      buscarSimilares: encoderDisponible
+        ? async (desc, tipoMov) => {
+            const resultado = await buscarSimilares(userId, desc, tipoMov)
+            // Convertir ResultadoBusqueda a CoincidenciaHistorial | null
+            if (resultado.categoria === null) return null
+            return {
+              categoria: resultado.categoria,
+              confianza: resultado.confianza,
+            }
+          }
+        : undefined,
     })
 
     // Se registra incluso cuando no hubo sugerencia: saber cuántas veces el
@@ -64,6 +77,14 @@ export async function sugerirCategoria(
       mechanism: resultado.mecanismo,
       latencyMs: resultado.latenciaMs,
     })
+
+    // Generar y guardar el embedding para futuras búsquedas (spec 013).
+    // Se hace en background: no bloquea la respuesta al usuario.
+    if (logId && encoderDisponible) {
+      codificarYGuardar(logId, texto).catch(() => {
+        // Silencioso: el embedding es una mejora, no un requisito.
+      })
+    }
 
     return {
       categoria: resultado.categoria,

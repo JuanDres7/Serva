@@ -151,6 +151,7 @@ export async function generarDatosDeEjemplo(
       finalCategory: fila.category,
       wasCorrected: false,
       latencyMs: null,
+      embedding: null,
     }))
 
   if (aprendizaje.length > 0) {

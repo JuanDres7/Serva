@@ -44,6 +44,8 @@ import {
 } from '@/lib/db/queries/budgets'
 import { calcularEstado, ritmoDiario } from '@/lib/domain/goals'
 import { resolverPeriodicidad, describirPeriodicidad } from '@/lib/domain/recurrence'
+import { buscarSimilares as buscarSimilaresDB } from '@/lib/db/queries/embeddings'
+import { encoderDisponible } from '@/lib/ai/encoder'
 
 /**
  * Esquema para propuesta de meta desde el chat (spec 012, §4).
@@ -359,6 +361,50 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
             fecha: punto.fecha,
             actual: punto.actual,
             anterior: punto.anterior,
+          })),
+        }
+      },
+    }),
+
+    /* Categorización semántica (spec 013).
+     *
+     * El encoder busca en el historial del usuario descripciones similares
+     * y devuelve la categoría sugerida. El LLM la usa para proponer
+     * movimientos con categorías correctas en lugar de adivinar. */
+
+    categorizar: tool({
+      description:
+        'Busca la categoría más adecuada para una descripción, comparando con el ' +
+        'historial del usuario. Devuelve la categoría sugerida y un score de ' +
+        'confianza. Úsala cuando vayas a proponer un movimiento y quieras ' +
+        'asegurarte de que la categoría sea correcta.',
+      inputSchema: z.object({
+        descripcion: z.string().min(1).max(120),
+        tipo: z.enum(['expense', 'income']),
+      }),
+      execute: async ({ descripcion, tipo }) => {
+        if (!encoderDisponible) {
+          return {
+            disponible: false,
+            categoria: null,
+            confianza: 0,
+            mensaje: 'El encoder no está disponible en este momento.',
+          }
+        }
+
+        const resultado = await buscarSimilaresDB(
+          contexto.userId,
+          descripcion,
+          tipo as 'expense' | 'income',
+        )
+
+        return {
+          disponible: true,
+          categoria: resultado.categoria,
+          confianza: resultado.confianza,
+          alternativas: resultado.alternativas.map((a) => ({
+            categoria: a.categoria,
+            confianza: a.confianza,
           })),
         }
       },

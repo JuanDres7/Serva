@@ -305,7 +305,24 @@ export const categorizationMechanism = pgEnum('categorization_mechanism', [
 ])
 
 /**
- * Historial de aprendizaje (D-015).
+ * Tipo vector para pgvector (spec 013).
+ *
+ * Almacena embeddings de 384 dimensiones generados por el modelo de
+ * paraphrase-multilingual-MiniLM-L12-v2. Se usa para búsqueda semántica
+ * con distancia coseno.
+ */
+const vector384 = customType<{ data: Float32Array; driverData: string }>({
+  dataType: () => 'vector(384)',
+  toDriver: (value) => `[${Array.from(value).join(',')}]`,
+  fromDriver: (value: string) => {
+    const limpio = value.replace(/[\[\]]/g, '')
+    const valores = limpio.split(',').map(Number)
+    return new Float32Array(valores)
+  },
+})
+
+/**
+ * Registro de aprendizaje (spec 002).
  *
  * Se captura desde el primer día aunque todavía no se explote del todo: es el
  * insumo de toda personalización futura y de cualquier medición de acierto, y no
@@ -350,6 +367,9 @@ export const categorizationLog = pgTable(
     wasCorrected: boolean('was_corrected').notNull().default(false),
 
     latencyMs: integer('latency_ms'),
+
+    /** Embedding de 384 dimensiones para búsqueda semántica (spec 013). */
+    embedding: text('embedding'),
 
     createdAt: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },

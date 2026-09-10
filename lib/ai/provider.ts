@@ -94,6 +94,53 @@ export function hayProveedor(): boolean {
   return crearModelo() !== null
 }
 
+/**
+ * Indica si el modelo actual soporta tool calling.
+ *
+ * Algunos modelos (como gemma3:1b) solo tienen「completion」y Ollama rechaza
+ * la petición si se le envían herramientas. En ese caso el chat funciona como
+ * conversación libre: responde con su conocimiento pero no puede consultar la
+ * base de datos ni ejecutar acciones.
+ *
+ * La cache evita una llamada a Ollama en cada petición del chat. Los
+ *Capabilities de un modelo no cambian durante la vida del servidor.
+ */
+let cacheTools: boolean | null = null
+
+export async function hayToolSupport(): Promise<boolean> {
+  if (cacheTools !== null) return cacheTools
+
+  const proveedor = process.env.AI_PROVIDER ?? 'none'
+  if (proveedor !== 'ollama') {
+    cacheTools = true
+    return true
+  }
+
+  const modelo = process.env.OLLAMA_MODEL
+  if (!modelo) {
+    cacheTools = false
+    return false
+  }
+
+  try {
+    const baseUrl = process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434'
+    const res = await fetch(`${baseUrl}/api/tags`, { signal: AbortSignal.timeout(3000) })
+    if (!res.ok) {
+      cacheTools = false
+      return false
+    }
+    const data = await res.json() as {
+      models?: Array<{ name: string; capabilities?: string[] }>
+    }
+    const info = data.models?.find((m) => m.name === modelo)
+    cacheTools = info?.capabilities?.includes('tools') ?? false
+    return cacheTools
+  } catch {
+    cacheTools = false
+    return false
+  }
+}
+
 export function crearProveedor(): ProveedorIA {
   const modelo = crearModelo()
   if (!modelo) return proveedorInactivo

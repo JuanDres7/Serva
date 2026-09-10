@@ -2,8 +2,8 @@ import { convertToModelMessages, streamText, stepCountIs, type UIMessage } from 
 import { currentUserId } from '@/lib/session'
 import { ensureUserSettings } from '@/lib/db/queries/settings'
 import { crearHerramientas } from '@/lib/ai/tools'
-import { instruccionesDelAsistente } from '@/lib/ai/chat-prompt'
-import { modeloDeChat } from '@/lib/ai/provider'
+import { instruccionesDelAsistente, instruccionesSinHerramientas } from '@/lib/ai/chat-prompt'
+import { modeloDeChat, hayToolSupport } from '@/lib/ai/provider'
 import { guardarConversacion } from '@/lib/db/queries/conversations'
 
 /**
@@ -43,29 +43,37 @@ export async function POST(peticion: Request) {
   } = await peticion.json()
   const settings = await ensureUserSettings(userId)
 
-  const tools = crearHerramientas({
-    userId,
-    cycleConfig: settings.cycleConfig,
-    cycleConfiguredAt: settings.cycleConfiguredAt,
-    currency: settings.currency,
-    locale: settings.locale,
-    timeZone: settings.timeZone,
-  })
+  const conHerramientas = await hayToolSupport()
+
+  const tools = conHerramientas
+    ? crearHerramientas({
+        userId,
+        cycleConfig: settings.cycleConfig,
+        cycleConfiguredAt: settings.cycleConfiguredAt,
+        currency: settings.currency,
+        locale: settings.locale,
+        timeZone: settings.timeZone,
+      })
+    : undefined
 
   // Las herramientas quedan ligadas a este usuario: el modelo no puede indicar
   // sobre qué cuenta consultar porque nunca recibe ese parámetro.
 
+  const systemPrompt = conHerramientas
+    ? instruccionesDelAsistente(settings.displayName)
+    : instruccionesSinHerramientas(settings.displayName)
+
   try {
     const resultado = streamText({
       model: modelo,
-      system: instruccionesDelAsistente(settings.displayName),
+      system: systemPrompt,
       messages: await convertToModelMessages(messages.slice(-TURNOS_AL_MODELO)),
       tools,
       // Proponer, escribir y después consultar: el FR-020 exige que un mismo
       // turno pueda registrar y responder una pregunta, y la respuesta debe
       // reflejar el estado posterior a la escritura (RN-009). Sigue habiendo
       // tope: un modelo confundido no puede encadenar llamadas sin fin.
-      stopWhen: stepCountIs(5),
+      ...(conHerramientas ? { stopWhen: stepCountIs(5) } : {}),
       temperature: 0.3,
     })
 

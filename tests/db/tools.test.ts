@@ -349,6 +349,9 @@ describe('límites del asistente', () => {
     'mayoresGastos',
     'buscarMovimientos',
     'ritmoDelPeriodo',
+    // Categorización semántica (spec 013). El LLM usa esta herramienta para
+    // obtener la categoría más adecuada antes de proponer movimientos.
+    'categorizar',
     // Escritura (spec 010). Cada una de estas tres es una decision deliberada:
     // el asistente dejo de ser de solo lectura y la garantia pasa de ser por
     // construccion a ser por enumeracion (D-066).

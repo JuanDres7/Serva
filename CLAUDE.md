@@ -78,6 +78,12 @@ crea metas de ahorro, aporta o retira de ellas, configura presupuestos y gestion
 cobros recurrentes. Usa `buscarMetaPorNombre`, `buscarRecurrentePorDescripcion` y
 `buscarPresupuestoPorCategoria` para encontrar entidades por texto (spec 012, §4).
 
+**El asistente categoriza con embeddings** desde la feature 013: antes de
+categorizar un movimiento, usa la herramienta `categorizar` que busca similitud
+semántica en el historial del usuario. Cascade: semantic search → keywords
+fallback → LLM. El modelo de embeddings corre server-side con
+`@huggingface/transformers` (spec 013, §3).
+
 La extracción se evalúa aparte con `npm run evaluar`, contra el proveedor real:
 11 de 11 en extracción y 8 de 8 en deudas en la última medida (D-075). Nunca
 dentro de `verify`.
