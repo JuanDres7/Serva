@@ -107,6 +107,11 @@ Esta función es pura (no toca la base de datos) y se prueba con una tabla de ve
 
 ## 6. Verificación sin modelo
 
+Estas verificaciones son la versión concreta de los criterios 2, 3, 5 y 7 de §6
+de la spec, que son deliberadamente agnósticos de tecnología: aquí vive el
+esquema (`savings_goals`, `budgets`, `transactions`, `nextDueOn`,
+`created_by = 'ai'`), no en la spec.
+
 | Capa | Qué se prueba | ¿Necesita modelo? |
 |---|---|---|
 | Búsqueda por nombre (buscarYValidar) | Tabla de verdad: exacta, varias, ninguna | No |

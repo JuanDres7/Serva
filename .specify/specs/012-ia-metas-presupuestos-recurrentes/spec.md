@@ -199,17 +199,20 @@ lista los que sí están pendientes.
 ## 6. Criterios de aceptación
 
 1. Los quince escenarios E1–E15 se ejecutan correctamente.
-2. Crear una meta desde el chat produce una fila en la tabla `savings_goals` con
-   los datos correctos y con `created_by = 'ai'`.
-3. Aportar y retirar desde el chat crean transacciones de tipo `saving` con la
-   dirección correcta, y el progreso de la meta se actualiza derivadamente.
+2. Crear una meta desde el chat la persiste con los datos correctos —nombre,
+   objetivo y fecha opcional— y queda marcada como creada por la IA,
+   distinguible de una creada a mano.
+3. Aportar y retirar desde el chat registran el movimiento de la meta con la
+   dirección y el monto correctos, y el progreso de la meta se actualiza
+   derivadamente.
 4. La lista de metas desde el chat muestra el mismo progreso que la pantalla de
    metas para los mismos datos.
-5. Crear un presupuesto desde el chat produce una fila en `budgets` con el tope
-   correcto, y el presupuesto aparece en la pantalla de presupuestos.
+5. Crear un presupuesto desde el chat lo persiste con el tope correcto, y el
+   presupuesto aparece en la pantalla de presupuestos.
 6. Eliminar un presupuesto desde el chat lo borra de la tabla y de la pantalla.
-7. Confirmar un recurrente pendiente desde el chat crea la transacción
-   correspondiente en `transactions` y actualiza `nextDueOn` del recurrente.
+7. Confirmar un recurrente pendiente desde el chat registra el cobro como
+   movimiento y programa el siguiente vencimiento según la periodicidad del
+   recurrente.
 8. Con ciclo no configurado, ninguna operación de presupuesto se ejecuta desde el
    chat.
 9. Ninguna herramienta nueva expone datos de otro usuario (Art. VI.1).

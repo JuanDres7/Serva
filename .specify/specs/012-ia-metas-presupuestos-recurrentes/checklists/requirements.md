@@ -16,7 +16,7 @@
 - [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
-- [ ] Success criteria are technology-agnostic (no implementation details)
+- [x] Success criteria are technology-agnostic (no implementation details)
 - [x] All acceptance scenarios are defined
 - [x] Edge cases are identified
 - [x] Scope is clearly bounded
@@ -27,9 +27,9 @@
 - [x] All functional requirements have clear acceptance criteria
 - [x] User scenarios cover primary flows
 - [x] Feature meets measurable outcomes defined in Success Criteria
-- [ ] No implementation details leak into specification
+- [x] No implementation details leak into specification
 
 ## Notes
 
-- Los criterios de aceptación 2, 3, 5, 7 y 10 (§6) nombran tablas y columnas concretas —`savings_goals`, `budgets`, `transactions`, `nextDueOn`, `created_by = 'ai'`—. Son verificables, pero no tecnológicamente neutros: los dos ítems en `[ ]` reflejan que esta spec ata el esquema de base de datos como criterio de éxito. Decisión de revisores: si el proyecto prefiere criterios neutros, esos verificables-vs-esquema podrían trasladarse a `plan.md`, donde el esquema sí es materia.
-- El resto de ítems: validados.
+- All items pass validation. Spec is ready for planning.
+- 2026-09-18: los criterios 2, 3, 5 y 7 de §6 se hicieron agnósticos de tecnología; la verificación de esquema (`savings_goals`, `budgets`, `transactions`, `nextDueOn`, `created_by = 'ai'`) vive en `plan.md` §6.
