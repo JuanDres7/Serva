@@ -1,6 +1,6 @@
 # Plan técnico — Feature 010
 
-- **Spec:** `specs/010-acciones-conversacionales/spec.md`
+- **Spec:** `.specify/specs/010-acciones-conversacionales/spec.md`
 - **Creado:** 2026-08-23
 - **Valida contra:** constitución v2.0.0, artículos I, II, III, IV, VI y VII
 

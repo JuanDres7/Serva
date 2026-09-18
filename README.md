@@ -206,7 +206,7 @@ Si vienes a ver el código, quizá te interese más esto:
 | [Constitución](.specify/memory/constitution.md) | Los principios innegociables del proyecto |
 | [Decisiones](docs/decisiones.md) | Cada decisión tomada, por qué, y las que se revirtieron |
 | [Método](docs/metodo.md) | Cómo se trabaja |
-| [Specs](specs/) | Qué hace cada funcionalidad, escrito antes de construirla |
+| [Specs](.specify/specs/) | Qué hace cada funcionalidad, escrito antes de construirla |
 
 El registro de decisiones incluye las descartadas y las revertidas, con su
 razonamiento intacto. Es lo que evita volver a discutir lo ya resuelto.

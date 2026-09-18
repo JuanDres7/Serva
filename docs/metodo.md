@@ -15,9 +15,9 @@ constitución  →  spec.md  →  plan.md  →  tasks.md  →  implementación
 | Artefacto | Responde | Regla dura |
 |---|---|---|
 | `.specify/memory/constitution.md` | ¿Qué es innegociable? | Se escribe una vez; modificarlo versiona el documento. |
-| `specs/NNN-nombre/spec.md` | ¿Qué y por qué? | Cero tecnología. Ambigüedades marcadas, no adivinadas. |
-| `specs/NNN-nombre/plan.md` | ¿Cómo? | Stack, modelo de datos, contratos. Se valida contra la constitución. |
-| `specs/NNN-nombre/tasks.md` | ¿En qué orden? | Tareas atómicas, cada una con su criterio de verificación. |
+| `.specify/specs/NNN-nombre/spec.md` | ¿Qué y por qué? | Cero tecnología. Ambigüedades marcadas, no adivinadas. |
+| `.specify/specs/NNN-nombre/plan.md` | ¿Cómo? | Stack, modelo de datos, contratos. Se valida contra la constitución. |
+| `.specify/specs/NNN-nombre/tasks.md` | ¿En qué orden? | Tareas atómicas, cada una con su criterio de verificación. |
 
 **La puerta de control:** no se pasa de `spec.md` a `plan.md` mientras quede un
 `[NECESITA ACLARACIÓN]` sin resolver. Ese marcador es el mecanismo que impide que
