@@ -1,112 +1,131 @@
-# Spec NNN — [NOMBRE DE LA FEATURE]
+# Feature Specification: [FEATURE NAME]
 
-- **Estado:** borrador
-- **Creada:** [FECHA]
-- **Depende de:** [features previas, o «ninguna»]
-- **Decisiones aplicables:** [D-NNN, D-NNN…]
+**Feature Branch**: `[###-feature-name]`
+
+**Created**: [DATE]
+
+**Status**: Draft
+
+**Input**: User description: "$ARGUMENTS"
+
+## User Scenarios & Testing *(mandatory)*
+
+<!--
+  IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
+  Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
+  you should still have a viable MVP (Minimum Viable Product) that delivers value.
+
+  Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
+  Think of each story as a standalone slice of functionality that can be:
+  - Developed independently
+  - Tested independently
+  - Deployed independently
+  - Demonstrated to users independently
+-->
+
+### User Story 1 - [Brief Title] (Priority: P1)
+
+[Describe this user journey in plain language]
+
+**Why this priority**: [Explain the value and why it has this priority level]
+
+**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
+
+**Acceptance Scenarios**:
+
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
+2. **Given** [initial state], **When** [action], **Then** [expected outcome]
 
 ---
 
-<!--
-GUÍA PARA QUIEN RELLENA ESTA PLANTILLA — borrar este bloque al terminar.
+### User Story 2 - [Brief Title] (Priority: P2)
 
-Formato de la casa. Las specs de Serva se escriben así desde la 001 y se lee un
-conjunto coherente; no cambies la estructura sin una razón, y si la cambias,
-cámbiala en la plantilla para las siguientes.
+[Describe this user journey in plain language]
 
-En español, y sin tecnología. Esta spec responde QUÉ y POR QUÉ. El cómo va en
-`plan.md`: nada de stack, tablas, endpoints ni nombres de archivo.
+**Why this priority**: [Explain the value and why it has this priority level]
 
-Equivalencias con los pasos de Spec Kit, por si vienes de sus instrucciones:
+**Independent Test**: [Describe how this can be tested independently]
 
-  User Scenarios & Testing  → §3 Escenarios
-  Functional Requirements   → §4 Requisitos funcionales
-  Key Entities              → §5 Reglas de negocio, o una §  propia si hace falta
-  Success Criteria          → §6 Criterios de aceptación y §7 Métricas de éxito
-  Assumptions               → §8 Riesgo conocido, o §9 si son preguntas abiertas
-  [NEEDS CLARIFICATION]     → [NECESITA ACLARACIÓN — etiqueta]
+**Acceptance Scenarios**:
 
-**La puerta de control:** no se pasa a `plan.md` mientras quede un
-[NECESITA ACLARACIÓN] sin resolver. Ese marcador es lo que impide inventar
-requisitos. Máximo tres, y solo para decisiones donde equivocarse cambia el
-producto: alcance, privacidad, o algo que el usuario tendría que deshacer a mano.
-Para lo demás, elige el valor razonable y anótalo en §8.
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
 
-Toda spec se valida contra `.specify/memory/constitution.md`, que gana ante
-cualquier cosa escrita aquí.
--->
+---
 
-## 1. Contexto y motivación
+### User Story 3 - [Brief Title] (Priority: P3)
 
-[Qué problema real resuelve, en las palabras de quien lo sufre. Si no se puede
-nombrar a quién le duele y cuándo, la feature no está lista para escribirse.
+[Describe this user journey in plain language]
 
-Si esta feature cambia algo que otra spec ya declaró, dilo aquí y nombra el
-requisito que queda revocado. Una spec desmentida en silencio por otra es peor
-que una spec sin escribir.]
+**Why this priority**: [Explain the value and why it has this priority level]
 
-## 2. Alcance
+**Independent Test**: [Describe how this can be tested independently]
 
-### Dentro
+**Acceptance Scenarios**:
 
-- [Lo que esta feature hace, en frases que el usuario reconocería]
+1. **Given** [initial state], **When** [action], **Then** [expected outcome]
 
-### Fuera
+---
 
-- [Lo que deliberadamente no hace, y a qué feature futura pertenece si aplica]
-- [Lo que la constitución prohíbe, con el artículo]
+[Add more user stories as needed, each with an assigned priority]
 
-## 3. Escenarios
-
-### E1 — [Título corto y concreto]
-
-**Dado** que [situación de partida],
-**cuando** [lo que hace la persona],
-**entonces** [lo que observa, en términos verificables].
-
-### E2 — [...]
+### Edge Cases
 
 <!--
-Cubre siempre, además del camino feliz:
-  · qué pasa cuando falta un dato
-  · qué pasa cuando el usuario se equivoca
-  · qué pasa cuando el modelo o la red no están disponibles
-Un escenario que no se puede convertir en prueba está mal escrito.
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right edge cases.
 -->
 
-## 4. Requisitos funcionales
+- What happens when [boundary condition]?
+- How does system handle [error scenario]?
 
-| ID | Requisito |
-|---|---|
-| FR-001 | [El sistema debe… — comprobable, sin decir cómo] |
-| FR-002 | [...] |
+## Requirements *(mandatory)*
 
-## 5. Reglas de negocio
+<!--
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right functional requirements.
+-->
 
-- **RN-001** — [Invariante que se cumple siempre, independiente de la pantalla]
-- **RN-002** — [...]
+### Functional Requirements
 
-## 6. Criterios de aceptación
+- **FR-001**: System MUST [specific capability, e.g., "allow users to create accounts"]
+- **FR-002**: System MUST [specific capability, e.g., "validate email addresses"]
+- **FR-003**: Users MUST be able to [key interaction, e.g., "reset their password"]
+- **FR-004**: System MUST [data requirement, e.g., "persist user preferences"]
+- **FR-005**: System MUST [behavior, e.g., "log all security events"]
 
-1. Los N escenarios E1–EN se ejecutan correctamente.
-2. [Criterio comprobable automáticamente]
-3. Ninguna prueba de la suite requiere un modelo instalado (Art. IV).
+*Example of marking unclear requirements:*
 
-## 7. Métricas de éxito
+- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
-- [Cómo se sabrá, mirando el producto en uso, que esto salió bien]
-- [Y el umbral a partir del cual habría que revisar el diseño]
+### Key Entities *(include if feature involves data)*
 
-## 8. Riesgo conocido
+- **[Entity 1]**: [What it represents, key attributes without implementation]
+- **[Entity 2]**: [What it represents, relationships to other entities]
 
-[Lo que puede salir mal y no se detecta solo. Los supuestos que se asumieron sin
-poder confirmarlos. Si el mayor riesgo es que la feature acierte casi siempre y
-nadie la revise, dilo: es el más difícil de ver después.]
+## Success Criteria *(mandatory)*
 
-## 9. Pendiente de aclaración
+<!--
+  ACTION REQUIRED: Define measurable success criteria.
+  These must be technology-agnostic and measurable.
+-->
 
-<!-- Borrar esta sección cuando no quede ninguna. Con una sola abierta, la spec
-     no baja a plan.md. -->
+### Measurable Outcomes
 
-- **[NECESITA ACLARACIÓN — etiqueta corta]** [La pregunta, y por qué las
-  respuestas posibles llevan a productos distintos.]
+- **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
+- **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
+- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
+- **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]
+
+## Assumptions
+
+<!--
+  ACTION REQUIRED: The content in this section represents placeholders.
+  Fill them out with the right assumptions based on reasonable defaults
+  chosen when the feature description did not specify certain details.
+-->
+
+- [Assumption about target users, e.g., "Users have stable internet connectivity"]
+- [Assumption about scope boundaries, e.g., "Mobile support is out of scope for v1"]
+- [Assumption about data/environment, e.g., "Existing authentication system will be reused"]
+- [Dependency on existing system/service, e.g., "Requires access to the existing user profile API"]

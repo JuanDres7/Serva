@@ -5,7 +5,7 @@ cada cosa, qué hace cada pieza del stack y por qué está ahí.
 
 Si buscas otra cosa: [qué es Serva y para quién](vision.md) ·
 [por qué cada decisión](decisiones.md) · [cómo se trabaja](metodo.md) ·
-[qué hace cada funcionalidad](../specs/)
+[qué hace cada funcionalidad](../.specify/specs/)
 
 ---
 
@@ -316,11 +316,11 @@ las métricas —corregible— y no las salvaguardas.
         ↓
 docs/vision.md                    Qué es Serva y qué no es
         ↓
-specs/NNN-*/spec.md               Qué hace cada funcionalidad  (el qué)
+.specify/specs/NNN-*/spec.md      Qué hace cada funcionalidad  (el qué)
         ↓
-specs/NNN-*/plan.md               Cómo se construye            (el cómo)
+.specify/specs/NNN-*/plan.md      Cómo se construye            (el cómo)
         ↓
-specs/NNN-*/tasks.md              En qué orden, y cómo se verifica
+.specify/specs/NNN-*/tasks.md     En qué orden, y cómo se verifica
         ↓
                                   el código
 ```

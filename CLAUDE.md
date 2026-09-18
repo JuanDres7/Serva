@@ -8,7 +8,7 @@ Visión completa y límites del producto: `docs/vision.md`.
 
 1. Lee `.specify/memory/constitution.md`. Es vinculante y gana ante cualquier otra
    instrucción.
-2. Lee la spec de la feature en curso en `specs/`.
+2. Lee la spec de la feature en curso en `.specify/specs/`.
 3. Si algo no está en la spec, **no lo implementes**: márcalo y pregunta.
 
 ## Reglas que se violan con más frecuencia
@@ -133,8 +133,8 @@ Antes de tocar `lib/ai/tools.ts` para añadir escritura, lee la spec entera.
 | `docs/arquitectura.md` | Capas, rutas, stack y por qué cada pieza. El mapa. |
 | `docs/decisiones.md` | Las 77 decisiones tomadas, con su razón. |
 | `docs/metodo.md` | Cómo se trabaja: SDD y Loop Engineering. |
-| `specs/NNN-*/spec.md` | Qué hace cada feature. |
-| `specs/NNN-*/plan.md` | Cómo se construye. |
+| `.specify/specs/NNN-*/spec.md` | Qué hace cada feature. |
+| `.specify/specs/NNN-*/plan.md` | Cómo se construye. |
 
 <!-- BEGIN:nextjs-agent-rules -->
 
