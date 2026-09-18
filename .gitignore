@@ -44,3 +44,8 @@ next-env.d.ts
 # playwright
 /test-results/
 /playwright-report/
+
+# generated / local-only artifacts
+/dev-output.log
+/graphify-out/
+/package-lock.json
