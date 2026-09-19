@@ -81,7 +81,7 @@ Lectura pura: no escriben nada. El modelo las llama para responder preguntas.
 |---|---|---|
 | ✓ T-568 | `npm run verify` en verde sin modelo instalado | Las comprobaciones actuales más las nuevas |
 | ✓ T-569 | Ninguna spec queda desmentida por el código | Los requisitos que esta feature revoca (RN-005 de spec 006) están actualizados en su spec |
-| ○ T-570 | Evaluación con modelo: correr escenarios E1–E15 contra el proveedor real (Gemini) y registrar resultado en `docs/decisiones.md` como D-078 o el siguiente número | 15/15 escenarios pasan, o se documenta cuáles fallan y por qué |
+| ✓ T-570 | Evaluación con modelo: correr escenarios E1–E15 contra el proveedor real (Gemini) y registrar resultado en `docs/decisiones.md` como D-078 o el siguiente número | 15/15 escenarios pasan, o se documenta cuáles fallan y por qué |
 
 ---
 

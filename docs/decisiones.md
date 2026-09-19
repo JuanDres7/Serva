@@ -1971,6 +1971,49 @@ tokens (D-070).
 
 ---
 
+## D-078 — La 012 acierta 13 de 15, y el fallo está donde debe preguntar (2026-09-18)
+
+**Qué se probó.** Quince frases de metas, presupuestos y recurrentes contra
+Gemini, con `npm run evaluar`, una por escenario del banco
+`tests/evaluacion/banco-012.ts`: poner y quitar un tope, consultar presupuestos,
+crear la meta con aportes y retiros. Y todo el juego de los cobros: consultar los
+pendientes, confirmar el arriendo (queda registrado), no confirmar la luz (no
+estaba pendiente), crear un cobro con día fijo, un recurrente sin categoría y un
+aporte sin monto. Como en D-074, lo que se mide no es el texto sino **la elección
+de herramienta**: que no escriba donde debe preguntar y que sí proponga lo que el
+usuario pide.
+
+**Resultado: 13 de 15.** Elige bien en las trece, incluidas las que importan:
+el arriendo se confirma y pasa a movimiento, la luz no, el cobro se crea con día
+1, y la meta creada recibe, retira y responde. El aporte sin monto preguntó
+«¿quieres aportar?» en lugar de inventar una cifra: preguntar también es acertar.
+
+**El único fallo de elección, y es real.** «Register la suscripción de 40 mil
+cada mes» → el asistente propuso crear el cobro en vez de preguntar la categoría.
+La categoría es obligatoria (`recurrenteSchema`) y la regla de la 012 es
+preguntar en vez de inventar. Es la única frase en que escribió donde no debía,
+y falló en las cuatro pasadas de la sesión.
+
+**El otro fallo es de presentación.** «¿Cómo voy con los presupuestos?» →
+responde «has gastado el 60% de tu tope» y no repite el número del tope. No es
+elección de herramienta: es que la cifra pedida no aparece en la respuesta.
+Acertó en una de cuatro pasadas.
+
+**Por qué la primera pasada dio 8 de 15.** El oráculo solo leía los montos en
+dígitos y el modelo los escribe en palabras («300 mil», «2 millones»); solo
+aceptaba un verbo de aporte y el modelo dijo «agregué». Cinco fallos eran del
+rubric, no del modelo: **el formato en que se dice el monto no es lo que la 012
+promete**. El rubro ahora acepta cifras en español y el aporte por cualquiera de
+sus verbos; con eso, 13 de 15.
+
+**Qué no cambia.** Nada de código: la 012 ya estaba construida y esta es su
+primera medida con modelo real (D-057 solo cubrió las utilidades de la 003). La
+puerta cumplió: ni un peso se escribió sin confirmar. Queda anotado cuál es el
+límite real del modelo, una frase que se acomoda con el patrón de la 012 (si le
+falta la categoría, que la pida).
+
+---
+
 # Decisiones pendientes
 
 _Ninguna. Todas las preguntas abiertas quedaron resueltas._
