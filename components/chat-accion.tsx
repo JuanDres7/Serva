@@ -52,7 +52,7 @@ type Salida = {
     montoDespues: string | null
     fecha: string
   }
-  candidatos?: { descripcion: string; monto: string; fecha: string }[]
+  candidatos?: { descripcion: string; monto: string; fecha?: string }[]
   buscado?: string
   /** En qué quedó la propuesta, puesto al recargar la conversación (D-076). */
   estadoGuardado?: string
@@ -70,6 +70,47 @@ type Salida = {
     saldoAntes: string
     saldoDespues: string
     salda: boolean
+  }
+  /** Metas de ahorro (spec 012): creación (`proponerMeta`) o consulta
+   *  (`meta-existente`, sin `propuestaId`, así que nunca tiene botones). */
+  meta?: {
+    nombre: string
+    objetivo: string
+    fechaObjetivo?: string | null
+    /** Solo presente en `meta-existente`: cuánto lleva aportado. */
+    aportado?: string
+    porcentaje?: number
+  }
+  /** Aporte o retiro de una meta (`proponerAporteMeta`, spec 012). */
+  aporte?: {
+    nombre: string
+    monto: string
+    tipo: string
+    metaObjetivo: string
+    metaAportado: string
+  }
+  /** Presupuesto por categoría (`proponerPresupuesto`/`proponerEliminarPresupuesto`, spec 012). */
+  presupuesto?: {
+    categoria: string
+    clave: string
+    tope: string
+  }
+  /** Cobro recurrente nuevo (`proponerRecurrente`, spec 012). */
+  recurrente?: {
+    descripcion: string
+    monto: string
+    tipo: string
+    categoria: string
+    clave: string
+    periodicidad: string
+  }
+  /** Confirmación de un cobro recurrente pendiente (`confirmarRecurrente`, spec 012). */
+  confirmacion?: {
+    descripcion: string
+    monto: string
+    montoOriginal: string
+    cambioMonto: boolean
+    permanente: boolean
   }
 }
 
@@ -141,6 +182,28 @@ export function TarjetaDeAccion({ salida }: { salida: Salida }) {
   // Los dos son una pregunta en texto, no una propuesta: nada que confirmar.
   if (salida.resultado === 'falta-fecha' || salida.resultado === 'falta-dia') {
     return <Aviso>{salida.motivo}</Aviso>
+  }
+
+  // «meta-existente» no propone nada nuevo: solo cuenta cómo va la que ya
+  // existe. Sin `propuestaId`, nunca debe tener botones de confirmar.
+  if (salida.resultado === 'meta-existente' && salida.meta) {
+    return (
+      <Marco>
+        <div className="space-y-1 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="truncate">{salida.meta.nombre}</span>
+            <span className="cifra shrink-0">
+              {salida.meta.aportado} / {salida.meta.objetivo}
+            </span>
+          </div>
+          {typeof salida.meta.porcentaje === 'number' && (
+            <p className="text-xs text-muted-foreground">
+              Ya tienes el {salida.meta.porcentaje}% ahorrado.
+            </p>
+          )}
+        </div>
+      </Marco>
+    )
   }
 
   if (salida.resultado === 'varias-coincidencias') {
@@ -238,6 +301,101 @@ export function TarjetaDeAccion({ salida }: { salida: Salida }) {
               ? 'Con esto queda saldada.'
               : `Quedarían ${salida.abono.saldoDespues}.`}
           </p>
+        </div>
+      )}
+
+      {salida.meta && (
+        <div className="space-y-1 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="truncate">{salida.meta.nombre}</span>
+            <span className="cifra shrink-0">{salida.meta.objetivo}</span>
+          </div>
+          {salida.meta.fechaObjetivo && (
+            <p className="text-xs text-muted-foreground">
+              Para el {salida.meta.fechaObjetivo}
+            </p>
+          )}
+        </div>
+      )}
+
+      {salida.aporte && (
+        <div className="space-y-1 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="truncate">
+              {salida.aporte.tipo === 'retiro' ? 'Retiro de' : 'Aporte a'}{' '}
+              {salida.aporte.nombre}
+            </span>
+            <span className="cifra shrink-0">
+              {salida.aporte.tipo === 'retiro' ? '–' : '+'} {salida.aporte.monto}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Llevas {salida.aporte.metaAportado} de {salida.aporte.metaObjetivo}.
+          </p>
+        </div>
+      )}
+
+      {salida.presupuesto && (
+        <div className="flex items-baseline justify-between gap-4 text-sm">
+          <span className="flex min-w-0 items-center gap-2">
+            <span
+              aria-hidden
+              className="size-2 shrink-0 rounded-full"
+              style={{
+                backgroundColor:
+                  findCategory(salida.presupuesto.clave)?.color ?? 'var(--muted)',
+              }}
+            />
+            <span className="truncate">{salida.presupuesto.categoria}</span>
+          </span>
+          <span className="cifra shrink-0">{salida.presupuesto.tope}</span>
+        </div>
+      )}
+
+      {salida.recurrente && (
+        <div className="space-y-1 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="flex min-w-0 items-center gap-2">
+              <span
+                aria-hidden
+                className="size-2 shrink-0 rounded-full"
+                style={{
+                  backgroundColor:
+                    findCategory(salida.recurrente.clave)?.color ?? 'var(--muted)',
+                }}
+              />
+              <span className="truncate">{salida.recurrente.descripcion}</span>
+            </span>
+            <span className="cifra shrink-0">
+              {salida.recurrente.tipo === 'ingreso' ? '+' : '–'} {salida.recurrente.monto}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground">{salida.recurrente.periodicidad}</p>
+        </div>
+      )}
+
+      {salida.confirmacion && (
+        <div className="space-y-1 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
+            <span className="truncate">{salida.confirmacion.descripcion}</span>
+            <span className="cifra shrink-0">
+              {salida.confirmacion.cambioMonto ? (
+                <>
+                  <span className="text-muted-foreground line-through">
+                    {salida.confirmacion.montoOriginal}
+                  </span>{' '}
+                  {salida.confirmacion.monto}
+                </>
+              ) : (
+                salida.confirmacion.monto
+              )}
+            </span>
+          </div>
+          {salida.confirmacion.permanente && (
+            <p className="text-xs text-muted-foreground">
+              El nuevo monto queda para siempre.
+            </p>
+          )}
         </div>
       )}
 

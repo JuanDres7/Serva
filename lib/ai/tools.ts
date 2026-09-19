@@ -961,9 +961,12 @@ export function crearHerramientas(contexto: ContextoHerramientas) {
         if (encontrada.resultado === 'varias') {
           return {
             resultado: 'varias-coincidencias' as const,
+            // Mismo shape que el resto de las búsquedas por texto
+            // (movimientos, deudas, recurrentes): la tarjeta genérica de
+            // "varias coincidencias" espera `descripcion`/`monto`.
             candidatos: encontrada.candidatos.map((m) => ({
-              nombre: m.name,
-              aportado: dinero(m.aportadoCents),
+              descripcion: m.name,
+              monto: dinero(m.aportadoCents),
             })),
           }
         }
