@@ -2107,6 +2107,41 @@ ejercicio teórico. La primera vez que este proyecto se desplegó de verdad
 —incluso antes de tocar Vercel— ya salió un hallazgo que ningún test local
 podía haber visto.
 
+## D-082 — Primer despliegue real: Serva vive en Vercel y Neon, con el encoder degradado a propósito (2026-09-19)
+
+**Lo que se hizo.** Cuentas nuevas en Vercel y Neon, proyecto `serva` creado y
+conectado al repositorio de GitHub, base de Neon con pgvector activado
+(v0.8.6) y las 16 migraciones aplicadas (incluida la 0015 de D-081), variables
+de entorno de producción configuradas (`DATABASE_URL`, `BETTER_AUTH_SECRET`
+nuevo y distinto al de desarrollo, `BETTER_AUTH_URL`, `AI_PROVIDER=gemini`,
+`GOOGLE_GENERATIVE_AI_API_KEY`), y desplegado. Serva corre en
+`https://serva-flame.vercel.app`.
+
+**El checklist de D-080 se puso a prueba, y acertó a medias.** El riesgo del
+tamaño de función (punto 1) no se materializó. El riesgo de `onnxruntime-node`
+sí, pero con una causa más simple de lo previsto: `serverExternalPackages` en
+`next.config.ts` es necesario pero no basta — el módulo sigue sin encontrarse
+en tiempo de ejecución (`Cannot find module 'onnxruntime-node'`). Se intentó
+`outputFileTracingIncludes` con un comodín global para forzar su inclusión, y
+eso rompió el despliegue por una razón distinta y no anticipada: Vercel Hobby
+limita a 12 funciones serverless, y ese comodín altera cómo Next.js agrupa
+las rutas en funciones. Revertido en el momento, sin dejarlo a medias.
+
+**Por qué esto no fue un desastre.** El fix de D-080 —que el arranque del
+encoder no bloquee ni pueda tumbar el servidor— hizo exactamente su trabajo:
+la app entera funciona en producción (registro, sesión, chat, todo) con el
+único hueco de que la búsqueda semántica nunca se activa en esta instancia.
+Es la misma degradación que el sistema ya sabía hacer sin haber previsto este
+error puntual — la prueba de que diseñar para fallar bien importa más que
+prever cada fallo posible.
+
+**Lo que queda pendiente,** documentado en `plan.md` §10 de la spec 013: acotar
+`outputFileTracingIncludes` a rutas concretas en vez de un comodín global, o
+aplicar la receta completa de la comunidad (excluir binarios de otras
+plataformas, fijar versión de `onnxruntime-node`). No se fuerza un tercer
+intento a ciegas en el mismo despliegue — el sitio ya está en pie y funcional,
+y esto se retoma con más cuidado.
+
 ---
 
 # Decisiones pendientes

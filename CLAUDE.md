@@ -88,16 +88,18 @@ La extracción se evalúa aparte con `npm run evaluar`, contra el proveedor real
 11 de 11 en extracción y 8 de 8 en deudas en la última medida (D-075). Nunca
 dentro de `verify`.
 
-**Siguiente paso:** desplegar en Vercel y Neon. Es lo único pendiente del plan
-original: las doce features están construidas.
+**Serva ya está desplegada:** en Vercel + Neon, en `https://serva-flame.vercel.app`
+(D-082). Era lo único pendiente del plan original, y quedó hecho.
 
-**Antes de ese primer despliegue, hay un checklist esperando** en el `plan.md`
-de la spec 013 (§9): el modelo del encoder de embeddings no se comporta en
-Vercel exactamente como en un servidor tradicional —su caché en disco no
-sobrevive entre instancias serverless, y `onnxruntime-node` trae binarios que
-pueden exceder el límite de tamaño de función del plan gratuito. No es un
-bloqueante para desplegar, pero sí algo que revisar en cuanto se intente
-(D-080).
+**El encoder de embeddings no funciona en esa instancia, a propósito y sin
+romper nada.** `onnxruntime-node` no se encuentra en tiempo de ejecución
+(`Cannot find module`) — el sistema se degrada solo, exactamente como está
+diseñado (Art. III.2): todo lo demás funciona, la categorización semántica no.
+El checklist para arreglarlo de verdad vive en `plan.md` de la spec 013 (§9 y
+§10) — acotar `outputFileTracingIncludes` a rutas concretas en vez de un
+comodín global (el comodín rompió el límite de 12 funciones de Vercel Hobby),
+o la receta completa de la comunidad para empaquetar los binarios de
+`onnxruntime-node`. No es urgente: la app funciona sin eso.
 
 **Ojo con las deudas:** `movement_type` tiene un cuarto valor, `debt`. Un
 préstamo recibido no es ingreso y prestar no es gasto; lo único que cuenta en los

@@ -199,3 +199,36 @@ contra un Vercel real (Art. IV — no se puede verificar sin desplegar), y
 Serva todavía no se ha desplegado (D-040, pendiente). Intentarlo a ciegas
 arriesga romper el primer despliegue por una razón difícil de diagnosticar a
 distancia. Este checklist es la forma de no perder el hallazgo mientras tanto.
+
+## 10. Resultado del primer despliegue real (2026-09-19, D-082)
+
+Se desplegó Serva a Vercel + Neon por primera vez. Con datos reales en vez de
+investigación:
+
+- **El punto 1 del checklist no era un problema:** el tamaño de la función no
+  excedió el límite de Vercel. La app construyó y desplegó sin el ajuste de
+  `VERCEL_SUPPORT_LARGE_FUNCTIONS` que se anticipaba podría hacer falta.
+- **Sí apareció el error anticipado, pero con una causa más simple:**
+  `Cannot find module 'onnxruntime-node'` al arrancar. `serverExternalPackages:
+  ['@huggingface/transformers', 'onnxruntime-node']` en `next.config.ts` es el
+  ajuste correcto y ya quedó aplicado, pero **no fue suficiente por sí solo**
+  — el módulo sigue sin encontrarse en tiempo de ejecución.
+- **Se intentó `outputFileTracingIncludes` con comodín (`'/*'`) para forzar
+  la inclusión de los binarios, y rompió algo distinto:** Vercel Hobby limita
+  a 12 funciones serverless por despliegue, y ese comodín altera cómo Next.js
+  agrupa las rutas en funciones, empujando el conteo por encima del límite.
+  Revertido de inmediato — no se dejó a medias en producción.
+- **Gracias al fix de D-080 (arranque no bloqueante), nada de esto rompió el
+  sitio.** La app funciona completa —registro, chat, todo— salvo que el
+  encoder nunca queda disponible: cada arranque cae al mismo error y
+  `encoderDisponible` se queda en `false` para siempre en esta instancia,
+  exactamente la degradación para la que está diseñado (Art. III.2).
+
+**Estado actual, deliberado:** Serva está en producción y funcional, con la
+categorización semántica deshabilitada. Es una regresión de funcionalidad,
+no de estabilidad, y queda documentada en vez de forzada a ciegas con un
+tercer intento. Pendiente para la próxima vuelta: acotar
+`outputFileTracingIncludes` a las rutas concretas que usan el encoder (no un
+comodín global), o probar la receta completa de la comunidad —excluir los
+binarios de otras plataformas y version pinning de `onnxruntime-node`— que
+se documentó en D-080.
