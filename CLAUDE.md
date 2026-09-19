@@ -91,6 +91,14 @@ dentro de `verify`.
 **Siguiente paso:** desplegar en Vercel y Neon. Es lo único pendiente del plan
 original: las doce features están construidas.
 
+**Antes de ese primer despliegue, hay un checklist esperando** en el `plan.md`
+de la spec 013 (§9): el modelo del encoder de embeddings no se comporta en
+Vercel exactamente como en un servidor tradicional —su caché en disco no
+sobrevive entre instancias serverless, y `onnxruntime-node` trae binarios que
+pueden exceder el límite de tamaño de función del plan gratuito. No es un
+bloqueante para desplegar, pero sí algo que revisar en cuanto se intente
+(D-080).
+
 **Ojo con las deudas:** `movement_type` tiene un cuarto valor, `debt`. Un
 préstamo recibido no es ingreso y prestar no es gasto; lo único que cuenta en los
 totales es el abono (D-073).

@@ -7,9 +7,21 @@ import { normalizarParaEncoding } from '@/lib/domain/normalize'
  * Usa el modelo paraphrase-multilingual-MiniLM-L12-v2 vía ONNX para generar
  * embeddings de 384 dimensiones a partir de descripciones de transacciones.
  *
- * El modelo se carga una sola vez al iniciar el servidor y queda en memoria.
- * Si la carga falla, el sistema opera sin capacidades de encoding (degradación
- * graceful, Art. III.2).
+ * El modelo se carga una sola vez por instancia del servidor y queda en
+ * memoria mientras esa instancia esté viva. Si la carga falla, el sistema
+ * opera sin capacidades de encoding (degradación graceful, Art. III.2).
+ *
+ * **Riesgo conocido de despliegue serverless (spec 013, riesgo #4):** en
+ * Vercel el sistema de archivos es de solo lectura salvo `/tmp`, que además
+ * se vacía en cada instancia nueva. La ruta de caché por defecto de esta
+ * librería (`./.cache`) no sobrevive ahí, así que cada instancia fría podría
+ * volver a descargar el modelo completo por red en vez de reutilizar una
+ * copia local — no es un fallo, pero conviene que la primera categorización
+ * de cada instancia fría no dependa de que la descarga sea instantánea.
+ * `env.cacheDir` se apunta a `/tmp/.cache` solo cuando corre en Vercel, para
+ * que al menos dentro de la misma instancia no se repita la descarga entre
+ * invocaciones. Pendiente de verificar con un despliegue real: ver el
+ * checklist de `plan.md` §9.
  */
 
 const MODELO = 'sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2'
@@ -17,6 +29,15 @@ const DIMENSIONES = 384
 
 // Evitar descargas en el cliente — el modelo solo corre server-side.
 env.allowLocalModels = false
+
+// En Vercel, todo el sistema de archivos es de solo lectura salvo /tmp
+// (que tampoco es persistente entre instancias, pero sí durante la vida de
+// una misma instancia). Fuera de Vercel se deja el valor por defecto
+// (./.cache), que funciona bien en desarrollo local y en un servidor
+// tradicional con disco persistente.
+if (process.env.VERCEL === '1') {
+  env.cacheDir = '/tmp/.cache'
+}
 
 let pipelineInstancia: FeatureExtractionPipeline | null = null
 let cargando: Promise<FeatureExtractionPipeline | null> | null = null

@@ -2017,6 +2017,62 @@ y esta es su primera medida con modelo real (D-057 solo cubrió las utilidades d
 la 003). La puerta cumplió: ni un peso se escribió sin confirmar. Lo que cambió
 fue la interfaz, para enseñar la pregunta de `falta-dia` como pregunta.
 
+## D-079 — El encoder de embeddings nunca se invocaba, ocho días sin que nadie lo notara (2026-09-18)
+
+**El hallazgo.** `lib/ai/encoder.ts` (spec 013, escrito el 10 de septiembre)
+define `cargarEncoder()`, pero ningún punto de la aplicación lo llamaba.
+`encoderDisponible` se quedaba en `false` para siempre, y el Nivel 1 de la
+cascada de categorización —la búsqueda semántica, la razón de ser de la
+013— se saltaba en silencio desde el primer día. Sin error, sin test en rojo:
+el sistema está diseñado para degradarse así (Art. III.2), así que la
+degradación funcionó exactamente como debía, incluso cuando lo que
+degradaba era la feature entera.
+
+**Es la misma clase de bug que D-068 y D-074: falta la segunda mitad, la que
+activa lo que ya se escribió.** Ahí faltaba encaminar una herramienta en la
+tarjeta del chat; aquí faltaba invocar una función en el arranque del
+servidor. El patrón es idéntico un nivel más abajo, en infraestructura en vez
+de en UI.
+
+**La corrección.** Se agregó `instrumentation.ts` con la función `register()`
+que Next.js llama una sola vez al iniciar el servidor (Node runtime, RN-005 de
+la spec 013). Medido con el modelo real: carga en frío (primera descarga)
+~50s, carga en caliente (ya cacheado) ~2.7-6s, `codificar()` individual
+~10-60ms, `buscarSimilares()` de punta a punta contra pgvector ~10-140ms —
+dentro del objetivo de <200ms p95 (FR-011).
+
+**Qué queda pendiente:** ver D-080, que ajustó cómo arranca esto mismo al
+pensar en el despliegue en Vercel.
+
+## D-080 — El arranque del encoder no debe bloquear el servidor, y su caché no sobrevive a una instancia serverless (2026-09-19)
+
+**El primer ajuste.** El `register()` de D-079 esperaba (`await`) a que el
+encoder terminara de cargar antes de dejar que Next.js aceptara peticiones.
+Eso significa que quien le tocara "despertar" una instancia fría —después de
+un rato sin tráfico, o justo tras un despliegue— se quedaba esperando esos
+3-6 segundos (o más) sin necesitar nada del encoder. Corregido: `register()`
+ya no espera; el encoder carga de fondo y el cascade se degrada solo mientras
+tanto, que es exactamente para lo que ya estaba diseñado (Art. III.2). Nadie
+espera nada; unas pocas categorizaciones justo después de un arranque en frío
+pierden la búsqueda semántica sin que se note.
+
+**El segundo hallazgo, más grande, sigue abierto.** Investigando cómo Vercel
+maneja esto (el destino de despliegue ya decidido en D-040): la caché en
+disco de `@huggingface/transformers` (`./.cache` por defecto) no sobrevive en
+Vercel, donde el sistema de archivos es de solo lectura salvo `/tmp` — y
+`/tmp` se vacía en cada instancia nueva. RN-005 de la spec 013 dice que el
+modelo "se carga una sola vez": eso es cierto dentro de la vida de una
+instancia, pero cada instancia nueva podría volver a descargar los ~120MB por
+red, no una sola vez en la vida del proyecto sino potencialmente varias veces
+al día. Se corrigió lo que se pudo verificar sin desplegar (`env.cacheDir`
+apuntado a `/tmp/.cache` solo en Vercel, para que al menos no se repita
+dentro de la misma instancia). La mitigación completa —empaquetar los pesos
+del modelo en el propio despliegue para no depender de la red— **no se
+implementó a ciegas**: requiere un despliegue real de Vercel para
+verificarse (Art. IV), y Serva todavía no se ha desplegado. Queda como
+checklist en `plan.md` §9 de la spec 013, para no perder el hallazgo antes de
+llegar a ese punto.
+
 ---
 
 # Decisiones pendientes

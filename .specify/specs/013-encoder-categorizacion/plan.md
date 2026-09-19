@@ -170,3 +170,32 @@ El comando de integración se ejecuta con `npm run evaluar-encoder` (no dentro d
 - Si el backfill de embeddings existentes se hace como parte de la feature o como script manual
 - Si se agrega un botón "re-categorizar" en la UI para mejorar el historial gradualmente
 - El nombre exacto del archivo de tests de integración con el encoder real
+
+## 9. Checklist pendiente antes del primer despliegue en Vercel (añadido 2026-09-19)
+
+Investigado el 2026-09-19 (spec.md, riesgo #4): el modelo ONNX de este encoder
+no se comporta en Vercel exactamente como en un servidor tradicional. Dos
+cosas ya se corrigieron sin necesitar un despliegue real para verificarlas
+(ambas en `develop`):
+
+1. **`instrumentation.ts` ya no bloquea el arranque** esperando al encoder —
+   corre en segundo plano y el cascade se degrada solo mientras carga.
+2. **`env.cacheDir` ya apunta a `/tmp/.cache` cuando `process.env.VERCEL ===
+   '1'`** — evita que la librería intente escribir en una ruta de solo
+   lectura.
+
+Lo que **no** se puede verificar sin un despliegue real, y por eso queda aquí
+en vez de en el código, para no adivinar configuración a ciegas (Art. IV):
+
+| # | Qué falta | Por qué importa |
+|---|---|---|
+| 1 | Confirmar que el tamaño de la función no excede el límite de Vercel (250MB sin comprimir en el plan gratuito). `onnxruntime-node` incluye binarios nativos para varias plataformas (~700MB sin filtrar); hay que excluir con `outputFileTracingExcludes` (`next.config.ts`) todo lo que no sea `linux/x64`. | Sin esto, el despliegue puede fallar directamente al construir, no solo ir lento. |
+| 2 | Decidir si se empaquetan los pesos del modelo en el propio despliegue (`env.allowLocalModels = true` + `env.localModelPath` + `outputFileTracingIncludes` en `next.config.ts` para que Vercel los incluya) en vez de descargarlos por red en cada instancia fría. | Es la única forma de que la descarga de ~120MB no se repita varias veces al día; sin esto, el mitigante del punto 2 de arriba (`/tmp/.cache`) solo ayuda dentro de la vida de una misma instancia, no entre instancias. |
+| 3 | Verificar la versión de `onnxruntime-node` en uso (`^1.22.0` o posterior tiene los fixes conocidos para este tipo de despliegue). | Versiones anteriores tienen bugs documentados específicos de entornos serverless de solo lectura. |
+| 4 | Medir en producción real cuánto tarda una instancia fría en quedar lista, y cuántas categorizaciones caen a keywords/LLM mientras tanto. | Para saber si vale la pena el esfuerzo del punto 2, o si el degradado silencioso ya es suficientemente bueno en la práctica. |
+
+**Decisión deliberada:** no se implementó el punto 2 hoy. Requiere probarse
+contra un Vercel real (Art. IV — no se puede verificar sin desplegar), y
+Serva todavía no se ha desplegado (D-040, pendiente). Intentarlo a ciegas
+arriesga romper el primer despliegue por una razón difícil de diagnosticar a
+distancia. Este checklist es la forma de no perder el hallazgo mientras tanto.
