@@ -136,7 +136,10 @@ export function TarjetaDeAccion({ salida }: { salida: Salida }) {
     return <Aviso>No encontré nada que coincida con «{salida.buscado}».</Aviso>
   }
 
-  if (salida.resultado === 'falta-fecha') {
+  // «falta-fecha» es la forma de decir que falta el día de un movimiento
+  // (spec 010), y «falta-dia» la de un recurrente «cada mes» sin día (spec 012).
+  // Los dos son una pregunta en texto, no una propuesta: nada que confirmar.
+  if (salida.resultado === 'falta-fecha' || salida.resultado === 'falta-dia') {
     return <Aviso>{salida.motivo}</Aviso>
   }
 

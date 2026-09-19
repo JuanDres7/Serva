@@ -126,11 +126,12 @@ export const BANCO_012: readonly Caso012[] = [
     espera: 'tarjeta',
     debeMostrarUnidades: 80000000,
   },
-  // E14 — recurrente sin categoría: pregunta antes de crear nada.
+  // E14 — recurrente al que le falta un dato («cada mes» sin día): pregunta,
+  // nunca escribe. El dato que falte puede ser el día o la categoría.
   {
     frase: 'register la suscripción de 40 mil cada mes',
     espera: 'sin-tarjeta',
-    debeMostrar: /categor/,
+    debeMostrar: /d[ií]a del mes|categor/,
   },
   // E15 — aporte sin monto: pregunta, nunca inventa. La pregunta puede ser
   // «¿cuánto?» o «¿quieres aportar?»; lo que no puede hacer es escribir sin
