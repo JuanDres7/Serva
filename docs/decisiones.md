@@ -2073,6 +2073,40 @@ verificarse (Art. IV), y Serva todavía no se ha desplegado. Queda como
 checklist en `plan.md` §9 de la spec 013, para no perder el hallazgo antes de
 llegar a ese punto.
 
+## D-081 — El diario de migraciones nunca registró la 0015, y solo se vio al desplegar de verdad (2026-09-19)
+
+**El hallazgo.** `drizzle/0015_embedding_vector.sql` (la columna `embedding` y su
+índice HNSW, spec 013) existe como archivo desde el 10 de septiembre, pero
+`drizzle/meta/_journal.json` terminaba en la 0014. `drizzle-kit migrate` solo
+aplica lo que está en el diario — así que en cualquier base nueva, la 0015
+simplemente no se aplicaba, sin ningún error. Localmente no se notó porque la
+columna ya existía (se aplicó a mano, por fuera de Drizzle, en algún momento
+de la construcción de la 013) — el diario nunca se actualizó para reflejarlo.
+
+**Por qué solo apareció ahora.** Es exactamente D-080 en miniatura: un hueco
+invisible mientras la única base que existía ya tenía el parche aplicado a
+mano. Al crear la base de Neon para el primer despliegue real y correr
+`drizzle-kit migrate` contra ella —una base limpia, sin ese arreglo manual—,
+la tabla `categorization_log` se quedó sin columna `embedding` ni índice, y
+sin ningún mensaje de error: la 012 y el resto de la app funcionan igual, la
+013 simplemente nunca tendría con qué buscar por similitud. Ninguna prueba de
+`verify` lo detecta, porque la integración con el encoder real se prueba
+aparte (spec 013, plan.md §6) y no corre contra una base recién migrada.
+
+**La corrección.** Se agregó la entrada faltante al diario (`idx: 15, tag:
+"0015_embedding_vector"`). En Neon, se corrió `drizzle-kit migrate` de nuevo
+y esta vez sí aplicó la columna y el índice HNSW. En la base local, en vez de
+volver a ejecutar un `ALTER TABLE`/`CREATE INDEX` que ya estaban aplicados
+(y hubiera fallado por duplicado), se insertó directamente en
+`drizzle.__drizzle_migrations` el registro con el hash correcto —el mismo
+`sha256` del archivo que calcula `drizzle-orm` internamente— para que Drizzle
+la reconozca como ya aplicada sin repetir el trabajo.
+
+**Lo que esto confirma en general:** el checklist de D-080 no era un
+ejercicio teórico. La primera vez que este proyecto se desplegó de verdad
+—incluso antes de tocar Vercel— ya salió un hallazgo que ningún test local
+podía haber visto.
+
 ---
 
 # Decisiones pendientes
